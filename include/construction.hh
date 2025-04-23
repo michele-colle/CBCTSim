@@ -16,6 +16,9 @@ class MyDetectorConstruction: public G4VUserDetectorConstruction
 
     virtual G4VPhysicalVolume *Construct();
 
+    //definisco il volume logico a cui dovro' accedere per creare il volume sensibile
+    private:
+    G4LogicalVolume *logicDetector;
 };
 
 
