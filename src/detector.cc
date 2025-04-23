@@ -22,7 +22,12 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *aStep,G4TouchableHistory *ROhist
     //G4cout << "copy number: "<< copyNo<<G4endl;
     G4VPhysicalVolume *physvol = touchable->GetVolume();
     G4ThreeVector posDetector = physvol->GetTranslation();
-    G4cout << "detector position: "<< posDetector<<G4endl;
+    //G4cout << "detector position: "<< posDetector<<G4endl;
 
+    //per il futuro
+    //https://indico.cern.ch/event/294651/sessions/55918/attachments/552022/760640/UserActions.pdf
+    // G4double edep = aStep->GetTotalEnergyDeposit();
+    // if(edep>0)
+    //     G4cout << "detector position: "<< posDetector<<" energy: " <<edep<<G4endl;
     return false;
 }
