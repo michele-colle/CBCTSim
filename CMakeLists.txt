@@ -30,14 +30,15 @@ add_custom_target(geant4cbctsimmik DEPENDS ctsim)
 # build B1. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-# set(EXAMPLEB1_SCRIPTS
-  # init_vis.mac
-  # )
+set(SCRIPTS
+  vis.mac
+  run.mac
+  )
 
-# foreach(_script ${EXAMPLEB1_SCRIPTS})
-  # configure_file(
-    # ${PROJECT_SOURCE_DIR}/${_script}
-    # ${PROJECT_BINARY_DIR}/${_script}
-    # COPYONLY
-    # )
-# endforeach()
+foreach(_script ${SCRIPTS})
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/${_script}
+    ${PROJECT_BINARY_DIR}/${_script}
+    COPYONLY
+    )
+endforeach()

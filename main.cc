@@ -10,7 +10,11 @@
 #include <action.hh>
 
 int main(int argc, char** argv) {
+
     G4UIExecutive* ui = nullptr;
+    //se il numero dei parametri è uno vuol dire che non ho lanciato il sw con una macro
+    //se non lancio il sw con una macro allora apro il visualizzatore, se invece lancio 
+    //la macro spengo la visualizzazione cosi va piú veloce
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
     }
@@ -25,17 +29,20 @@ int main(int argc, char** argv) {
     visManager->Initialize();
 
     G4UImanager* UImanager = G4UImanager::GetUIpointer();
-    UImanager->ApplyCommand("/vis/open");
-    UImanager->ApplyCommand("/vis/view/set/viewpointVector 1 1 1");
-    UImanager->ApplyCommand("/vis/drawVolume");
-    UImanager->ApplyCommand("/vis/viewer/set/autoRefresh true");
-    UImanager->ApplyCommand("/vis/scene/add/trajectories smooth");
-    UImanager->ApplyCommand("/vis/scene/endOfEventAction accumulate");
-
-
-
-
-    ui->SessionStart();
+    //se l'interfaccia esiste allora la apro
+    if(ui)
+    {
+      //in pratica per lanciare l'interfaccia grafica devo chiamare vis/open
+      //se non la chiamo non si apre
+      UImanager->ApplyCommand("/control/execute vis.mac");
+      ui->SessionStart();
+    }
+    else
+    {
+      G4String command = "/control/execute ";
+      G4String filename = argv[1];
+      UImanager->ApplyCommand(command+filename);
+    }
 
     return 0;
 }

@@ -3,13 +3,7 @@
 MyPrimaryGenerator::MyPrimaryGenerator()
 {
     fParticleGun = new G4ParticleGun(1);
-}
-MyPrimaryGenerator::~MyPrimaryGenerator()
-{
-    delete fParticleGun;
-}
-void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
-{
+    //creo qua la particella cosi da poter fare l' override direttamente dalle macro
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
     G4String particleName ="proton";
     G4ParticleDefinition *particle = particleTable->FindParticle("proton");
@@ -22,5 +16,13 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
     fParticleGun->SetParticleMomentum(100.*GeV);
     fParticleGun->SetParticleDefinition(particle);
 
+}
+MyPrimaryGenerator::~MyPrimaryGenerator()
+{
+    delete fParticleGun;
+}
+void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
+{
+    //quello che faccio qua non viene influenzato dalle macro
     fParticleGun->GeneratePrimaryVertex(anEvent);
 }
