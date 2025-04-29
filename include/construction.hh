@@ -19,6 +19,8 @@ class MyDetectorConstruction: public G4VUserDetectorConstruction
     MyDetectorConstruction();
     ~MyDetectorConstruction();
 
+    G4LogicalVolume *GetScoringVolume() const {return fScoringVolume;}
+
     virtual G4VPhysicalVolume *Construct();
 
     //definisco il volume logico a cui dovro' accedere per creare il volume sensibile
@@ -28,7 +30,7 @@ class MyDetectorConstruction: public G4VUserDetectorConstruction
     G4GenericMessenger *fMessenger;
     G4int nCols,nRows;
     G4Box *solidWorld, *solidRadiator, *solidDetector;
-    G4LogicalVolume *logicWorld, *logicRadiator;
+    G4LogicalVolume *logicWorld, *logicRadiator, *fScoringVolume;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector;
     G4Material *Aerogel, *worldMat;
     void DefineMaterial();

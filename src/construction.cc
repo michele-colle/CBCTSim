@@ -71,6 +71,8 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
     logicRadiator = new G4LogicalVolume(solidRadiator, Aerogel,"logicalRadiator");
     physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.25*m), logicRadiator,"physRadiatoar",logicWorld,false,0 );
 
+    //uso il radiator come scoring volume, ovvero sommmo l'energia depositata su tutto il volume del radiator
+    fScoringVolume = logicRadiator;
 
     //rivelatori di fotoni
     solidDetector = new G4Box("solidDetector", xWorld/nCols, yWorld/nRows, 0.01*m);
