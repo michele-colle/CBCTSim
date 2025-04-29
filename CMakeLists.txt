@@ -30,18 +30,27 @@ add_custom_target(geant4cbctsimmik DEPENDS ctsim)
 # build B1. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(SCRIPTS
-  vis.mac
-  run.mac
-  test0.mac
-  det.mac
-  scandet.mac
-  )
+# set(SCRIPTS
+#   vis.mac
+#   run.mac
+#   test0.mac
+#   det.mac
+#   scandet.mac
+#   eff.dat
+#   )
 
-foreach(_script ${SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
-endforeach()
+# foreach(_script ${SCRIPTS})
+#   configure_file(
+#     ${PROJECT_SOURCE_DIR}/${_script}
+#     ${PROJECT_BINARY_DIR}/${_script}
+#     COPYONLY
+#     )
+# endforeach()
+
+#per far girare questo bisonga fare salva su questo file.
+#quello di sopra veniva rifatto ad ogni build direttamente...
+file(GLOB MACRO_FILES "*.mac")
+file(COPY ${MACRO_FILES} DESTINATION ${PROJECT_BINARY_DIR})
+
+file(GLOB DATA_FILES "*.dat")
+file(COPY ${DATA_FILES} DESTINATION ${PROJECT_BINARY_DIR})

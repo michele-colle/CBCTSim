@@ -3,12 +3,24 @@ MyRunAction::MyRunAction()
 {
     //singleton, basta chiamare instance
     G4AnalysisManager *man = G4AnalysisManager::Instance();
+
+    //questa ntupla é per i dati "monte carlo" ovvero parametri non osservabili che utilizzeremo per questioni tipo efficienza quantica ecc...
+    man->CreateNtuple("Photons","Photons");
+    man->CreateNtupleIColumn("fEvent");
+    man->CreateNtupleDColumn("fX");
+    man->CreateNtupleDColumn("fY");
+    man->CreateNtupleDColumn("fZ");
+    man->CreateNtupleDColumn("fWlen");
+    man->FinishNtuple(0);
+
+
+    //questa ntupla é per i dati "realistici" ovvero colpi contati dal detector ecc, dati effettivamente misurabili
     man->CreateNtuple("Hits","Hits");
     man->CreateNtupleIColumn("fEvent");
     man->CreateNtupleDColumn("fX");
     man->CreateNtupleDColumn("fY");
     man->CreateNtupleDColumn("fZ");
-    man->FinishNtuple(0);
+    man->FinishNtuple(1);
 }
 MyRunAction::~MyRunAction(){}
 
