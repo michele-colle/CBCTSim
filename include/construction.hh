@@ -7,7 +7,11 @@
 #include <G4PVPlacement.hh>
 #include <globals.hh>
 #include <CLHEP/Vector/ThreeVector.h>
+#include <G4GenericMessenger.hh>
+
+
 #include <detector.hh>
+
 
 class MyDetectorConstruction: public G4VUserDetectorConstruction
 {
@@ -21,6 +25,13 @@ class MyDetectorConstruction: public G4VUserDetectorConstruction
     private:
     G4LogicalVolume *logicDetector;
     virtual void ConstructSDandField();
+    G4GenericMessenger *fMessenger;
+    G4int nCols,nRows;
+    G4Box *solidWorld, *solidRadiator, *solidDetector;
+    G4LogicalVolume *logicWorld, *logicRadiator;
+    G4VPhysicalVolume *physWorld, *physRadiator, *physDetector;
+    G4Material *Aerogel, *worldMat;
+    void DefineMaterial();
 };
 
 
