@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
       //in pratica per lanciare l'interfaccia grafica devo chiamare vis/open
       //se non la chiamo non si apre
       UImanager->ApplyCommand("/control/execute vis.mac");
+      
       ui->SessionStart();
     }
     else

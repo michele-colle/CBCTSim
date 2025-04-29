@@ -33,6 +33,9 @@ add_custom_target(geant4cbctsimmik DEPENDS ctsim)
 set(SCRIPTS
   vis.mac
   run.mac
+  test0.mac
+  det.mac
+  scandet.mac
   )
 
 foreach(_script ${SCRIPTS})

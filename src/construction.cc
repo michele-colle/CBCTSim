@@ -7,10 +7,13 @@ MyDetectorConstruction::MyDetectorConstruction()
     //dichiaro i miei comandi
     fMessenger = new G4GenericMessenger(this, "/detector/", "Detector Construction");
     //in questo caso creo un comando per cambiare il numero di sensori in una colonna
+   
     fMessenger->DeclareProperty("nCols", nCols,"Number of columns");
     fMessenger->DeclareProperty("nRows", nRows,"Number of rows");
+
     nCols = 100;
     nRows = 100;
+    
     DefineMaterial();
 }
 MyDetectorConstruction::~MyDetectorConstruction(){}
@@ -55,9 +58,6 @@ void MyDetectorConstruction::DefineMaterial()
 G4VPhysicalVolume *MyDetectorConstruction::Construct()
 {
     
-
-    //fine effetto cherenkov
-
     //dimensioni del mondo
     G4double xWorld = 0.5*m;
     G4double yWorld = 0.5*m;
@@ -67,13 +67,13 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
     logicWorld = new G4LogicalVolume(solidWorld, worldMat, "logicWorld");
     physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicWorld,"physWorld", 0, false, 0,true);
-    solidRadiator = new G4Box("solidRadiator", xWorld/nCols, yWorld/nRows, 0.01*m);
+    solidRadiator = new G4Box("solidRadiator", 0.4*m, 0.4*m, 0.01*m);
     logicRadiator = new G4LogicalVolume(solidRadiator, Aerogel,"logicalRadiator");
     physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.25*m), logicRadiator,"physRadiatoar",logicWorld,false,0 );
 
 
     //rivelatori di fotoni
-    solidDetector = new G4Box("solidDetector", 0.005*m, 0.005*m, 0.01*m);
+    solidDetector = new G4Box("solidDetector", xWorld/nCols, yWorld/nRows, 0.01*m);
     //per orail detector e' fatto di aria
     logicDetector = new G4LogicalVolume(solidDetector, worldMat, "logicDetector");
     //creo i vari detector
@@ -82,7 +82,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
         for(G4int j=0;j<nCols;j++)
         {
             physDetector = new G4PVPlacement(
-                0,G4ThreeVector(-0.5*m+(i+0.5)*m/nCols,-0.5*m+(j+0.5)*m/nCols,0.49*m), logicDetector, "physDetector", logicWorld, false,j+i*nRows,true);
+                0,G4ThreeVector(-0.5*m+(j+0.5)*m/nCols,-0.5*m+(i+0.5)*m/nRows,0.49*m), logicDetector, "physDetector", logicWorld, false,j+i*nCols,true);
         }
     }
 
