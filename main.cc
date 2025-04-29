@@ -1,5 +1,6 @@
 #include <iostream>
 #include "G4RunManager.hh"
+#include <G4MTRunManager.hh>
 #include "G4VisManager.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
@@ -19,11 +20,18 @@ int main(int argc, char** argv) {
       ui = new G4UIExecutive(argc, argv);
     }
     // Initialize the run manager
+
+    #ifdef G4MULTITHREADED
+    G4MTRunManager *runManager = new G4MTRunManager();
+    #else
     G4RunManager* runManager = new G4RunManager();
+    #endif
+
     runManager->SetUserInitialization(new MyDetectorConstruction());
     runManager->SetUserInitialization(new MyPhysicsList());
     runManager->SetUserInitialization(new MyActionInitialization());
-    runManager->Initialize();
+    //in multithreading va chiamato questa istruzione con il numero di thread, quindi la sposto nella macro
+    //runManager->Initialize();
 
     G4VisManager* visManager = new G4VisExecutive();
     visManager->Initialize();
