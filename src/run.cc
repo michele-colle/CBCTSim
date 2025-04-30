@@ -12,18 +12,7 @@ MyRunAction::MyRunAction()
     man->CreateNtupleDColumn("fZ");
     man->CreateNtupleDColumn("fWlen");
     man->FinishNtuple(0);
-   //questa ntupla é per i dati "realistici" ovvero colpi contati dal detector ecc, dati effettivamente misurabili
-   man->CreateNtuple("Hits","Hits");
-   man->CreateNtupleIColumn("fEvent");
-   man->CreateNtupleDColumn("fX");
-   man->CreateNtupleDColumn("fY");
-   man->CreateNtupleDColumn("fZ");
-   man->FinishNtuple(1);
-
-    //questa ntupla é per l'energia depositata
-    man->CreateNtuple("Scoring","Scoring");
-    man->CreateNtupleDColumn("fEdep");
-    man->FinishNtuple(2);
+  
 
 
 }

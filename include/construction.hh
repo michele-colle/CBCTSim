@@ -5,6 +5,7 @@
 #include <G4SystemOfUnits.hh>
 #include <G4LogicalVolume.hh>
 #include <G4PVPlacement.hh>
+//#include <G4OpticalMaterialProperties.hh>
 #include <globals.hh>
 #include <CLHEP/Vector/ThreeVector.h>
 #include <G4GenericMessenger.hh>
@@ -32,7 +33,7 @@ class MyDetectorConstruction: public G4VUserDetectorConstruction
     G4Box *solidWorld, *solidRadiator, *solidDetector;
     G4LogicalVolume *logicWorld, *logicRadiator, *fScoringVolume;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector;
-    G4Material *Aerogel, *worldMat;
+    G4Material *tungsteen, *worldMat;
     void DefineMaterial();
 };
 

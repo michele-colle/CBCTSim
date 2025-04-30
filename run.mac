@@ -1,4 +1,3 @@
-/run/numberOfThreads 32
-/run/initialize 
-/gun/momentumAmp 10 GeV
-/run/beamOn 100000 
+/gps/ene/min 0 keV
+/gps/ene/max 120 keV
+/run/beamOn 1000

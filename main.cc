@@ -26,6 +26,8 @@ int main(int argc, char** argv) {
     #else
     G4RunManager* runManager = new G4RunManager();
     #endif
+    //G4RunManager* runManager = new G4RunManager();
+
 
     runManager->SetUserInitialization(new MyDetectorConstruction());
     runManager->SetUserInitialization(new MyPhysicsList());
@@ -42,6 +44,7 @@ int main(int argc, char** argv) {
     {
       //in pratica per lanciare l'interfaccia grafica devo chiamare vis/open
       //se non la chiamo non si apre
+      UImanager->ApplyCommand("/control/execute run.mac");
       UImanager->ApplyCommand("/control/execute vis.mac");
       
       ui->SessionStart();
