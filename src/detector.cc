@@ -1,52 +1,86 @@
 #include <detector.hh>
-MySensitiveDetector::MySensitiveDetector(G4String name) : G4VSensitiveDetector(name)
+#include <G4Gamma.hh>
+#include <TrackInfo.hh>
+SensitiveDetector::SensitiveDetector(G4String name) : G4VSensitiveDetector(name)
 {
-   
 }
-MySensitiveDetector::~MySensitiveDetector(){}
+SensitiveDetector::~SensitiveDetector() {}
 
-G4bool MySensitiveDetector::ProcessHits(G4Step *aStep,G4TouchableHistory *ROhist)
+G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 {
-    G4Track *track = aStep->GetTrack();
-    //questo impedisce la generazione di fotoni nel materiale del detector (glare?)
-    track->SetTrackStatus(fStopAndKill);
-    G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
-    G4StepPoint *postStepPoint = aStep->GetPostStepPoint();
-    auto mass = preStepPoint->GetMass();
-    if(mass!=0)
-        return false;
-
-    G4ThreeVector posPhoton = preStepPoint->GetPosition();
-    //leggo il momento del fotone per calcolarmi la lungheza d'onada
-    G4double energy = preStepPoint->GetKineticEnergy();
-    G4cout << " Photon energy: "<< energy<<G4endl;
-
-    //usando questa funzione si possono stampare le posizioni di ingresso dei fotoni nel detector
-    //G4cout << " Photon position: "<< posPhoton<<G4endl;
-    const G4VTouchable *touchable = aStep->GetPreStepPoint()->GetTouchable();
-    //questo volendo mi da l'indice del detector colpito dal fotone
-    //G4int copyNo = touchable->GetCopyNumber();
-    //G4cout << "copy number: "<< copyNo<<G4endl;
-    G4VPhysicalVolume *physvol = touchable->GetVolume();
-    G4ThreeVector posDetector = physvol->GetTranslation();
-    //G4cout << "detector position: "<< posDetector<<G4endl;
-
-    //per il futuro
-    //https://indico.cern.ch/event/294651/sessions/55918/attachments/552022/760640/UserActions.pdf
-    // G4double edep = aStep->GetTotalEnergyDeposit();
-    // if(edep>0)
-    //     G4cout << "detector position: "<< posDetector<<" energy: " <<edep<<G4endl;
-    G4int evt = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
-    G4AnalysisManager *man = G4AnalysisManager::Instance();
-
-    //specifico il numero dell ntupla
-    man->FillNtupleIColumn(0, 0, evt);
-    man->FillNtupleDColumn(0, 1, posPhoton[0]);
-    man->FillNtupleDColumn(0, 2, posPhoton[1]);
-    man->FillNtupleDColumn(0, 3, posPhoton[2]);
-    man->FillNtupleDColumn(0, 4, energy/keV);
-    man->AddNtupleRow(0);
-
-
+  // qua sembrano parlare di come discriminare lo scatter
+  // https://www.researchgate.net/post/How-to-stop-particles-tracking-in-GEANT4
+  G4Track *track = aStep->GetTrack();
+  // questo impedisce la generazione di fotoni nel materiale del detector (glare?)
+  track->SetTrackStatus(fStopAndKill);
+  if (track->GetDefinition() != G4Gamma::Definition())
     return false;
+
+  G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
+  G4StepPoint *postStepPoint = aStep->GetPostStepPoint();
+
+  G4ThreeVector posPhoton = preStepPoint->GetPosition();
+  // leggo il momento del fotone per calcolarmi la lungheza d'onada
+  G4ThreeVector momPhoton = preStepPoint->GetMomentum();
+  G4double wlen = (1.239841939 * eV / momPhoton.mag()) * 1E+03;
+  G4double en = preStepPoint->GetKineticEnergy();
+
+  //auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
+  G4AnalysisManager *analysis = G4AnalysisManager::Instance();
+  analysis->FillH1(1, en);
+
+  if (false)
+  {
+    // G4ThreeVector p = info->primaryMomentum;
+    // G4double E = info->primaryEnergy;
+    // G4double diffSquared = (momPhoton/momPhoton.mag() - p/p.mag()).mag();
+    // const bool isCollinear = (diffSquared == 0);
+    // G4double deltaEnergy = E-en;
+    // // const bool isCollinear = (diffSquared < DBL_EPSILON);
+    // // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
+    // // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
+    // // G4cout<<"primary id "<<info->primaryID<<G4endl;
+    // // G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
+    // // G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
+    // // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
+
+    // // primary
+    // if (deltaEnergy == 0 && isCollinear)
+    // {
+    //   analysis->FillH1(1, en);
+    // }
+    // else//scatter collinear and not collinear
+    // {
+    //   analysis->FillH1(isCollinear ? 2 : 3, en);
+      
+    // }
+
+
+      
+  }
+  else{
+          //G4cout<<"asfiojafiojaopdfijapodfijapdosfijapodifjpioj   "<<en<<G4endl;
+
+  }
+
+  // G4cout<<"energy ararara"<<en<<G4endl;
+
+// const G4VProcess *process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
+//       G4String processName = " UserLimit";
+//       if (process)
+//       {
+//         processName = process->GetProcessName();
+//         if(processName!="Transportation"){
+//           G4cout << "*Gamma - Process:  " << processName  <<G4endl;
+//           const bool isCollinear = (diffSquared < DBL_EPSILON);
+//           G4cout<<"mom angle diff "<<diffSquared<<G4endl;
+//           G4cout<<"parent id "<<track->GetParentID()<<G4endl;
+//           G4cout<<"primary id "<<info->primaryID<<G4endl;
+//           G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
+//           G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
+//           G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl<<G4endl<<G4endl;
+//         }
+//       }
+
+  return false;
 }

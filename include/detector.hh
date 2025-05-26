@@ -8,16 +8,14 @@
 #include <G4PhysicsOrderedFreeVector.hh>
 
 
-class MySensitiveDetector : public G4VSensitiveDetector
+class SensitiveDetector : public G4VSensitiveDetector
 {
 public:
-    MySensitiveDetector(G4String);
-    ~MySensitiveDetector();
+    SensitiveDetector(G4String);
+    ~SensitiveDetector();
 
 private:
     virtual G4bool ProcessHits(G4Step *,G4TouchableHistory *);
-    //G4PhysicsOrderedFreeVector *quEff;
-
 };
 
 #endif

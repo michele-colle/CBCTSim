@@ -1,56 +1,59 @@
 #----------------------------------------------------------------------------
 # Setup the project
-#
 cmake_minimum_required(VERSION 3.16...3.27)
-project(geant4cbctsimmik)
+project(cbctsim)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
-# See the documentation for a guide on how to enable/disable specific components
+# You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
+# to build a batch mode only executable
 #
-find_package(Geant4 REQUIRED ui_all vis_all)
+option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
+if(WITH_GEANT4_UIVIS)
+  find_package(Geant4 REQUIRED ui_all vis_all)
+else()
+  find_package(Geant4 REQUIRED)
+endif()
+
+
+#----------------------------------------------------------------------------
+# Setup Geant4 include directories and compile definitions
+#
+include(${Geant4_USE_FILE})
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
-# NB: headers are included so they will show up in IDEs
 #
+include_directories(${PROJECT_SOURCE_DIR}/include 
+                    ${Geant4_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
 #----------------------------------------------------------------------------
-# Add the executable, use our local headers, and link it to the Geant4 libraries
+# Add the executable, and link it to the Geant4 libraries
 #
-add_executable(ctsim main.cc ${sources} ${headers})
-target_include_directories(ctsim PRIVATE include)
-target_link_libraries(ctsim PRIVATE ${Geant4_LIBRARIES})
+add_executable(particleGun particleGun.cc ${sources} ${headers})
+target_link_libraries(particleGun ${Geant4_LIBRARIES} )
 
-add_custom_target(geant4cbctsimmik DEPENDS ctsim)
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
-# build B1. This is so that we can run the executable directly because it
+# build particleGun. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-# set(SCRIPTS
-#   vis.mac
-#   run.mac
-#   test0.mac
-#   det.mac
-#   scandet.mac
-#   eff.dat
-#   )
+set(particleGun_SCRIPTS
+    plotHisto.C run.mac vis.mac
+  )
 
-# foreach(_script ${SCRIPTS})
-#   configure_file(
-#     ${PROJECT_SOURCE_DIR}/${_script}
-#     ${PROJECT_BINARY_DIR}/${_script}
-#     COPYONLY
-#     )
-# endforeach()
+foreach(_script ${particleGun_SCRIPTS})
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/${_script}
+    ${PROJECT_BINARY_DIR}/${_script}
+    COPYONLY
+    )
+endforeach()
 
-#per far girare questo bisonga fare salva su questo file.
-#quello di sopra veniva rifatto ad ogni build direttamente...
-file(GLOB MACRO_FILES "*.mac")
-file(COPY ${MACRO_FILES} DESTINATION ${PROJECT_BINARY_DIR})
+#----------------------------------------------------------------------------
+# Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
+#
+#install(TARGETS particleGun DESTINATION bin)
 
-file(GLOB DATA_FILES "*.dat")
-file(COPY ${DATA_FILES} DESTINATION ${PROJECT_BINARY_DIR})
