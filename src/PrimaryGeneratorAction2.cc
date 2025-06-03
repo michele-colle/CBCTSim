@@ -57,7 +57,7 @@ PrimaryGeneratorAction2::PrimaryGeneratorAction2()
   auto par = CBCTParams::Instance();
 
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., -par->GetDSO()));
+  fParticleGun->SetParticlePosition(G4ThreeVector(0, -par->GetDSO(), 0));
   G4cout<<"distanza sorgente centro di rotazione: "<<par->GetDSO()<<G4endl;
 
   // energy distribution
@@ -71,11 +71,19 @@ PrimaryGeneratorAction2::~PrimaryGeneratorAction2()
 
 void PrimaryGeneratorAction2::GeneratePrimaries(G4Event* anEvent)
 {
+  auto par = CBCTParams::Instance();
   // uniform solid angle
-  G4double cosAlpha = 1. - 2 * G4UniformRand();  // cosAlpha uniform in [-1,+1]
-  G4double sinAlpha = std::sqrt(1. - cosAlpha * cosAlpha);
-  G4double psi = twopi * G4UniformRand();  // psi uniform in [0, 2*pi]
-  G4ThreeVector dir(sinAlpha * std::cos(psi), sinAlpha * std::sin(psi), cosAlpha);
+  G4double semiw = par->GetDetWidth() / 2.0; // semi-width
+  G4double semih = par->GetDetHeight() / 2.0; // semi-height
+  G4double fw = semiw*semiw/par->GetDSD()/par->GetDSD(); // width factor
+  G4double fh = semih*semih/par->GetDSD()/par->GetDSD(); // height factor
+  G4double xmax = sqrt(fw/(1. + fw)); // x max
+  G4double zmax = sqrt(fh/(1. + fh)); // z max
+  G4double xr = xmax*(1. - 2 * G4UniformRand());  //  uniform in [-1,+1]
+  G4double zr = zmax*(1. - 2 * G4UniformRand());  // 
+  G4double yr = sqrt(1. - xr * xr - zr * zr); // y from x and z
+  G4ThreeVector dir(xr, yr, zr);
+  //G4cout<<dir<<G4endl;
 
   // fParticleGun->SetParticleMomentumDirection(dir);
   fParticleGun->SetParticleMomentumDirection(dir);
@@ -95,6 +103,11 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event* anEvent)
  //salvo I0
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
   analysis->FillH1(0, energySelected);
+  //proietto sul detector
+  G4double detx = par->GetDSD()*dir.x()/dir.y();
+  G4double detz = par->GetDSD()*dir.z()/dir.y();
+  analysis->FillH2(0, detx, detz);
+  //G4cout<<"air detector position: "<<detx<<" "<< detz<<G4endl;
 
 
  // create vertex

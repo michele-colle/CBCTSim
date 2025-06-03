@@ -6,6 +6,7 @@
 #include "TArrow.h"
 #include "TLatex.h"
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TFile.h>
 #include <TApplication.h>
 
@@ -123,23 +124,25 @@ void plotHisto()
   c1->SetLogx();
   c1->SetLogy();
   c1->SetGrid();
-  TH1D* air = (TH1D*)(f -> Get("0"));
-  TH1D* primary = (TH1D*)(f -> Get("1"));
-  TH1D* scCollinear = (TH1D*)(f -> Get("2"));
-  TH1D* scNonCollinear = (TH1D*)(f -> Get("3"));
+  TH1D* airEnergy = (TH1D*)(f -> Get("0"));
+  TH1D* primaryEnergy = (TH1D*)(f -> Get("1"));
+  TH1D* scatterEnergy = (TH1D*)(f -> Get("2"));
+  TH2D* airMap = (TH2D*)(f -> Get("3"));
+  TH2D* primaryMap = (TH2D*)(f -> Get("4"));
+  TH2D* scatterMap = (TH2D*)(f -> Get("5"));
   //hist1->Draw("Incident energy");
 
-  double bin = primary->GetNbinsX();
+  double bin = primaryEnergy->GetNbinsX();
   double thickness = 2.0*10.0*1e-4;//um to cm : 10^-4
   double rho = 19.254;
 
   vector<double> x, y;
   for (size_t i = 1; i < bin-1; i++)
   {
-    double tair = air->GetAt(i);
+    double tair = airEnergy->GetAt(i);
     //double tair = 10000000.0/1024.0;
-    double tval = primary->GetAt(i);
-    double en = primary->GetXaxis()->GetBinCenter(i);
+    double tval = primaryEnergy->GetAt(i);
+    double en = primaryEnergy->GetXaxis()->GetBinCenter(i);
     double tx= en;//keV
     double ty = log(tair/tval)/thickness/rho;
 
@@ -185,6 +188,37 @@ void plotHisto()
   gr->GetXaxis()->SetNdivisions(990);  // major = 5, minor = 10
   gr->GetXaxis()->SetMoreLogLabels();
   c1->Update();
+
+
+  // Plot scatterEnergy2D
+  TCanvas* c2D3 = new TCanvas("c2D3", "Scatter Energy Deposition", 600, 600);
+  c2D3->SetRightMargin(0.15); 
+  //c2D3->SetLogz(); // optional
+  scatterMap->Draw("COLZ");
+  // Plot airEnergy2D
+  TCanvas* c2D1 = new TCanvas("c2D1", "Air Energy Deposition", 600, 600);
+  c2D1->SetRightMargin(0.15);
+  //c2D1->SetLogz(); // optional
+  airMap->Draw("COLZ");
+
+  // Plot primaryEnergy2D
+  TCanvas* c2D2 = new TCanvas("c2D2", "Primary Energy Deposition", 600, 600);
+  c2D2->SetRightMargin(0.15);
+  //c2D2->SetLogz(); // optional
+  primaryMap->Draw("COLZ");
+
+  // Plot primaryEnergy2D
+  TCanvas* c2D4 = new TCanvas("c2D4", "Scatter Energy distribution", 600, 600);
+  c2D4->SetRightMargin(0.15);
+  //c2D2->SetLogz(); // optional
+  scatterEnergy->Draw("HIST");
+  scatterEnergy->SetTitle("Scatter energy;keV;mu/rho");
+  scatterEnergy->GetXaxis()->SetNdivisions(990);  // major = 5, minor = 10
+  scatterEnergy->GetXaxis()->SetMoreLogLabels();
+  c2D4->SetLogx();
+  c2D4->SetLogy();
+  c2D4->SetGrid();
+
 
 }  
 

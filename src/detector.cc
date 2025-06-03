@@ -45,20 +45,17 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
     // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
 
     // primary
-    if (deltaEnergy <= DBL_EPSILON && isCollinear)
+    if (isCollinear)
     {
       analysis->FillH1(1, en);
+      analysis->FillH2(1, posPhoton.x(), posPhoton.z());
     }
-    else//scatter collinear and not collinear
+    else//scatter
     {
-      analysis->FillH1(isCollinear ? 2 : 3, en);
-      if(isCollinear)
-        G4cout<<"collinearrrrrrrrrrrrrrr   "<<en<<G4endl;
-      // else  
-      //   G4cout<<"scatterrrrrrrrrrrrrrrr   "<<en<<G4endl;
-
-      
+      analysis->FillH1(2, en);
+      analysis->FillH2(2, posPhoton.x(), posPhoton.z());
     }
+    //G4cout<<"actual pos "<<posPhoton<<G4endl;
 
 
       

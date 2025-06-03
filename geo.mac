@@ -1,14 +1,23 @@
 
 #
 # Set source-detector distance
-/mysim/setDSD 120 mm
+/mysim/setDSD 100 cm
 
 # Set source to rotation center distance
-/mysim/setDSO 40 mm
+/mysim/setDSO 90 cm
 
 # Set detector width and height
-/mysim/setDetWidth 200 mm
-/mysim/setDetHeight 150 mm
+/mysim/setDetWidth 30 cm
+/mysim/setDetHeight 30 cm
+
+# attivo gli istogrammi I0 primaria a scatter
+/analysis/setFileName run0
+/analysis/h1/set 0 2048 10 120 keV #energia I0
+/analysis/h1/set 1 2048 10 120 keV #energia primaria
+/analysis/h1/set 2 2048 10 120 keV #energia scatter
+/analysis/h2/set 0 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa I0, lasciare in cm se no va modificato il codice
+/analysis/h2/set 1 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa primaria
+/analysis/h2/set 2 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa scatter
 
 # Set filter 1 and filter 2 materials (use valid Geant4 material names)
 /mysim/setFilter1Material G4_Al
@@ -26,3 +35,5 @@
 
 # Set object angle (rotation of the reconstruction cylinder)
 /mysim/setObjectAngle 30 deg
+
+/run/reinitializeGeometry

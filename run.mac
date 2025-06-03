@@ -7,14 +7,4 @@
 /run/initialize
 
 
-
-/analysis/setFileName ../root_macro/run0
-/analysis/h1/set 0 2048 10 120 keV 
-/analysis/h1/set 1 2048 10 120 keV 
-/analysis/h1/set 2 2048 10 120 keV 
-/analysis/h1/set 3 2048 10 120 keV 
-
-
-
-
-/run/beamOn 100000000
+/run/beamOn 10000000

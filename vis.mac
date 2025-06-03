@@ -24,13 +24,14 @@
 /vis/viewer/set/style surface
 /vis/geometry/set/visibility World 0 false
 
-
+#/vis/viewer/set/culling global false
+/vis/viewer/set/culling invisible true
 #
 # Draw geometry:
 /vis/drawVolume
 #
 # Specify view angle:
-/vis/viewer/set/viewpointThetaPhi 90. 180.
+/vis/viewer/set/viewpointThetaPhi 0. 0.
 #
 # Specify zoom value:
 /vis/viewer/zoom 1.5
@@ -74,3 +75,6 @@
 #
 # For file-based drivers, use this to create an empty detector view:
 #/vis/viewer/flush
+
+#per salvare l'immagine visualizzata
+#/vis/vtk/export jpg ../Geant4CTsimCylinder

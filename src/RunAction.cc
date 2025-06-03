@@ -34,9 +34,9 @@
 #include "RunAction.hh"
 #include "HistoManager.hh"
 #include "G4Run.hh"
+#include <filesystem>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 
 RunAction::RunAction()
 {
@@ -52,40 +52,56 @@ RunAction::~RunAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 time_t start_time;
-void RunAction::BeginOfRunAction(const G4Run*)
+void RunAction::BeginOfRunAction(const G4Run *)
 {
   start_time = time(NULL);
   // histograms
   //
-  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  if (analysisManager->IsActive()) {
+  G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+  if (analysisManager->IsActive())
+  {
     analysisManager->OpenFile();
-    G4cout<<"opening histogram"<<G4endl;
-
+    G4cout << "opening histogram" << G4endl;
   }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void RunAction::EndOfRunAction(const G4Run*)
+void RunAction::EndOfRunAction(const G4Run *)
 {
-  G4cout<<"ed of run action"<<G4endl;
+  G4cout << "ed of run action" << G4endl;
   time_t end_time = time(NULL);
-  time_t elapsed = end_time-start_time;
+  time_t elapsed = end_time - start_time;
   tm *ltm = localtime(&elapsed);
-  std::cout << "elapsed time "<< ltm->tm_hour << ":" <<  ltm->tm_min << ":" << ltm->tm_sec << ")" << std::endl;
-
+  std::cout << "elapsed time " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << ")" << std::endl;
 
   // save histograms
   //
-  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  if (analysisManager->IsActive()) {
+  G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+  if (analysisManager->IsActive())
+  {
     analysisManager->Write();
+    auto file = analysisManager->GetFileName();
     analysisManager->CloseFile();
-    G4cout<<"clodeing histogram"<<G4endl;
+    G4cout << "Closing histogram... " << file << G4endl;
 
+    // copio il file nella cartella root_macro
+    std::filesystem::path outputPath(file.c_str());
+    std::filesystem::path parentDir = std::filesystem::current_path().parent_path();
+    std::filesystem::path targetDir = parentDir / "root_macro";
+    std::filesystem::path targetPath = targetDir / outputPath.filename();
+    try
+    {
+      std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
+      G4cout << "copied histogram... " << targetPath << G4endl;
+    }
+    catch (const std::exception& e)
+    {
+      G4cerr << "Error copying histogram file: " << e.what() << G4endl;
+      return;
+    }
+    
   }
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

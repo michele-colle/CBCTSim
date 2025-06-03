@@ -63,7 +63,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto par = CBCTParams::Instance();
   auto ddo = par->GetDSD()-par->GetDSO();
 
-  auto maxz = std::max(par->GetDSO(), ddo);
+  auto maxxy = std::max(par->GetDSO(), ddo);
+  auto maxz = par->GetDetHeight()/2.0;
 
 
   G4cout<<"DSD: "<<par->GetDSD()<<G4endl;
@@ -72,8 +73,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
   //https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/Appendix/materialNames.html
   //dimensioni del mondo
-  G4double xWorld = maxz+10*cm;
-  G4double yWorld = maxz+10*cm;
+  G4double xWorld = maxxy+10*cm;
+  G4double yWorld = maxxy+10*cm;
   G4double zWorld = maxz+10*cm;
   
   solidWorld = new G4Box("World", xWorld, yWorld, zWorld);
@@ -84,43 +85,41 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   // --- Reconstruction Cylinder (mother for radiator) ---
   G4double reconRadius = ddo;
   G4double reconHeight = ddo;
-  auto solidReconCyl = new G4Tubs("ReconCylinder", 0, reconRadius, reconHeight, 0, 360*deg);
+  auto solidReconCyl = new G4Tubs("ReconCylinder", 0, reconRadius, maxz, 0, 360*deg);
   auto logicReconCyl = new G4LogicalVolume(solidReconCyl, air, "ReconCylinder");
-  logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 1.0, 0.0, 0.1)));//cilindro gialle
+  logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 1.0, 0.0, 0.1)));//cilindro giallo
 
   // Rotation matrix for scan angle (around Y axis, for example)
   auto scanAngle = par->GetObjectAngleInDegree();
-  auto reconRot = new G4RotationMatrix();
-  reconRot->rotateX(90 * deg);
-  reconRot->rotateY(scanAngle);
+  auto rotRecon = new G4RotationMatrix();
+  rotRecon->rotateZ(scanAngle);
 
-  //l'orientazione degli oggetti nel cilindro é come quella del dicom ma con la z al contrario, 
-  //in pratica il piano x e y é il pavimento e la z sale verso l'alto, 
-  //quindi é come se la particella venuisse sparata lungo l'asse -y
-  solidRadiator = new G4Box("Radiator", 4*cm, 0.5*cm, 4*cm);
-  logicRadiator = new G4LogicalVolume(solidRadiator, H2O,"Radiator");
+  auto solidRadiator = new G4Tubs("Radiator",0, 5*cm, 8*cm,0, 360*deg);
+  auto logicRadiator = new G4LogicalVolume(solidRadiator, H2O,"Radiator");
   physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
 
 
   // Place the reconstruction cylinder at the origin, rotated
   auto physReconCyl = new G4PVPlacement(
-      reconRot, G4ThreeVector(0,0,0), logicReconCyl, "ReconCylinder",
+      rotRecon, G4ThreeVector(0,0,0), logicReconCyl, "ReconCylinder",
       logicWorld, false, 0, true);
 
 
   //rivelatori di fotoni
-  solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*par->GetDetHeight(), 0.5*cm);
+  solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
   logicDetector = new G4LogicalVolume(solidDetector, air, "Detector");
   logicDetector->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)));//detector blu
   //sposto il detecto di metá della sua profonditá per mantenere la ddo corretta
-  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,0.,ddo+0.5*cm), logicDetector,"Detector",logicWorld,false,0 );
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*cm,0.), logicDetector,"Detector",logicWorld,false,0 );
 
 
   // creo un marker per la sorgente
   auto sourceMarkerSolid = new G4Cons("GunMarkerCone", 0, 1*cm, 0, 2*cm, 1*cm, 0, 360*deg);
   auto sourceMarkerLogical = new G4LogicalVolume(sourceMarkerSolid, air, "sourceMarkerLV");
   sourceMarkerLogical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
-  physSourceMarker = new G4PVPlacement(0, G4ThreeVector(0, 0, -1.001*cm-par->GetDSO()), sourceMarkerLogical, "sourceMarker", logicWorld, false, 0, true);            
+  auto rotMarker = new G4RotationMatrix();
+  rotMarker->rotateX(90*deg); // Rotate the marker to point upwards
+  physSourceMarker = new G4PVPlacement(rotMarker, G4ThreeVector(0, -1.001*cm-par->GetDSO(), 0), sourceMarkerLogical, "sourceMarker", logicWorld, false, 0, true);            
 
 
   return physWorld;
@@ -130,4 +129,5 @@ void DetectorConstruction::ConstructSDandField()
 {
   SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector");
   logicDetector->SetSensitiveDetector(sensDet);
+  G4cout << "Sensitive Detector set for Detector volume."<<logicDetector<< G4endl;
 }

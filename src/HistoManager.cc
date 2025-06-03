@@ -55,21 +55,19 @@ void HistoManager::Book()
   analysisManager->SetActivation(true);  // enable inactivation of histograms
 
   // Define histograms start values
-  const G4int kMaxHisto = 4;
-  const G4String id[] = {"0", "1", "2", "3"};
+  const G4int kMaxHisto = 3;
+  const G4String id[] = {"0", "1", "2"};
   const G4String title[] = {
     "I0",  // 0
     "primary energy",  // 1
-    "scatter collinear energy",  // 2
-    "scatter non collinear energy",  // 3
+    "scatter non collinear energy",  // 2
   };
-  const G4int kMaxHisto2 = 4;
-  const G4String id2[] = {"4", "5", "6", "7"};
+  const G4int kMaxHisto2 = 3;
+  const G4String id2[] = {"3", "4", "5"};
   const G4String title2[] = {
-    "I0 hit map",  // 4
-    "primary hit map",// 5
-    "scatter collinear hit map",// 6
-    "scatter non collinear hit map"// 7
+    "I0 hit map",  // 3
+    "primary hit map",// 4
+    "scatter hit map",// 5
   };
 
   // Default values (to be reset via /analysis/h1/set command)
@@ -84,8 +82,9 @@ void HistoManager::Book()
    analysisManager->SetH1Activation(ih, false);
   }
   for (G4int k = 0; k < kMaxHisto2; k++) {
-   G4int ih = analysisManager->CreateH2(id2[k], title2[k], nbins, nbins, vmin, vmax, vmin, vmax);
+   G4int ih = analysisManager->CreateH2(id2[k], title2[k], nbins, vmin, vmax, nbins,vmin, vmax);
    analysisManager->SetH2Activation(ih, false);
+   G4cout<<"2d histo id"<<ih<<G4endl;
   }
 }
 
