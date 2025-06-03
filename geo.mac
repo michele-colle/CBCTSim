@@ -1,0 +1,28 @@
+
+#
+# Set source-detector distance
+/mysim/setDSD 120 mm
+
+# Set source to rotation center distance
+/mysim/setDSO 40 mm
+
+# Set detector width and height
+/mysim/setDetWidth 200 mm
+/mysim/setDetHeight 150 mm
+
+# Set filter 1 and filter 2 materials (use valid Geant4 material names)
+/mysim/setFilter1Material G4_Al
+/mysim/setFilter2Material G4_Pb
+
+# Set filter 1 and filter 2 thicknesses
+/mysim/setFilter1Thickness 2 mm
+/mysim/setFilter2Thickness 1 mm
+
+# Set detector material
+/mysim/setDetectorMaterial G4_Si
+
+# Set detector thickness
+/mysim/setDetectorThickness 0.5 mm
+
+# Set object angle (rotation of the reconstruction cylinder)
+/mysim/setObjectAngle 30 deg

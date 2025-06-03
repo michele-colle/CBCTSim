@@ -61,7 +61,7 @@ class DetectorConstruction: public G4VUserDetectorConstruction
     //G4GenericMessenger *fMessenger;
     G4Box *solidWorld, *solidRadiator, *solidDetector;
     G4LogicalVolume *logicWorld, *logicRadiator;
-    G4VPhysicalVolume *physWorld, *physRadiator, *physDetector;
+    G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, *physSourceMarker, *physReconstructionCylinder;
     G4Material *H2O, *air, *tungsteen;
     void DefineMaterial();
 };

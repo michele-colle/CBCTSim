@@ -25,42 +25,47 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   G4double wlen = (1.239841939 * eV / momPhoton.mag()) * 1E+03;
   G4double en = preStepPoint->GetKineticEnergy();
 
-  //auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
+  auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
-  analysis->FillH1(1, en);
+  //analysis->FillH1(1, en);
 
-  if (false)
+  if (info)
   {
-    // G4ThreeVector p = info->primaryMomentum;
-    // G4double E = info->primaryEnergy;
-    // G4double diffSquared = (momPhoton/momPhoton.mag() - p/p.mag()).mag();
-    // const bool isCollinear = (diffSquared == 0);
-    // G4double deltaEnergy = E-en;
-    // // const bool isCollinear = (diffSquared < DBL_EPSILON);
-    // // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
-    // // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
-    // // G4cout<<"primary id "<<info->primaryID<<G4endl;
-    // // G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
-    // // G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
-    // // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
+    G4ThreeVector p = info->primaryMomentum;
+    G4double E = info->primaryEnergy;
+    G4double diffSquared = (momPhoton/momPhoton.mag() - p/p.mag()).mag();
+    const bool isCollinear = (diffSquared <= DBL_EPSILON);
+    G4double deltaEnergy = E-en;
+    // const bool isCollinear = (diffSquared < DBL_EPSILON);
+    // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
+    // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
+    // G4cout<<"primary id "<<info->primaryID<<G4endl;
+    // G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
+    // G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
+    // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
 
-    // // primary
-    // if (deltaEnergy == 0 && isCollinear)
-    // {
-    //   analysis->FillH1(1, en);
-    // }
-    // else//scatter collinear and not collinear
-    // {
-    //   analysis->FillH1(isCollinear ? 2 : 3, en);
+    // primary
+    if (deltaEnergy <= DBL_EPSILON && isCollinear)
+    {
+      analysis->FillH1(1, en);
+    }
+    else//scatter collinear and not collinear
+    {
+      analysis->FillH1(isCollinear ? 2 : 3, en);
+      if(isCollinear)
+        G4cout<<"collinearrrrrrrrrrrrrrr   "<<en<<G4endl;
+      // else  
+      //   G4cout<<"scatterrrrrrrrrrrrrrrr   "<<en<<G4endl;
+
       
-    // }
+    }
 
 
       
   }
-  else{
-          //G4cout<<"asfiojafiojaopdfijapodfijapdosfijapodifjpioj   "<<en<<G4endl;
-
+  else
+  {
+    G4cout<<"asfiojafiojaopdfijapodfijapdosfijapodifjpioj   "<<en<<G4endl;
   }
 
   // G4cout<<"energy ararara"<<en<<G4endl;

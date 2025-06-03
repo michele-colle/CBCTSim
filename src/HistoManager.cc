@@ -83,10 +83,10 @@ void HistoManager::Book()
    G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
    analysisManager->SetH1Activation(ih, false);
   }
-  // for (G4int k = 0; k < kMaxHisto2; k++) {
-  //  G4int ih = analysisManager->CreateH2(id2[k], title2[k], nbins, nbins, vmin, vmax, vmin, vmax);
-  //  analysisManager->SetH2Activation(ih, false);
-  // }
+  for (G4int k = 0; k < kMaxHisto2; k++) {
+   G4int ih = analysisManager->CreateH2(id2[k], title2[k], nbins, nbins, vmin, vmax, vmin, vmax);
+   analysisManager->SetH2Activation(ih, false);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

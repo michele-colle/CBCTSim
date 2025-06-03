@@ -1,14 +1,20 @@
 /control/verbose 0
 /run/verbose 0
-#
+
+
+/control/execute geo.mac
+
 /run/initialize
+
+
+
 /analysis/setFileName ../root_macro/run0
 /analysis/h1/set 0 2048 10 120 keV 
 /analysis/h1/set 1 2048 10 120 keV 
 /analysis/h1/set 2 2048 10 120 keV 
 /analysis/h1/set 3 2048 10 120 keV 
 
-# questo tenendolo ad uno zero in meno del numero di particelle va abbastanza bene
-#/run/printProgress 100000000
-#
+
+
+
 /run/beamOn 100000000

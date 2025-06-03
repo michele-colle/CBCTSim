@@ -42,6 +42,7 @@
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 #include "Randomize.hh"
+#include <Messenger.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
 
@@ -67,6 +68,8 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(new PhysicsList);
 
   runManager->SetUserInitialization(new ActionInitialization);
+
+  Messenger* mess = new Messenger();
 
   // initialize visualization
   G4VisManager* visManager = nullptr;

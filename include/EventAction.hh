@@ -19,10 +19,12 @@ class EventAction : public G4UserEventAction
 
     void BeginOfEventAction(const G4Event* event) override;
     void EndOfEventAction(const G4Event* event) override;
+    void IncrementSecondaryParticleCounter();
 
 
   private:
     RunAction* fRunAction = nullptr;
+    G4int nSecondaries;
 };
 
 

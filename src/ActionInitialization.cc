@@ -56,11 +56,11 @@ void ActionInitialization::Build() const
   PrimaryGeneratorAction2* primary = new PrimaryGeneratorAction2();
   SetUserAction(primary);
 
-  // TrackingAction* trackingAction = new TrackingAction;
-  // SetUserAction(trackingAction);
+  TrackingAction* trackingAction = new TrackingAction;
+  SetUserAction(trackingAction);
 
-  // SteppingAction* steppingAction = new SteppingAction();
-  // SetUserAction(steppingAction);
+  SteppingAction* steppingAction = new SteppingAction();
+  SetUserAction(steppingAction);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

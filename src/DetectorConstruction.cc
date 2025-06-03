@@ -32,12 +32,17 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "DetectorConstruction.hh"
+#include <CBCTParams.hh>
 
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
+#include <G4Cons.hh>
+#include <G4Tubs.hh>
+#include <G4VisAttributes.hh>
+#include <G4Colour.hh>
 
 DetectorConstruction::DetectorConstruction()
 {  
@@ -55,24 +60,68 @@ void DetectorConstruction::DefineMaterial()
 
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
+  auto par = CBCTParams::Instance();
+  auto ddo = par->GetDSD()-par->GetDSO();
+
+  auto maxz = std::max(par->GetDSO(), ddo);
+
+
+  G4cout<<"DSD: "<<par->GetDSD()<<G4endl;
+  G4cout<<"DSO: "<<par->GetDSO()<<G4endl;
+
+
   //https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/Appendix/materialNames.html
   //dimensioni del mondo
-  G4double xWorld = 0.5*m;
-  G4double yWorld = 0.5*m;
-  G4double zWorld = 0.5*m;
+  G4double xWorld = maxz+10*cm;
+  G4double yWorld = maxz+10*cm;
+  G4double zWorld = maxz+10*cm;
   
-  solidWorld = new G4Box("solidWorld", xWorld, yWorld, zWorld);
-  logicWorld = new G4LogicalVolume(solidWorld, air, "logicWorld");
-  physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicWorld,"physWorld", 0, false, 0,true);
+  solidWorld = new G4Box("World", xWorld, yWorld, zWorld);
+  logicWorld = new G4LogicalVolume(solidWorld, air, "World");
+  physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicWorld,"World", 0, false, 0,true);
 
-  solidRadiator = new G4Box("solidRadiator", 0.4*m, 0.4*m, 10.0*um);
-  logicRadiator = new G4LogicalVolume(solidRadiator, tungsteen,"logicalRadiator");
-  physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.1*m), logicRadiator,"physRadiatoar",logicWorld,false,0 );
+
+  // --- Reconstruction Cylinder (mother for radiator) ---
+  G4double reconRadius = ddo;
+  G4double reconHeight = ddo;
+  auto solidReconCyl = new G4Tubs("ReconCylinder", 0, reconRadius, reconHeight, 0, 360*deg);
+  auto logicReconCyl = new G4LogicalVolume(solidReconCyl, air, "ReconCylinder");
+  logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 1.0, 0.0, 0.1)));//cilindro gialle
+
+  // Rotation matrix for scan angle (around Y axis, for example)
+  auto scanAngle = par->GetObjectAngleInDegree();
+  auto reconRot = new G4RotationMatrix();
+  reconRot->rotateX(90 * deg);
+  reconRot->rotateY(scanAngle);
+
+  //l'orientazione degli oggetti nel cilindro é come quella del dicom ma con la z al contrario, 
+  //in pratica il piano x e y é il pavimento e la z sale verso l'alto, 
+  //quindi é come se la particella venuisse sparata lungo l'asse -y
+  solidRadiator = new G4Box("Radiator", 4*cm, 0.5*cm, 4*cm);
+  logicRadiator = new G4LogicalVolume(solidRadiator, H2O,"Radiator");
+  physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
+
+
+  // Place the reconstruction cylinder at the origin, rotated
+  auto physReconCyl = new G4PVPlacement(
+      reconRot, G4ThreeVector(0,0,0), logicReconCyl, "ReconCylinder",
+      logicWorld, false, 0, true);
+
 
   //rivelatori di fotoni
-  solidDetector = new G4Box("solidDetector", xWorld, yWorld, 0.01*m);
-  logicDetector = new G4LogicalVolume(solidDetector, air, "logicDetector");
-  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.49*m), logicDetector,"physDetector",logicWorld,false,0 );
+  solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*par->GetDetHeight(), 0.5*cm);
+  logicDetector = new G4LogicalVolume(solidDetector, air, "Detector");
+  logicDetector->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)));//detector blu
+  //sposto il detecto di metá della sua profonditá per mantenere la ddo corretta
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,0.,ddo+0.5*cm), logicDetector,"Detector",logicWorld,false,0 );
+
+
+  // creo un marker per la sorgente
+  auto sourceMarkerSolid = new G4Cons("GunMarkerCone", 0, 1*cm, 0, 2*cm, 1*cm, 0, 360*deg);
+  auto sourceMarkerLogical = new G4LogicalVolume(sourceMarkerSolid, air, "sourceMarkerLV");
+  sourceMarkerLogical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  physSourceMarker = new G4PVPlacement(0, G4ThreeVector(0, 0, -1.001*cm-par->GetDSO()), sourceMarkerLogical, "sourceMarker", logicWorld, false, 0, true);            
+
 
   return physWorld;
 }

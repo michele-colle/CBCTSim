@@ -32,6 +32,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "PrimaryGeneratorAction2.hh"
+#include <CBCTParams.hh>
 
 
 #include "G4Event.hh"
@@ -53,7 +54,12 @@ PrimaryGeneratorAction2::PrimaryGeneratorAction2()
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   //fParticleGun->SetParticleDefinition(G4Proton::Definition());
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., 0.));
+  auto par = CBCTParams::Instance();
+
+
+  fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., -par->GetDSO()));
+  G4cout<<"distanza sorgente centro di rotazione: "<<par->GetDSO()<<G4endl;
+
   // energy distribution
   //
   InitFunction();
@@ -72,7 +78,7 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event* anEvent)
   G4ThreeVector dir(sinAlpha * std::cos(psi), sinAlpha * std::sin(psi), cosAlpha);
 
   // fParticleGun->SetParticleMomentumDirection(dir);
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,0,1));
+  fParticleGun->SetParticleMomentumDirection(dir);
 
   // set energy from a tabulated distribution
   //

@@ -13,6 +13,7 @@ void EventAction::BeginOfEventAction(const G4Event*anEvent)
 {
 //https://geant4-forum.web.cern.ch/t/how-to-output-time-since-start/6382/2
  // Run status
+  nSecondaries = 0;
   G4int eventID=anEvent->GetEventID();
   G4Run* run = static_cast<G4Run*>( G4RunManager::GetRunManager()->GetNonConstCurrentRun() );
   G4int nOfEvents = run->GetNumberOfEventToBeProcessed();
@@ -31,8 +32,14 @@ void EventAction::BeginOfEventAction(const G4Event*anEvent)
 
 void EventAction::EndOfEventAction(const G4Event*)
 {
+  //G4cout << "Number of secondaries: " << nSecondaries << G4endl;
 
   // accumulate statistics in run action
+}
+
+void EventAction::IncrementSecondaryParticleCounter()
+{
+  nSecondaries++;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
