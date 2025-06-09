@@ -1,8 +1,22 @@
 #include <detector.hh>
 #include <G4Gamma.hh>
 #include <TrackInfo.hh>
+#include <TxtWithHeaderReader.hh>
+#include <CBCTParams.hh>
 SensitiveDetector::SensitiveDetector(G4String name) : G4VSensitiveDetector(name)
 {
+  TxtWithHeaderReader reader;
+  CBCTParams *params = CBCTParams::Instance();
+  if(reader.loadFromFile(params->GetDetectorMaterial()+".txt"))
+  {
+    scintillatorDetectorEfficiency = new G4PhysicsOrderedFreeVector();
+    auto enflt = reader.getColumn("keV");
+    auto att = reader.getColumn("att");
+    for (size_t i = 0; i < enflt.size(); ++i)
+    {
+      scintillatorDetectorEfficiency->InsertValues(enflt[i]*keV, 1-exp(-params->GetDetectorThickness()*att[i]/cm));
+    }
+  }
 }
 SensitiveDetector::~SensitiveDetector() {}
 
@@ -27,7 +41,12 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 
   auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
-  //analysis->FillH1(1, en);
+  //valuto se il fotone viene visto dal detector in base allo spettro di assorbimento dello scintillatore
+  // if(scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
+  // {
+  //   G4cout<<"photon not detected "<<en<<G4endl;
+  //   return false; // non viene visto
+  // }
 
   if (info)
   {

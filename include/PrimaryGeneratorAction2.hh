@@ -36,6 +36,8 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
+#include <G4PhysicsOrderedFreeVector.hh>
+
 
 #include <vector>
 
@@ -58,8 +60,13 @@ class PrimaryGeneratorAction2: public G4VUserPrimaryGeneratorAction
 
   public:
     G4double RejectAccept();
+    G4double InverseCumulSecondOrder();
     G4double InverseCumul();
-    G4double GetLogUniformRandom();
+    //questa va chiamata da runAction perché per calcolare lo spettro
+    //dei filtri devo aver attivato il kernel di Geant4, qualsiasi cosa vioglia dire.
+    // in pratica se calcolo la cross section in questo costruttore mi ritorna tutti zeri
+    void CreateSourceSpectrumWithFilters();
+
 
   private:
     G4ParticleGun* fParticleGun = nullptr;
@@ -68,16 +75,10 @@ class PrimaryGeneratorAction2: public G4VUserPrimaryGeneratorAction
     std::vector<G4double> fX;  // abscisses X
     std::vector<G4double> fY;  // values of Y(X)
     std::vector<G4double> fSlp;  // slopes
+    std::vector<G4double> fYC2;  // cumulative function of Y
     std::vector<G4double> fYC;  // cumulative function of Y
     G4double fYmax = 0.;  // max(Y)
-
-    G4int nPointsCumul = 0;  // nb of points
-    std::vector<G4double> logUniformX; 
-    std::vector<G4double> logUniformCumul;  
-
-  private:
-    void InitFunction();
-    void InitLogUniform(G4double start, G4double end);
+    G4PhysicsOrderedFreeVector* scintillatorDetectorEfficiency;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

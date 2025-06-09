@@ -9,21 +9,16 @@
 #include <TH2D.h>
 #include <TFile.h>
 #include <TApplication.h>
+#include <TNtuple.h>
 
 // i/o example
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
+
 using namespace std;
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
 
 std::vector<std::vector<double>> readColumnWiseData(const std::string& filename) {
     std::ifstream infile(filename);
@@ -55,10 +50,6 @@ std::vector<std::vector<double>> readColumnWiseData(const std::string& filename)
 
     return data;
 }
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
 
 template<typename T>
 bool writeVectorsToFile(const std::vector<std::vector<T>>& vectors, const std::string& filename) {
@@ -96,7 +87,7 @@ bool writeVectorsToFile(const std::vector<std::vector<T>>& vectors, const std::s
 }
 
 
-void plotHisto()
+void plotHistoNIST()
 {
   std::string filename = "nist_w.txt";
   std::vector<std::vector<double>> data = readColumnWiseData(filename);
@@ -127,9 +118,7 @@ void plotHisto()
   TH1D* airEnergy = (TH1D*)(f -> Get("0"));
   TH1D* primaryEnergy = (TH1D*)(f -> Get("1"));
   TH1D* scatterEnergy = (TH1D*)(f -> Get("2"));
-  TH2D* airMap = (TH2D*)(f -> Get("3"));
-  TH2D* primaryMap = (TH2D*)(f -> Get("4"));
-  TH2D* scatterMap = (TH2D*)(f -> Get("5"));
+  TH1D* IPEMSourceEnergy = (TH1D*)(f -> Get("spectrum"));
   //hist1->Draw("Incident energy");
 
   double bin = primaryEnergy->GetNbinsX();
@@ -177,19 +166,16 @@ void plotHisto()
   legend->AddEntry(gr, "geant", "l");     // "l" = line style
   legend->Draw();
   c1->Update();
+}
 
-  TCanvas *c = new TCanvas("c", "Geant");
-  c->SetLogx();
-  c->SetLogy();
-  c->SetGrid();
-  c->cd();
-  gr->Draw("AL");
-  gr->SetTitle("Attenuation;keV;mu/rho");
-  gr->GetXaxis()->SetNdivisions(990);  // major = 5, minor = 10
-  gr->GetXaxis()->SetMoreLogLabels();
-  c1->Update();
+void plotHitMaps()
+{
+  TFile* f (TFile::Open("run0.root"));  
 
-
+  TH2D* airMap = (TH2D*)(f -> Get("3"));
+  TH2D* primaryMap = (TH2D*)(f -> Get("4"));
+  TH2D* scatterMap = (TH2D*)(f -> Get("5"));
+  f->ls();
   // Plot scatterEnergy2D
   TCanvas* c2D3 = new TCanvas("c2D3", "Scatter Energy Deposition", 600, 600);
   c2D3->SetRightMargin(0.15); 
@@ -206,6 +192,14 @@ void plotHisto()
   c2D2->SetRightMargin(0.15);
   //c2D2->SetLogz(); // optional
   primaryMap->Draw("COLZ");
+}
+
+void plotHistoScatterEnergy()
+{
+  TFile* f (TFile::Open("run0.root"));  
+  f->ls();
+  
+  TH1D* scatterEnergy = (TH1D*)(f -> Get("2"));
 
   // Plot primaryEnergy2D
   TCanvas* c2D4 = new TCanvas("c2D4", "Scatter Energy distribution", 600, 600);
@@ -221,11 +215,92 @@ void plotHisto()
 
 
 }  
+std::pair<std::vector<double>, std::vector<double>> HistoToVectors(TH1D* histo, double scaleX = 1.0, double scaleY = 1.0){
+  vector<double> x, y;
+  double bin = histo->GetNbinsX();
+  for (size_t i = 1; i < bin-1; i++)
+  {
+    double tval = histo->GetAt(i);
+    double en = histo->GetXaxis()->GetBinCenter(i);
+    double tx = en*scaleX;
+    double ty = tval*scaleY;
+    //cout<<i<<" "<<tx<<" "<<ty<<endl;
+
+    x.push_back(tx);
+    y.push_back(ty);
+  }
+  return std::make_pair(x, y);
+}
+std::pair<std::vector<double>, std::vector<double>> NtupleToVectorsScaled(
+    TNtuple* ntuple, 
+    const char* branch1 = "var0", 
+    const char* branch2 = "var1") 
+{
+    std::vector<double> x, y;
+    double v1, v2;
+  
+    ntuple->SetBranchAddress(branch1, &v1);
+    ntuple->SetBranchAddress(branch2, &v2);
+    Long64_t nentries = ntuple->GetEntries();
+    for (Long64_t i = 0; i < nentries; ++i) {
+        ntuple->GetEntry(i);
+        x.push_back(v1);
+        y.push_back(v2);
+    }
+    return std::make_pair(x, y);
+}
+void plotHistoIPEMPrimary()
+{
+  TFile* f (TFile::Open("run0.root"));  
+  f->ls();
+  TH1D* airEnergyHisto = (TH1D*)(f -> Get("0"));
+
+  TNtuple* IPEMSourceEnergyHisto = (TNtuple*)(f -> Get("spectrum_ntuple"));
+  IPEMSourceEnergyHisto->Print();
+  auto [kvIPEM, IPEMcounts] = NtupleToVectorsScaled(IPEMSourceEnergyHisto, "energy_keV", "intensity");
+  for(auto &val : kvIPEM) val *= 1e3; // convert from MeV to keV
+  auto maxIPEM = *std::max_element(IPEMcounts.begin(), IPEMcounts.end());
+  for(auto &val : IPEMcounts) val /= maxIPEM; // normalize to maximum
+  auto [kv, airCounts] = HistoToVectors(airEnergyHisto, 1.0, 1.0/airEnergyHisto->GetMaximum());
+
+
+  // Plot primaryEnergy2D
+  TCanvas* c = new TCanvas("c2D5", "I0 Energy distribution", 600, 600);
+  c->SetRightMargin(0.15);
+  //c2D2->SetLogz(); // optional
+  
+
+  auto IPEMSourceEnergy1 = new TGraph (kvIPEM.size(), kvIPEM.data(), IPEMcounts.data());
+  auto airEnergy1 = new TGraph (kv.size(), kv.data(), airCounts.data());
+
+
+  IPEMSourceEnergy1->SetTitle("Energy spectra;keV;count");
+  IPEMSourceEnergy1->SetLineColor(kRed);    // Set line color to blue
+  IPEMSourceEnergy1->SetLineWidth(5);
+  IPEMSourceEnergy1->Draw("ALF");
+  c->Update();
+
+
+  airEnergy1->SetLineColor(kBlue);    // Set line color to blue
+  airEnergy1->Draw("L SAME"); // Draw with line and markers
+  c->Update();
+
+  // primaryEnergy->GetXaxis()->SetNdivisions(990);  // major = 5, minor = 10
+  // primaryEnergy->GetXaxis()->SetMoreLogLabels();
+
+
+  TLegend *legend1 = new TLegend(0.7, 0.7, 0.9, 0.85); // x1, y1, x2, y2 in NDC (0–1)
+  legend1->AddEntry(airEnergy1, "air", "l");     // "l" = line style
+  legend1->AddEntry(IPEMSourceEnergy1, "IPEM", "l");     // "l" = line style
+  legend1->Draw();
+  c->Update();
+  c->SetGrid();
+}  
 
 void StandaloneApplication(int argc, char** argv) {
   // eventually, evaluate the application parameters argc, argv
   // ==>> here the ROOT macro is called
-  plotHisto();
+  plotHistoIPEMPrimary();
 }
   // This is the standard "main" of C++ starting
   // a ROOT application

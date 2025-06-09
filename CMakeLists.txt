@@ -42,7 +42,7 @@ target_link_libraries(particleGun ${Geant4_LIBRARIES} )
 #
 set(particleGun_SCRIPTS
     plotHisto.C run.mac vis.mac
-    geo.mac
+    geo.mac IPEMXraysCatalogue.txt muspectrum.mac
   )
 
 foreach(_script ${particleGun_SCRIPTS})

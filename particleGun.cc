@@ -43,11 +43,13 @@
 #include "G4VisExecutive.hh"
 #include "Randomize.hh"
 #include <Messenger.hh>
+#include <TxtWithHeaderReader.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
 
 int main(int argc, char** argv)
 {
+
   // detect interactive mode (if no arguments) and define UI session
   G4UIExecutive* ui = 0;
   if (argc == 1) ui = new G4UIExecutive(argc, argv);

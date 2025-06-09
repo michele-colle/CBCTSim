@@ -1,10 +1,13 @@
-
+#set the source spectrum
+/mysim/setXRaySourceSpectrum 120K10DW
+/mysim/setDetectorMaterial G4_CESIUM_IODIDE
+/mysim/setDetectorThickness 0.35 mm
 #
 # Set source-detector distance
 /mysim/setDSD 100 cm
 
 # Set source to rotation center distance
-/mysim/setDSO 90 cm
+/mysim/setDSO 30 cm
 
 # Set detector width and height
 /mysim/setDetWidth 30 cm
@@ -12,26 +15,21 @@
 
 # attivo gli istogrammi I0 primaria a scatter
 /analysis/setFileName run0
-/analysis/h1/set 0 2048 10 120 keV #energia I0
-/analysis/h1/set 1 2048 10 120 keV #energia primaria
-/analysis/h1/set 2 2048 10 120 keV #energia scatter
+/analysis/h1/set 0 2048 3.5 150 keV #energia I0
+/analysis/h1/set 1 2048 3.5 150 keV #energia primaria
+/analysis/h1/set 2 2048 3.5 150 keV #energia scatter
 /analysis/h2/set 0 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa I0, lasciare in cm se no va modificato il codice
 /analysis/h2/set 1 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa primaria
 /analysis/h2/set 2 128 -15 +15 cm none linear 128 -15 +15 cm none linear #mappa scatter
 
 # Set filter 1 and filter 2 materials (use valid Geant4 material names)
 /mysim/setFilter1Material G4_Al
-/mysim/setFilter2Material G4_Pb
+/mysim/setFilter2Material G4_BRASS
 
 # Set filter 1 and filter 2 thicknesses
 /mysim/setFilter1Thickness 2 mm
 /mysim/setFilter2Thickness 1 mm
 
-# Set detector material
-/mysim/setDetectorMaterial G4_Si
-
-# Set detector thickness
-/mysim/setDetectorThickness 0.5 mm
 
 # Set object angle (rotation of the reconstruction cylinder)
 /mysim/setObjectAngle 30 deg

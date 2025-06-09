@@ -7,7 +7,8 @@
 #include "G4RunManager.hh"
 #include "G4Material.hh"
 
-Messenger::Messenger() {
+Messenger::Messenger()
+{
     // Create command directory
     fDir = new G4UIdirectory("/mysim/");
     fDir->SetGuidance("Commands for simulation parameters");
@@ -79,9 +80,19 @@ Messenger::Messenger() {
     fSetObjectAngleCmd->SetParameterName("angle", false);
     fSetObjectAngleCmd->SetUnitCategory("Angle");
     fSetObjectAngleCmd->SetDefaultUnit("deg");
+
+    // XRaySourceSpectrum string
+    fSetXRaySourceSpectrumCmd = new G4UIcmdWithAString("/mysim/setXRaySourceSpectrum", this);
+    fSetXRaySourceSpectrumCmd->SetGuidance("Set the X-ray source spectrum string.");
+    fSetXRaySourceSpectrumCmd->SetCandidates(
+        "030K10DW 040K10DW 050K10DW 060K10DW 070K10DW 080K10DW 090K10DW 100K10DW 110K10DW 120K10DW 130K10DW 140K10DW 150K10DW 40kV-ImaS 110K15D0W2 060K15D0W2 120K15D0W2");
+
+    fCreateMaterialSpecturm = new G4UIcmdWithAString("/mysim/createMaterialSpectrum", this);
+    fCreateMaterialSpecturm->SetGuidance("Create mu spectrum from nist name, example: 'G4_WATER'.");
 }
 
-Messenger::~Messenger() {
+Messenger::~Messenger()
+{
     delete fSetDSDCmd;
     delete fSetDSOCmd;
     delete fSetDetWidthCmd;
@@ -96,52 +107,79 @@ Messenger::~Messenger() {
     delete fDir;
 }
 
-void Messenger::SetNewValue(G4UIcommand* command, G4String newValue) {
-    auto* params = CBCTParams::Instance();
+void Messenger::SetNewValue(G4UIcommand *command, G4String newValue)
+{
+    auto *params = CBCTParams::Instance();
 
-    if (command == fSetDSDCmd) {
+    if (command == fSetDSDCmd)
+    {
         G4double dsd = fSetDSDCmd->GetNewDoubleValue(newValue);
         params->SetDSD(dsd);
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetDSOCmd) {
+    }
+    else if (command == fSetDSOCmd)
+    {
         G4double dso = fSetDSOCmd->GetNewDoubleValue(newValue);
         params->SetDSO(dso);
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetDetWidthCmd) {
+    }
+    else if (command == fSetDetWidthCmd)
+    {
         params->SetDetWidth(fSetDetWidthCmd->GetNewDoubleValue(newValue));
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetDetHeightCmd) {
+    }
+    else if (command == fSetDetHeightCmd)
+    {
         params->SetDetHeight(fSetDetHeightCmd->GetNewDoubleValue(newValue));
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetFilter1MatCmd) {
-        G4Material* mat = G4Material::GetMaterial(newValue, false);
-        if (mat) params->SetFilter1Material(mat);
-
-    } else if (command == fSetFilter2MatCmd) {
-        G4Material* mat = G4Material::GetMaterial(newValue, false);
-        if (mat) params->SetFilter2Material(mat);
-
-    } else if (command == fSetFilter1ThickCmd) {
+    }
+    else if (command == fSetFilter1MatCmd)
+    {
+        params->SetFilter1Material(newValue);
+    }
+    else if (command == fSetFilter2MatCmd)
+    {
+        params->SetFilter2Material(newValue);
+    }
+    else if (command == fSetFilter1ThickCmd)
+    {
         params->SetFilter1Thickness(fSetFilter1ThickCmd->GetNewDoubleValue(newValue));
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetFilter2ThickCmd) {
+    }
+    else if (command == fSetFilter2ThickCmd)
+    {
         params->SetFilter2Thickness(fSetFilter2ThickCmd->GetNewDoubleValue(newValue));
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetDetMatCmd) {
-        G4Material* mat = G4Material::GetMaterial(newValue, false);
-        if (mat) params->SetDetectorMaterial(mat);
-
-    } else if (command == fSetDetThickCmd) {
+    }
+    else if (command == fSetDetMatCmd)
+    {
+        params->SetDetectorMaterial(newValue);
+    }
+    else if (command == fSetDetThickCmd)
+    {
         params->SetDetectorThickness(fSetDetThickCmd->GetNewDoubleValue(newValue));
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
-
-    } else if (command == fSetObjectAngleCmd) {
+    }
+    else if (command == fSetObjectAngleCmd)
+    {
         params->SetObjectAngleInDegree(fSetObjectAngleCmd->GetNewDoubleValue(newValue));
+    }
+    else if (command == fSetXRaySourceSpectrumCmd) {
+        static const std::set<G4String> allowed = {
+            "030K10DW", "040K10DW", "050K10DW", "060K10DW", "070K10DW", "080K10DW", "090K10DW",
+            "100K10DW", "110K10DW", "120K10DW", "130K10DW", "140K10DW", "150K10DW",
+            "40kV-ImaS", "110K15D0W2", "060K15D0W2", "120K15D0W2"
+        };
+        if (allowed.count(newValue)) {
+            params->SetXRaySourceSpectrum(newValue);
+        } else {
+            G4cerr << "Invalid XRaySourceSpectrum: " << newValue << G4endl;
+            G4cerr << "Allowed values are: ";
+            for (const auto& v : allowed) G4cerr << v << " ";
+            G4cerr << G4endl;
+        }
+    }
+    else if (command == fCreateMaterialSpecturm) {
+        params->CreateMaterialSpectrum(newValue);
     }
 }

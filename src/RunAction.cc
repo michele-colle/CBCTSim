@@ -35,6 +35,14 @@
 #include "HistoManager.hh"
 #include "G4Run.hh"
 #include <filesystem>
+#include <CBCTParams.hh>
+#include <TxtWithHeaderReader.hh>
+#include <PrimaryGeneratorAction2.hh>
+#include "G4AnalysisManager.hh"
+#include "G4UnitsTable.hh"
+
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -54,7 +62,10 @@ RunAction::~RunAction()
 time_t start_time;
 void RunAction::BeginOfRunAction(const G4Run *)
 {
+  //viene chiamato per ogni thread
   start_time = time(NULL);
+
+
   // histograms
   //
   G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -69,6 +80,34 @@ void RunAction::BeginOfRunAction(const G4Run *)
 
 void RunAction::EndOfRunAction(const G4Run *)
 {
+  TxtWithHeaderReader reader;
+    
+  // Load the data file
+  if (!reader.loadFromFile("IPEMXraysCatalogue.txt")) {
+      std::cerr << "Failed to load data file" << std::endl;
+      return;
+  }
+
+  auto par = CBCTParams::Instance();
+
+  auto fX = reader.getColumn("keV");
+  for (auto& x : fX) x *= keV;
+  auto fY = reader.getColumn(par->GetXRaySourceSpectrum());
+  // Create histogram for spectrum
+ // Create ntuple for spectrum
+  auto analysis = G4AnalysisManager::Instance();
+  analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
+  analysis->CreateNtupleDColumn("energy_keV"); // or "energy" if you prefer
+  analysis->CreateNtupleDColumn("intensity");
+  analysis->FinishNtuple();
+
+  // Fill ntuple with the spectrum data
+  for (size_t i = 0; i < fX.size(); ++i) {
+      analysis->FillNtupleDColumn(0, fX[i]);
+      analysis->FillNtupleDColumn(1, fY[i]);
+      analysis->AddNtupleRow();
+  }
+
   G4cout << "ed of run action" << G4endl;
   time_t end_time = time(NULL);
   time_t elapsed = end_time - start_time;

@@ -1,0 +1,4 @@
+/run/initialize
+/mysim/createMaterialSpectrum G4_Al
+/mysim/createMaterialSpectrum G4_BRASS
+/mysim/createMaterialSpectrum G4_CESIUM_IODIDE

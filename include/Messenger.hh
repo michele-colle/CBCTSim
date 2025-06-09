@@ -25,4 +25,6 @@ private:
     G4UIcmdWithAString* fSetDetMatCmd;
     G4UIcmdWithADoubleAndUnit* fSetDetThickCmd;
     G4UIcmdWithADoubleAndUnit* fSetObjectAngleCmd;
+    G4UIcmdWithAString* fSetXRaySourceSpectrumCmd; 
+    G4UIcmdWithAString* fCreateMaterialSpecturm; 
 };
