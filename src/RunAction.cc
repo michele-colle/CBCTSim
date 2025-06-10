@@ -96,16 +96,16 @@ void RunAction::EndOfRunAction(const G4Run *)
   // Create histogram for spectrum
  // Create ntuple for spectrum
   auto analysis = G4AnalysisManager::Instance();
-  analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
-  analysis->CreateNtupleDColumn("energy_keV"); // or "energy" if you prefer
-  analysis->CreateNtupleDColumn("intensity");
-  analysis->FinishNtuple();
+  auto id = analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
+  analysis->CreateNtupleDColumn(id,"energy_keV"); // or "energy" if you prefer
+  analysis->CreateNtupleDColumn(id,"intensity");
+  analysis->FinishNtuple(id);
 
   // Fill ntuple with the spectrum data
   for (size_t i = 0; i < fX.size(); ++i) {
-      analysis->FillNtupleDColumn(0, fX[i]);
-      analysis->FillNtupleDColumn(1, fY[i]);
-      analysis->AddNtupleRow();
+      analysis->FillNtupleDColumn(id,0, fX[i]);
+      analysis->FillNtupleDColumn(id,1, fY[i]);
+      analysis->AddNtupleRow(id);
   }
 
   G4cout << "ed of run action" << G4endl;

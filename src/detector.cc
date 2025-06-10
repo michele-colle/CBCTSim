@@ -42,11 +42,11 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
   //valuto se il fotone viene visto dal detector in base allo spettro di assorbimento dello scintillatore
-  // if(scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
-  // {
-  //   G4cout<<"photon not detected "<<en<<G4endl;
-  //   return false; // non viene visto
-  // }
+  if(scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
+  {
+    // //G4cout<<"photon not detected "<<en<<G4endl;
+    return false; // non viene visto
+  }
 
   if (info)
   {

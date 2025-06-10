@@ -71,6 +71,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   G4cout<<"DSO: "<<par->GetDSO()<<G4endl;
 
 
+  G4NistManager *nist = G4NistManager::Instance();
+  auto bone =  nist->FindOrBuildMaterial("G4_BONE_COMPACT_ICRU");
+  auto al =  nist->FindOrBuildMaterial("G4_Al");
   //https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/Appendix/materialNames.html
   //dimensioni del mondo
   G4double xWorld = maxxy+10*cm;
@@ -94,9 +97,18 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto rotRecon = new G4RotationMatrix();
   rotRecon->rotateZ(scanAngle);
 
-  auto solidRadiator = new G4Tubs("Radiator",0, 5*cm, 8*cm,0, 360*deg);
-  auto logicRadiator = new G4LogicalVolume(solidRadiator, H2O,"Radiator");
-  physRadiator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
+  auto solidRadiator = new G4Tubs("Radiator",2*cm, 3*cm, 8*cm,0, 360*deg);
+  //auto solidRadiator = new G4Box("Radiator",5*cm, 5*cm/2.0,5*cm);
+  auto logicRadiator = new G4LogicalVolume(solidRadiator, al,"Radiator");
+  physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
+
+  auto solidRadiator2 = new G4Tubs("Radiator2",0, 1.99*cm, 8*cm,0, 360*deg);;
+  auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
+  new G4PVPlacement(0,G4ThreeVector(4*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
+
+  auto solidRadiator3 = new G4Tubs("Radiator",3.01*cm, 5*cm, 4*cm,0, 360*deg);
+  auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
+  new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
 
 
   // Place the reconstruction cylinder at the origin, rotated

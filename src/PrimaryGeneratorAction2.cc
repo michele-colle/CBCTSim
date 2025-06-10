@@ -52,7 +52,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(1);
+  fParticleGun = new G4ParticleGun(1000);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   // fParticleGun->SetParticleDefinition(G4Proton::Definition());
@@ -87,8 +87,8 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
   G4ThreeVector dir(xr, yr, zr);
   // G4cout<<dir<<G4endl;
 
-  // fParticleGun->SetParticleMomentumDirection(dir);
   fParticleGun->SetParticleMomentumDirection(dir);
+  //fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,1,0));
 
   // set energy from a tabulated distribution
   //
@@ -102,11 +102,11 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
   // G4cout<<"energy: "<< energySelected<<G4endl;
 
   fParticleGun->SetParticleEnergy(energySelected);
-  // fParticleGun->SetParticleEnergy(10*MeV);
 
   // salvo I0 pesando la probabilitá che questo venga contato dal rivelatore
-  if(scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(energySelected))
+  if (scintillatorDetectorEfficiency && G4UniformRand() <= scintillatorDetectorEfficiency->Value(energySelected))
   {
+    // fParticleGun->SetParticleEnergy(10*MeV);
     G4AnalysisManager *analysis = G4AnalysisManager::Instance();
     analysis->FillH1(0, energySelected);
     // proietto sul detector
@@ -139,17 +139,17 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
 
   fY = readerSourceSpectrum.getColumn(par->GetXRaySourceSpectrum());
 
-  TxtWithHeaderReader filter1Spectrum;
-  G4cout << "Loading filter1 spectrum for material: " << par->GetFilter1Material()<< G4endl;
-  if(filter1Spectrum.loadFromFile(par->GetFilter1Material()+".txt"))
+  TxtWithHeaderReader filterSpectrum;
+  G4cout << "Loading filter1 spectrum for material: " << par->GetFilter1Material() << G4endl;
+  if (filterSpectrum.loadFromFile(par->GetFilter1Material() + ".txt"))
   {
-    filter1Spectrum.printSummary();
-    filter1Spectrum.printSample();
-    auto enflt = filter1Spectrum.getColumn("keV");
-    auto att = filter1Spectrum.getColumn("att");
+    filterSpectrum.printSummary();
+    filterSpectrum.printSample();
+    auto enflt = filterSpectrum.getColumn("keV");
+    auto att = filterSpectrum.getColumn("att");
     for (size_t i = 0; i < fY.size(); ++i)
     {
-      if(enflt[i]*keV != fX[i])
+      if (enflt[i] * keV != fX[i])
       {
         G4cout << "Warning: energy mismatch in filter1 spectrum at index " << i << ": "
                << enflt[i] * keV << " != " << fX[i] << G4endl;
@@ -157,22 +157,23 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
       fY[i] *= std::exp(-par->GetFilter1Thickness() * att[i] / cm); // attenuazione
     }
   }
-  if(filter1Spectrum.loadFromFile(par->GetFilter2Material()+".txt"))
+  if (filterSpectrum.loadFromFile(par->GetFilter2Material() + ".txt"))
   {
-    auto enflt = filter1Spectrum.getColumn("keV");
-    auto att = filter1Spectrum.getColumn("att");
+    auto enflt = filterSpectrum.getColumn("keV");
+    auto att = filterSpectrum.getColumn("att");
     for (size_t i = 0; i < fY.size(); ++i)
     {
-      if(enflt[i]*keV != fX[i])
+      if (enflt[i] * keV != fX[i])
       {
         G4cout << "Warning: energy mismatch in filter1 spectrum at index " << i << ": "
                << enflt[i] * keV << " != " << fX[i] << G4endl;
       }
-      fY[i] *= std::exp(-par->GetFilter1Thickness() * att[i] / cm); // attenuazione
+      fY[i] *= std::exp(-par->GetFilter2Thickness() * att[i] / cm); // attenuazione
     }
   }
 
-  for (auto &x : fY) G4cout << x << G4endl;
+  for (auto &x : fY)
+    G4cout << x << G4endl;
 
   // tabulated function
   // Y is assumed positive, linear per segment, continuous
@@ -208,20 +209,18 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
 
   // codice duplicato ma vabe, c'e' di peggio nella vita
   TxtWithHeaderReader reader;
-  std::cout << "Loading scintillator detector efficiency for material: " << par->GetDetectorMaterial()+".txt" << std::endl;
-  if(reader.loadFromFile(par->GetDetectorMaterial()+".txt"))
+  std::cout << "Loading scintillator detector efficiency for material: " << par->GetDetectorMaterial() + ".txt" << std::endl;
+  if (reader.loadFromFile(par->GetDetectorMaterial() + ".txt"))
   {
     scintillatorDetectorEfficiency = new G4PhysicsOrderedFreeVector();
     auto enflt = reader.getColumn("keV");
     auto att = reader.getColumn("att");
     for (size_t i = 0; i < enflt.size(); ++i)
     {
-      scintillatorDetectorEfficiency->InsertValues(enflt[i]*keV, 1-exp(-par->GetDetectorThickness()*att[i]/cm));
-      //std::cout << enflt[i] << " "<< 1-exp(-par->GetDetectorThickness()*att[i]/cm) << std::endl;
+      scintillatorDetectorEfficiency->InsertValues(enflt[i] * keV, 1 - exp(-par->GetDetectorThickness() * att[i] / cm));
+      std::cout << enflt[i] << " " << 1 - exp(-par->GetDetectorThickness() * att[i] / cm) << std::endl;
     }
   }
-
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
