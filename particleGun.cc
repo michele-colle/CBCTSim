@@ -44,6 +44,9 @@
 #include "Randomize.hh"
 #include <Messenger.hh>
 #include <TxtWithHeaderReader.hh>
+#include "ICRP110PhantomConstruction.hh"
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
 
@@ -66,7 +69,14 @@ int main(int argc, char** argv)
 
   // set mandatory initialization classes
   DetectorConstruction* detector = new DetectorConstruction;
+  //auto userPhantom = new ICRP110PhantomConstruction();
+
   runManager->SetUserInitialization(detector);
+
+
+  // auto userPhantom = new ICRP110PhantomConstruction();
+  // runManager -> SetUserInitialization(userPhantom);
+
   runManager->SetUserInitialization(new PhysicsList);
 
   runManager->SetUserInitialization(new ActionInitialization);

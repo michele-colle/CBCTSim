@@ -6,6 +6,10 @@
 #include "G4UIdirectory.hh"
 #include "G4RunManager.hh"
 #include "G4Material.hh"
+#include "G4Polyline.hh"
+#include <G4VVisManager.hh>
+#include <G4Colour.hh>
+#include <G4VisAttributes.hh>
 
 Messenger::Messenger()
 {
@@ -89,6 +93,10 @@ Messenger::Messenger()
 
     fCreateMaterialSpecturm = new G4UIcmdWithAString("/mysim/createMaterialSpectrum", this);
     fCreateMaterialSpecturm->SetGuidance("Create mu spectrum from nist name, example: 'G4_WATER'.");
+
+    //draw FOV command
+    fDrawFov = new G4UIcommand("/mysim/drawFOV", this);
+    fDrawFov->SetGuidance("Draw the field of view (FOV) of the detector.");
 }
 
 Messenger::~Messenger()
@@ -105,6 +113,8 @@ Messenger::~Messenger()
     delete fSetDetThickCmd;
     delete fSetObjectAngleCmd;
     delete fDir;
+    delete fDrawFov;
+
 }
 
 void Messenger::SetNewValue(G4UIcommand *command, G4String newValue)
@@ -181,5 +191,53 @@ void Messenger::SetNewValue(G4UIcommand *command, G4String newValue)
     }
     else if (command == fCreateMaterialSpecturm) {
         params->CreateMaterialSpectrum(newValue);
+    }
+    else if (command == fDrawFov) {
+        //disengo le righe del fov
+        G4VVisManager *vis = G4VVisManager::GetConcreteInstance();
+        auto par = CBCTParams::Instance();
+        auto dsd = par->GetDSD();
+        auto dso = par->GetDSO();
+        auto ddo = dsd-dso;
+        auto halfH = par->GetDetHeight() / 2.0;
+        auto halfW = par->GetDetWidth() / 2.0;
+
+        G4Polyline line;
+        // define endpoints (in world coordinates)
+        line.push_back(G4Point3D(0, -dso, 0));
+        line.push_back(G4Point3D(halfH, ddo, halfW));
+
+        G4Colour color(1.0, 0.0, 0.0); // red
+        line.SetVisAttributes(G4VisAttributes(color));
+
+        vis->Draw(line);
+
+        G4Polyline line2;
+        // define endpoints (in world coordinates)
+        line2.push_back(G4Point3D(0, -dso, 0));
+        line2.push_back(G4Point3D(-halfH, ddo, halfW));
+
+        line2.SetVisAttributes(G4VisAttributes(color));
+
+        vis->Draw(line2);
+
+        G4Polyline line3;
+        // define endpoints (in world coordinates)
+        line3.push_back(G4Point3D(0, -dso, 0));
+        line3.push_back(G4Point3D(halfH, ddo, -halfW));
+
+        line3.SetVisAttributes(G4VisAttributes(color));
+
+        vis->Draw(line3);
+
+        G4Polyline line4;
+        // define endpoints (in world coordinates)
+        line4.push_back(G4Point3D(0, -dso, 0));
+        line4.push_back(G4Point3D(-halfH, ddo, -halfW));
+
+        line4.SetVisAttributes(G4VisAttributes(color));
+
+        vis->Draw(line4);
+      
     }
 }

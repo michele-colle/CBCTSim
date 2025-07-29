@@ -43,6 +43,14 @@
 #include <G4Tubs.hh>
 #include <G4VisAttributes.hh>
 #include <G4Colour.hh>
+#include "G4Polyline.hh"
+#include "G4Colour.hh"
+#include "G4VisAttributes.hh"
+#include "G4VVisManager.hh"
+#include "G4Point3D.hh"
+
+#include "ICRP110PhantomConstruction.hh"
+
 
 DetectorConstruction::DetectorConstruction()
 {  
@@ -60,8 +68,19 @@ void DetectorConstruction::DefineMaterial()
 
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
+
+  //creo il phantmo antropomorfo
+
+  auto userPhantom = new ICRP110PhantomConstruction();
+
+
+
+
   auto par = CBCTParams::Instance();
-  auto ddo = par->GetDSD()-par->GetDSO();
+  auto dsd = par->GetDSD();
+  auto dso = par->GetDSO();
+  auto ddo = dsd-dso;
+  auto detwidth = par->GetDetWidth();
 
   auto maxxy = std::max(par->GetDSO(), ddo);
   auto maxz = par->GetDetHeight()/2.0;
@@ -86,11 +105,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
   // --- Reconstruction Cylinder (mother for radiator) ---
-  G4double reconRadius = ddo;
+  G4double reconRadius = dso/dsd* detwidth/2.0; // Radius of the cylinder based on DSO and DSD
   G4double reconHeight = ddo;
   auto solidReconCyl = new G4Tubs("ReconCylinder", 0, reconRadius, maxz, 0, 360*deg);
   auto logicReconCyl = new G4LogicalVolume(solidReconCyl, air, "ReconCylinder");
-  logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 1.0, 0.0, 0.1)));//cilindro giallo
+  logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 1.0, 0.2)));//cilindro viola
 
   // Rotation matrix for scan angle (around Y axis, for example)
   auto scanAngle = par->GetObjectAngleInDegree();
@@ -100,15 +119,15 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto solidRadiator = new G4Tubs("Radiator",2*cm, 3*cm, 8*cm,0, 360*deg);
   //auto solidRadiator = new G4Box("Radiator",5*cm, 5*cm/2.0,5*cm);
   auto logicRadiator = new G4LogicalVolume(solidRadiator, al,"Radiator");
-  physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
+  //physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
 
-  auto solidRadiator2 = new G4Tubs("Radiator2",0, 1.99*cm, 8*cm,0, 360*deg);;
+  auto solidRadiator2 = new G4Tubs("Radiator2",0, 5*cm, 8*cm,0, 360*deg);;
   auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
-  new G4PVPlacement(0,G4ThreeVector(4*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
+  //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
 
   auto solidRadiator3 = new G4Tubs("Radiator",3.01*cm, 5*cm, 4*cm,0, 360*deg);
   auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
-  new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
+//  new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
 
 
   // Place the reconstruction cylinder at the origin, rotated
@@ -116,14 +135,12 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
       rotRecon, G4ThreeVector(0,0,0), logicReconCyl, "ReconCylinder",
       logicWorld, false, 0, true);
 
-
   //rivelatori di fotoni
   solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
   logicDetector = new G4LogicalVolume(solidDetector, air, "Detector");
   logicDetector->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)));//detector blu
   //sposto il detecto di metá della sua profonditá per mantenere la ddo corretta
   physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*cm,0.), logicDetector,"Detector",logicWorld,false,0 );
-
 
   // creo un marker per la sorgente
   auto sourceMarkerSolid = new G4Cons("GunMarkerCone", 0, 1*cm, 0, 2*cm, 1*cm, 0, 360*deg);
@@ -133,7 +150,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   rotMarker->rotateX(90*deg); // Rotate the marker to point upwards
   physSourceMarker = new G4PVPlacement(rotMarker, G4ThreeVector(0, -1.001*cm-par->GetDSO(), 0), sourceMarkerLogical, "sourceMarker", logicWorld, false, 0, true);            
 
-  //creo un marker per il fov
+  userPhantom->PlacePhantomInVolume(logicReconCyl);
+
   
 
   return physWorld;

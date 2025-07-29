@@ -10,4 +10,4 @@
 #1000000 sono circa 10 minuti
 #6000000 43 minuti
 
-/run/beamOn 6000000
+/run/beamOn 600000

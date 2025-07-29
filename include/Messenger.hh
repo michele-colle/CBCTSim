@@ -27,4 +27,5 @@ private:
     G4UIcmdWithADoubleAndUnit* fSetObjectAngleCmd;
     G4UIcmdWithAString* fSetXRaySourceSpectrumCmd; 
     G4UIcmdWithAString* fCreateMaterialSpecturm; 
+    G4UIcommand* fDrawFov;
 };

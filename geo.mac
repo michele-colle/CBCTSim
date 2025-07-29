@@ -13,6 +13,7 @@
 /mysim/setDetWidth 29.34 cm
 /mysim/setDetHeight 29.34 cm
 
+
 # attivo gli istogrammi I0 primaria a scatter
 /analysis/setFileName run0
 /analysis/h1/set 0 2048 3.5 150 keV #energia I0
@@ -32,6 +33,6 @@
 
 
 # Set object angle (rotation of the reconstruction cylinder)
-/mysim/setObjectAngle 0 deg
+/mysim/setObjectAngle 30 deg
 
 /run/reinitializeGeometry

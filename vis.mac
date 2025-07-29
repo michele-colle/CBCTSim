@@ -21,14 +21,17 @@
 # trajectories are established:
 /vis/viewer/set/autoRefresh false
 /vis/verbose errors
+
+
+
+# Draw geometry:
+/vis/drawVolume 
+/vis/viewer/set/culling global true
+
 /vis/viewer/set/style surface
 /vis/geometry/set/visibility World 0 false
 
-#/vis/viewer/set/culling global false
-/vis/viewer/set/culling invisible true
-#
-# Draw geometry:
-/vis/drawVolume
+
 #
 # Specify view angle:
 /vis/viewer/set/viewpointThetaPhi 0. 0.
@@ -78,3 +81,5 @@
 
 #per salvare l'immagine visualizzata
 #/vis/vtk/export jpg ../Geant4CTsimCylinder
+
+/mysim/drawFOV

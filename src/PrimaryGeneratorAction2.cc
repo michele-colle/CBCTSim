@@ -52,7 +52,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(1000);
+  fParticleGun = new G4ParticleGun(5);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   // fParticleGun->SetParticleDefinition(G4Proton::Definition());
@@ -220,6 +220,11 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
       scintillatorDetectorEfficiency->InsertValues(enflt[i] * keV, 1 - exp(-par->GetDetectorThickness() * att[i] / cm));
       std::cout << enflt[i] << " " << 1 - exp(-par->GetDetectorThickness() * att[i] / cm) << std::endl;
     }
+  }
+  else
+  {
+    std::cerr << "Failed to load scintillator detector efficiency data file" << std::endl;
+    scintillatorDetectorEfficiency = nullptr;
   }
 }
 
