@@ -68,6 +68,10 @@ public:
     void CreateMaterialSpectrum(const G4String& material);
 
 
+    void SetPatienStandPosition(G4double val) { fPatientStandPosition = val; }
+    G4double GetPatienStandPosition() const { return fPatientStandPosition; }
+
+
 
 private:
     CBCTParams() = default;
@@ -84,6 +88,8 @@ private:
     G4double fDetectorThickness = 0.0;
     G4double objectAngleInDegree = 0.0;
     G4String XRaySourceSpectrum = "120K10DW"; // Added member
+    G4double fPatientStandPosition = 0.0;
+
 
 
 };

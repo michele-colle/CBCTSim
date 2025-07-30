@@ -28,4 +28,5 @@ private:
     G4UIcmdWithAString* fSetXRaySourceSpectrumCmd; 
     G4UIcmdWithAString* fCreateMaterialSpecturm; 
     G4UIcommand* fDrawFov;
+    G4UIcmdWithADoubleAndUnit* fSetPatienStandPositionCmd;
 };

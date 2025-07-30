@@ -69,9 +69,6 @@ void DetectorConstruction::DefineMaterial()
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
 
-  //creo il phantmo antropomorfo
-
-  auto userPhantom = new ICRP110PhantomConstruction();
 
 
 
@@ -107,7 +104,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   // --- Reconstruction Cylinder (mother for radiator) ---
   G4double reconRadius = dso/dsd* detwidth/2.0; // Radius of the cylinder based on DSO and DSD
   G4double reconHeight = ddo;
-  auto solidReconCyl = new G4Tubs("ReconCylinder", 0, reconRadius, maxz, 0, 360*deg);
+  auto solidReconCyl = new G4Tubs("ReconCylinder", 0, std::min(ddo, dso), maxz, 0, 360*deg);
   auto logicReconCyl = new G4LogicalVolume(solidReconCyl, air, "ReconCylinder");
   logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 1.0, 0.2)));//cilindro viola
 
@@ -135,6 +132,24 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
       rotRecon, G4ThreeVector(0,0,0), logicReconCyl, "ReconCylinder",
       logicWorld, false, 0, true);
 
+
+
+
+  //creo il phantmo antropomorfo
+  auto userPhantom = new ICRP110PhantomConstruction();
+  userPhantom->PlacePhantomInVolume(logicReconCyl);
+
+  //aggiungo la barella
+  auto patientStandPosition = par->GetPatienStandPosition();
+  auto patientStand = new G4Box("PatientStand", 25*cm, 1.5*cm, maxz);
+  auto logicPatientStand = new G4LogicalVolume(patientStand, H2O, "PatientStand");
+  logicPatientStand->SetVisAttributes(new G4VisAttributes(G4Colour(0.5, 0.5, 0.5))); // Grigio
+  new G4PVPlacement(0,G4ThreeVector(0,patientStandPosition,0), logicPatientStand,"PatientStand",logicReconCyl,false,0 );
+
+
+
+
+
   //rivelatori di fotoni
   solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
   logicDetector = new G4LogicalVolume(solidDetector, air, "Detector");
@@ -150,7 +165,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   rotMarker->rotateX(90*deg); // Rotate the marker to point upwards
   physSourceMarker = new G4PVPlacement(rotMarker, G4ThreeVector(0, -1.001*cm-par->GetDSO(), 0), sourceMarkerLogical, "sourceMarker", logicWorld, false, 0, true);            
 
-  userPhantom->PlacePhantomInVolume(logicReconCyl);
+
+  
 
   
 

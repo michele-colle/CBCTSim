@@ -97,6 +97,13 @@ Messenger::Messenger()
     //draw FOV command
     fDrawFov = new G4UIcommand("/mysim/drawFOV", this);
     fDrawFov->SetGuidance("Draw the field of view (FOV) of the detector.");
+
+
+    // posizione barella
+    fSetPatienStandPositionCmd = new G4UIcmdWithADoubleAndUnit("/mysim/setPatienStandPosition", this);
+    fSetPatienStandPositionCmd->SetGuidance("Set object angle in degree.");
+    fSetPatienStandPositionCmd->SetParameterName("position", false);
+    fSetPatienStandPositionCmd->SetDefaultUnit("cm");
 }
 
 Messenger::~Messenger()
@@ -114,6 +121,7 @@ Messenger::~Messenger()
     delete fSetObjectAngleCmd;
     delete fDir;
     delete fDrawFov;
+    delete fSetPatienStandPositionCmd;
 
 }
 
@@ -191,6 +199,10 @@ void Messenger::SetNewValue(G4UIcommand *command, G4String newValue)
     }
     else if (command == fCreateMaterialSpecturm) {
         params->CreateMaterialSpectrum(newValue);
+    }
+    else if (command == fSetPatienStandPositionCmd) {
+        params->SetPatienStandPosition(fSetPatienStandPositionCmd->GetNewDoubleValue(newValue));
+        G4RunManager::GetRunManager()->GeometryHasBeenModified();
     }
     else if (command == fDrawFov) {
         //disengo le righe del fov
