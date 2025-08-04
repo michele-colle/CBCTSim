@@ -52,7 +52,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(5);
+  fParticleGun = new G4ParticleGun(1000);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   // fParticleGun->SetParticleDefinition(G4Proton::Definition());
@@ -112,7 +112,7 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
     // proietto sul detector
     G4double detx = par->GetDSD() * dir.x() / dir.y();
     G4double detz = par->GetDSD() * dir.z() / dir.y();
-    analysis->FillH2(0, detx, detz);
+    analysis->FillH2(0, detx, detz, energySelected/keV);
   }
   // G4cout<<"air detector position: "<<detx<<" "<< detz<<G4endl;
 

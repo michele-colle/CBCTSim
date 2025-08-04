@@ -58,7 +58,7 @@ ICRP110PhantomConstruction::ICRP110PhantomConstruction() : fMotherVolume(nullptr
   fMaterial_Female = new ICRP110PhantomMaterial_Female();
   fMaterial_Male = new ICRP110PhantomMaterial_Male();
   fSex = "female";   // Female phantom is the default option
-  fSection = "trunk"; // Head partial phantom is the default option
+  fSection = "head"; // Head partial phantom is the default option
 }
 
 ICRP110PhantomConstruction::~ICRP110PhantomConstruction()

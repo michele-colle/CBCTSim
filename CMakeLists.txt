@@ -82,7 +82,7 @@ add_dependencies(ICRP110phantoms ICRPdata)
 #
 set(particleGun_SCRIPTS
 female.in female_head.in female_trunk.in male.in male_head.in male_trunk.in ColourMap.dat g4views/g4_00.g4view g4views/g4_01.g4view
-    plotHisto.C run.mac vis.mac
+    plotHisto.C run.mac runloop.mac runsingle.mac vis.mac
     geo.mac IPEMXraysCatalogue.txt muspectrum.mac
     G4_Al.txt G4_BRASS.txt G4_CESIUM_IODIDE.txt 
   )

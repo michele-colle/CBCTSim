@@ -10,7 +10,7 @@
 #1000000 sono circa 10 minuti
 #6000000 43 minuti
 
-/analysis/setFileName runtest
-/mysim/setObjectAngle 0 deg
+/analysis/setFileName runtest{angle}
+/mysim/setObjectAngle {angle} deg
 /run/reinitializeGeometry
-/run/beamOn 600000
+/run/beamOn 10000

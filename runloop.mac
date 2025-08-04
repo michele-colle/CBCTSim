@@ -1,0 +1,4 @@
+/control/loop runsingle.mac angle 0 10 1
+
+#per salvare l'output della console in un file di testo:
+# ./particleGun runloop.mac | tee log.txt

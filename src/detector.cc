@@ -67,12 +67,12 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
     if (isCollinear)
     {
       analysis->FillH1(1, en);
-      analysis->FillH2(1, posPhoton.x(), posPhoton.z());
+      analysis->FillH2(1, posPhoton.x(), posPhoton.z(),en/keV);
     }
     else//scatter
     {
       analysis->FillH1(2, en);
-      analysis->FillH2(2, posPhoton.x(), posPhoton.z());
+      analysis->FillH2(2, posPhoton.x(), posPhoton.z(),en/keV);
     }
     //G4cout<<"actual pos "<<posPhoton<<G4endl;
 

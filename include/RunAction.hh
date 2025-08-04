@@ -37,6 +37,9 @@
 #include "G4UserRunAction.hh"
 #include "globals.hh"
 #include "G4RunManager.hh"
+#include <chrono> // Include for std::chrono.
+#include <atomic> // Include for std::atomic
+
 
 class G4Run;
 class HistoManager;
@@ -52,8 +55,18 @@ class RunAction : public G4UserRunAction
     void BeginOfRunAction(const G4Run*) override;
     void EndOfRunAction(const G4Run*) override;
 
+    // Public getter for the atomic counter (for EventAction)
+    std::atomic<long>& GetEventsProcessedCounter() { return fEventsProcessed; }
+    std::chrono::high_resolution_clock::time_point fStartTime;
+
+
   private:
     HistoManager* fHistoManager = nullptr;
+
+    
+    /// @brief Contatore atomico, serve per fare la stima del tiempo di completamento
+    static std::atomic<long> fEventsProcessed; 
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

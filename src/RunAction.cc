@@ -45,10 +45,15 @@
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+std::atomic<long> RunAction::fEventsProcessed;
+
 
 RunAction::RunAction()
 {
   fHistoManager = new HistoManager();
+  G4cout << "RunActionConstructor" << G4endl;
+  fEventsProcessed.store(0);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -59,11 +64,11 @@ RunAction::~RunAction()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-time_t start_time;
 void RunAction::BeginOfRunAction(const G4Run *)
 {
   //viene chiamato per ogni thread
-  start_time = time(NULL);
+  fStartTime = std::chrono::high_resolution_clock::now();
+  fEventsProcessed.store(0);
 
 
   // histograms
@@ -109,10 +114,15 @@ void RunAction::EndOfRunAction(const G4Run *)
   }
 
   G4cout << "ed of run action" << G4endl;
-  time_t end_time = time(NULL);
-  time_t elapsed = end_time - start_time;
-  tm *ltm = localtime(&elapsed);
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(end_time - fStartTime).count();
+  
+  // Use ctime to format the seconds, as it's easier
+  tm *ltm = localtime(&elapsed_time);
   std::cout << "elapsed time " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << ")" << std::endl;
+  std::cout << "=> GetNumberOfEventsToBeProcessed() " << G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed()  << std::endl;
+  std::cout << "=> total event counter " << fEventsProcessed.fetch_add(0,std::memory_order_relaxed)  << std::endl;
+
 
   // save histograms
   //

@@ -15,7 +15,7 @@
 
 
 # attivo gli istogrammi I0 primaria a scatter
-/analysis/setFileName run0
+#/analysis/setFileName run0 #lasciare commentato per run multiple
 /analysis/h1/set 0 2048 3.5 150 keV #energia I0
 /analysis/h1/set 1 2048 3.5 150 keV #energia primaria
 /analysis/h1/set 2 2048 3.5 150 keV #energia scatter
@@ -33,7 +33,7 @@
 /mysim/setPatienStandPosition 13 cm
 
 
+#tenere commentato per le simulazioni in loop
 # Set object angle (rotation of the reconstruction cylinder)
-/mysim/setObjectAngle 30 deg
-
-/run/reinitializeGeometry
+#/mysim/setObjectAngle 30 deg
+#/run/reinitializeGeometry

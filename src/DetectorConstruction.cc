@@ -144,7 +144,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto patientStand = new G4Box("PatientStand", 25*cm, 1.5*cm, maxz);
   auto logicPatientStand = new G4LogicalVolume(patientStand, H2O, "PatientStand");
   logicPatientStand->SetVisAttributes(new G4VisAttributes(G4Colour(0.5, 0.5, 0.5))); // Grigio
-  new G4PVPlacement(0,G4ThreeVector(0,patientStandPosition,0), logicPatientStand,"PatientStand",logicReconCyl,false,0 );
+  //new G4PVPlacement(0,G4ThreeVector(0,patientStandPosition,0), logicPatientStand,"PatientStand",logicReconCyl,false,0 );
 
 
 

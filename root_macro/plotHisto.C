@@ -121,7 +121,7 @@ void plotHistoNIST()
   //
 
   cout << "alalaa adasdadasd" << endl;
-  TFile *f(TFile::Open("run0.root"));
+  TFile *f(TFile::Open("./runtest0.root"));
   f->ls();
 
   TCanvas *c1 = new TCanvas("c1", "  ");
@@ -197,7 +197,7 @@ void saveTH2DAsBinary(TH2D *hist, const std::string &filename)
 }
 void plotHitMaps()
 {
-  TFile *f(TFile::Open("run0.root"));
+  TFile *f(TFile::Open("../runtest0.root"));
 
   TH2D *airMap = (TH2D *)(f->Get("3"));
   TH2D *primaryMap = (TH2D *)(f->Get("4"));
