@@ -42,6 +42,8 @@
 
 int main(int argc,char** argv)
 {
+      
+
  auto* runManager = G4RunManagerFactory::CreateRunManager();
  G4int nThreads = 4;
  runManager->SetNumberOfThreads(nThreads);

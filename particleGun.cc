@@ -47,12 +47,30 @@
 #include "ICRP110PhantomConstruction.hh"
 
 
+#include <CeleritasG4.hh>
+
+using TMI = celeritas::TrackingManagerIntegration;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
+celeritas::SetupOptions MakeOptions()
+{
+    celeritas::SetupOptions opts;
+    // NOTE: these numbers are appropriate for CPU execution and can be set
+    // through the UI using `/celer/`
+    opts.max_num_tracks = 2024;
+    opts.initializer_capacity = 2024 * 128;
+    // Celeritas does not support EmStandard MSC physics above 200 MeV
+    opts.ignore_processes = {"CoulombScat"};
 
+    // Use a uniform (zero) magnetic field
+    opts.make_along_step = celeritas::UniformAlongStepFactory();
+
+    // Save diagnostic file to a unique name
+    opts.output_file = "trackingmanager-offload.out.json";
+    return opts;
+}
 int main(int argc, char** argv)
 {
-
   // detect interactive mode (if no arguments) and define UI session
   G4UIExecutive* ui = 0;
   if (argc == 1) ui = new G4UIExecutive(argc, argv);
@@ -76,12 +94,19 @@ int main(int argc, char** argv)
 
   // auto userPhantom = new ICRP110PhantomConstruction();
   // runManager -> SetUserInitialization(userPhantom);
+  
+  auto& tmi = TMI::Instance();
+  auto* physics_list = new PhysicsList;
+  physics_list->RegisterPhysics(new celeritas::TrackingManagerConstructor(&tmi));
+  runManager->SetUserInitialization(physics_list);
 
-  runManager->SetUserInitialization(new PhysicsList);
+  //runManager->SetUserInitialization(new PhysicsList);
 
   runManager->SetUserInitialization(new ActionInitialization);
 
   Messenger* mess = new Messenger();
+   
+  tmi.SetOptions(MakeOptions());
 
   // initialize visualization
   G4VisManager* visManager = nullptr;

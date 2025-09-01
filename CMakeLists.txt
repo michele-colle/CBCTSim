@@ -8,12 +8,16 @@ project(cbctsim)
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
 # to build a batch mode only executable
 #
+
+find_package(Celeritas 0.6 REQUIRED)
+
 option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
 if(WITH_GEANT4_UIVIS)
   find_package(Geant4 REQUIRED ui_all vis_all)
 else()
   find_package(Geant4 REQUIRED)
 endif()
+
 
 
 
@@ -65,8 +69,9 @@ ExternalProject_Add(ICRPdata
 add_executable(particleGun particleGun.cc ${sources} ${headers})
 add_executable(ICRP110phantoms ICRP110phantoms.cc ${sources} ${headers})
 
-target_link_libraries(particleGun ${Geant4_LIBRARIES} )
-target_link_libraries(ICRP110phantoms ${Geant4_LIBRARIES} )
+celeritas_target_link_libraries(particleGun Celeritas::G4 ${Geant4_LIBRARIES} )
+celeritas_target_link_libraries(ICRP110phantoms Celeritas::G4 ${Geant4_LIBRARIES} )
+
 
 
 add_dependencies(ICRP110phantoms ICRPdata)

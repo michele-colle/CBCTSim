@@ -41,7 +41,8 @@
 #include "G4AnalysisManager.hh"
 #include "G4UnitsTable.hh"
 
-
+#include <CeleritasG4.hh>
+#include <accel/TrackingManagerIntegration.hh>
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -64,12 +65,13 @@ RunAction::~RunAction()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void RunAction::BeginOfRunAction(const G4Run *)
+void RunAction::BeginOfRunAction(const G4Run *run)
 {
   //viene chiamato per ogni thread
   fStartTime = std::chrono::high_resolution_clock::now();
   fEventsProcessed.store(0);
 
+    celeritas::TrackingManagerIntegration::Instance().BeginOfRunAction(run);
 
   // histograms
   //
@@ -83,7 +85,7 @@ void RunAction::BeginOfRunAction(const G4Run *)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void RunAction::EndOfRunAction(const G4Run *)
+void RunAction::EndOfRunAction(const G4Run *run)
 {
   TxtWithHeaderReader reader;
     
@@ -151,6 +153,8 @@ void RunAction::EndOfRunAction(const G4Run *)
     }
     
   }
+    celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
