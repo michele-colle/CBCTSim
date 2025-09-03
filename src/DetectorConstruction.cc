@@ -120,11 +120,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
   auto solidRadiator2 = new G4Tubs("Radiator2",0, 5*cm, 8*cm,0, 360*deg);;
   auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
-  //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
+  new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
 
   auto solidRadiator3 = new G4Tubs("Radiator",3.01*cm, 5*cm, 4*cm,0, 360*deg);
   auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
-//  new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
+  //new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
 
 
   // Place the reconstruction cylinder at the origin, rotated
@@ -136,8 +136,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
   //creo il phantmo antropomorfo
-  auto userPhantom = new ICRP110PhantomConstruction();
-  userPhantom->PlacePhantomInVolume(logicReconCyl);
+  //auto userPhantom = new ICRP110PhantomConstruction();
+  //userPhantom->PlacePhantomInVolume(logicReconCyl);
 
   //aggiungo la barella
   auto patientStandPosition = par->GetPatienStandPosition();
@@ -151,11 +151,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
   //rivelatori di fotoni
-  solidDetector = new G4Box("Detector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
-  logicDetector = new G4LogicalVolume(solidDetector, air, "Detector");
+  solidDetector = new G4Box("solidDetector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
+  logicDetector = new G4LogicalVolume(solidDetector, air, "logicDetector");
   logicDetector->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)));//detector blu
   //sposto il detecto di metá della sua profonditá per mantenere la ddo corretta
-  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*cm,0.), logicDetector,"Detector",logicWorld,false,0 );
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*cm,0.), logicDetector,"physDetector",logicWorld,false,0 );
 
   // creo un marker per la sorgente
   auto sourceMarkerSolid = new G4Cons("GunMarkerCone", 0, 1*cm, 0, 2*cm, 1*cm, 0, 360*deg);
@@ -176,6 +176,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 void DetectorConstruction::ConstructSDandField()
 {
   SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector");
+  G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
+
   logicDetector->SetSensitiveDetector(sensDet);
+
   G4cout << "Sensitive Detector set for Detector volume."<<logicDetector<< G4endl;
 }

@@ -49,10 +49,11 @@
 #include <G4NistManager.hh>
 #include <G4EmCalculator.hh>
 #include <algorithm>
+#include <EventInfo.hh>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(1000);
+  fParticleGun = new G4ParticleGun(100000);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   // fParticleGun->SetParticleDefinition(G4Proton::Definition());
@@ -103,22 +104,48 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
 
   fParticleGun->SetParticleEnergy(energySelected);
 
-  // salvo I0 pesando la probabilitá che questo venga contato dal rivelatore
-  if (scintillatorDetectorEfficiency && G4UniformRand() <= scintillatorDetectorEfficiency->Value(energySelected))
-  {
-    // fParticleGun->SetParticleEnergy(10*MeV);
-    G4AnalysisManager *analysis = G4AnalysisManager::Instance();
-    analysis->FillH1(0, energySelected);
-    // proietto sul detector
-    G4double detx = par->GetDSD() * dir.x() / dir.y();
-    G4double detz = par->GetDSD() * dir.z() / dir.y();
-    analysis->FillH2(0, detx, detz, energySelected/keV);
-  }
+  // // ATTENZIONE!!! questo non funziona perché scarterei il numero di particelle passato a particleGun!!!!! vedi sotto per dettagli
+  // // salvo I0 pesando la probabilitá che questo venga contato dal rivelatore
+  // if (scintillatorDetectorEfficiency && G4UniformRand() <= scintillatorDetectorEfficiency->Value(energySelected))
+  // {
+  //   // fParticleGun->SetParticleEnergy(10*MeV);
+  //   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
+  //   analysis->FillH1(0, energySelected);
+  //   // proietto sul detector
+  //   G4double detx = par->GetDSD() * dir.x() / dir.y();
+  //   G4double detz = par->GetDSD() * dir.z() / dir.y();
+  //   analysis->FillH2(0, detx, detz, energySelected/keV);
+  // }
+
+
+
   // G4cout<<"air detector position: "<<detx<<" "<< detz<<G4endl;
 
   // create vertex
   //
+  particleCounter++;
+  //G4cout<<"particleCounter: "<<particleCounter<<G4endl;
+  //qui passa per il numero hiamato da run beam on, quindi con beamOn 10 passa 10 volte 
+  //e spara il numero di particelle indicato in particleGun
+  //dunque de ho particleGun(100) e beamOn 10 mi aspetto 10 direzioni ed energie diverse
+  //e 100 particelle per ogni direzione
   fParticleGun->GeneratePrimaryVertex(anEvent);
+  G4PrimaryParticle* primary = anEvent->GetPrimaryVertex()->GetPrimary();
+  
+  anEvent->SetUserInformation(new EventInfo(primary->GetMomentum(), primary->GetKineticEnergy(), particleCounter));
+
+  // G4int nVtx = anEvent->GetNumberOfPrimaryVertex();
+  // G4cout<<"NUMBER OF VERTEX "<<anEvent->GetNumberOfPrimaryVertex()<<G4endl;
+  // G4cout<<"NUMBER OF Particle "<<anEvent->GetPrimaryVertex()->GetNumberOfParticle()<<G4endl;
+  //  for (int i = 0; i < vertex->GetNumberOfParticle(); ++i)
+  //   {
+  //       G4PrimaryParticle* primary = vertex->GetPrimary(i);
+
+  //       // For each primary particle, create a new TrackInfo object
+  //       // containing ITS OWN momentum and attach it.
+  //       primary->SetUserInformation(new TrackInfo(primary->GetMomentum()));
+  //   }
+
 }
 
 void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()

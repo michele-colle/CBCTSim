@@ -41,20 +41,19 @@
 #include "G4AnalysisManager.hh"
 #include "G4UnitsTable.hh"
 
+#ifdef WITH_CELERITAS
 #include <CeleritasG4.hh>
 #include <accel/TrackingManagerIntegration.hh>
-
+#endif
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 std::atomic<long> RunAction::fEventsProcessed;
-
 
 RunAction::RunAction()
 {
   fHistoManager = new HistoManager();
   G4cout << "RunActionConstructor" << G4endl;
   fEventsProcessed.store(0);
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -67,12 +66,13 @@ RunAction::~RunAction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void RunAction::BeginOfRunAction(const G4Run *run)
 {
-  //viene chiamato per ogni thread
+  // viene chiamato per ogni thread
   fStartTime = std::chrono::high_resolution_clock::now();
   fEventsProcessed.store(0);
+#ifdef WITH_CELERITAS
 
-    celeritas::TrackingManagerIntegration::Instance().BeginOfRunAction(run);
-
+  celeritas::TrackingManagerIntegration::Instance().BeginOfRunAction(run);
+#endif
   // histograms
   //
   G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -88,43 +88,45 @@ void RunAction::BeginOfRunAction(const G4Run *run)
 void RunAction::EndOfRunAction(const G4Run *run)
 {
   TxtWithHeaderReader reader;
-    
+
   // Load the data file
-  if (!reader.loadFromFile("IPEMXraysCatalogue.txt")) {
-      std::cerr << "Failed to load data file" << std::endl;
-      return;
+  if (!reader.loadFromFile("IPEMXraysCatalogue.txt"))
+  {
+    std::cerr << "Failed to load data file" << std::endl;
+    return;
   }
 
   auto par = CBCTParams::Instance();
 
   auto fX = reader.getColumn("keV");
-  for (auto& x : fX) x *= keV;
+  for (auto &x : fX)
+    x *= keV;
   auto fY = reader.getColumn(par->GetXRaySourceSpectrum());
   // Create histogram for spectrum
- // Create ntuple for spectrum
-  auto analysis = G4AnalysisManager::Instance();
-  auto id = analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
-  analysis->CreateNtupleDColumn(id,"energy_keV"); // or "energy" if you prefer
-  analysis->CreateNtupleDColumn(id,"intensity");
-  analysis->FinishNtuple(id);
+  // Create ntuple for spectrum
+  // auto analysis = G4AnalysisManager::Instance();
+  // auto id = analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
+  // analysis->CreateNtupleDColumn(id, "energy_keV"); // or "energy" if you prefer
+  // analysis->CreateNtupleDColumn(id, "intensity");
+  // analysis->FinishNtuple(id);
 
-  // Fill ntuple with the spectrum data
-  for (size_t i = 0; i < fX.size(); ++i) {
-      analysis->FillNtupleDColumn(id,0, fX[i]);
-      analysis->FillNtupleDColumn(id,1, fY[i]);
-      analysis->AddNtupleRow(id);
-  }
+  // // Fill ntuple with the spectrum data
+  // for (size_t i = 0; i < fX.size(); ++i)
+  // {
+  //   analysis->FillNtupleDColumn(id, 0, fX[i]);
+  //   analysis->FillNtupleDColumn(id, 1, fY[i]);
+  //   analysis->AddNtupleRow(id);
+  // }
 
   G4cout << "ed of run action" << G4endl;
   auto end_time = std::chrono::high_resolution_clock::now();
   auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(end_time - fStartTime).count();
-  
+
   // Use ctime to format the seconds, as it's easier
   tm *ltm = localtime(&elapsed_time);
   std::cout << "elapsed time " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << ")" << std::endl;
-  std::cout << "=> GetNumberOfEventsToBeProcessed() " << G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed()  << std::endl;
-  std::cout << "=> total event counter " << fEventsProcessed.fetch_add(0,std::memory_order_relaxed)  << std::endl;
-
+  std::cout << "=> GetNumberOfEventsToBeProcessed() " << G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed() << std::endl;
+  std::cout << "=> total event counter " << fEventsProcessed.fetch_add(0, std::memory_order_relaxed) << std::endl;
 
   // save histograms
   //
@@ -146,15 +148,15 @@ void RunAction::EndOfRunAction(const G4Run *run)
       std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
       G4cout << "copied histogram... " << targetPath << G4endl;
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
       G4cerr << "Error copying histogram file: " << e.what() << G4endl;
       return;
     }
-    
   }
-    celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);
-
+#ifdef WITH_CELERITAS
+  celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);
+#endif
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

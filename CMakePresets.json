@@ -1,0 +1,64 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "cpu-debug",
+      "displayName": "CPU (Debug)",
+      "description": "Debug build of the standard Geant4 application.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/cpu-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "WITH_CELERITAS": "OFF"
+      }
+    },
+    {
+      "name": "gpu-debug",
+      "displayName": "Celeritas GPU (Debug)",
+      "description": "Debug build of the Celeritas-accelerated version.",
+      "inherits": "cpu-debug",
+      "binaryDir": "${sourceDir}/build/gpu-debug",
+      "cacheVariables": {
+        "WITH_CELERITAS": "ON"
+      }
+    },
+    {
+      "name": "cpu-release",
+      "displayName": "CPU (Release)",
+      "description": "Optimized release build of the standard Geant4 application.",
+      "inherits": "cpu-debug",
+      "binaryDir": "${sourceDir}/build/cpu-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "gpu-release",
+      "displayName": "Celeritas GPU (Release)",
+      "description": "Optimized release build of the Celeritas-accelerated version.",
+      "inherits": "gpu-debug",
+      "binaryDir": "${sourceDir}/build/gpu-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "cpu-debug",
+      "configurePreset": "cpu-debug"
+    },
+    {
+      "name": "gpu-debug",
+      "configurePreset": "gpu-debug"
+    },
+    {
+      "name": "cpu-release",
+      "configurePreset": "cpu-release"
+    },
+    {
+      "name": "gpu-release",
+      "configurePreset": "gpu-release"
+    }
+  ]
+}

@@ -66,6 +66,7 @@ class PrimaryGeneratorAction2: public G4VUserPrimaryGeneratorAction
     //dei filtri devo aver attivato il kernel di Geant4, qualsiasi cosa vioglia dire.
     // in pratica se calcolo la cross section in questo costruttore mi ritorna tutti zeri
     void CreateSourceSpectrumWithFilters();
+    G4int particleCounter = 0;
 
 
   private:

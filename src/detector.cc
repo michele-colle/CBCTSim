@@ -1,27 +1,34 @@
 #include <detector.hh>
 #include <G4Gamma.hh>
-#include <TrackInfo.hh>
+//#include <TrackInfo.hh>
 #include <TxtWithHeaderReader.hh>
 #include <CBCTParams.hh>
+#include <EventInfo.hh>
+#include <MyHit.hh>
+#include <G4SDManager.hh>
+
 SensitiveDetector::SensitiveDetector(G4String name) : G4VSensitiveDetector(name)
 {
-  TxtWithHeaderReader reader;
-  CBCTParams *params = CBCTParams::Instance();
-  if(reader.loadFromFile(params->GetDetectorMaterial()+".txt"))
-  {
-    scintillatorDetectorEfficiency = new G4PhysicsOrderedFreeVector();
-    auto enflt = reader.getColumn("keV");
-    auto att = reader.getColumn("att");
-    for (size_t i = 0; i < enflt.size(); ++i)
-    {
-      scintillatorDetectorEfficiency->InsertValues(enflt[i]*keV, 1-exp(-params->GetDetectorThickness()*att[i]/cm));
-    }
-  }
+  collectionName.insert("MyHitsCollection");
+
 }
 SensitiveDetector::~SensitiveDetector() {}
 
+void SensitiveDetector::Initialize(G4HCofThisEvent* hce)
+{
+  // Create a new hits collection for this event
+  fHitsCollection = new MyHitsCollection(SensitiveDetectorName, collectionName[0]);
+
+  // Add this collection to the Geant4 Hits Collection of This Event (HCE)
+  // We get a unique ID for it that we can use to retrieve it later.
+  G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  hce->AddHitsCollection(hcID, fHitsCollection);
+}
+
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 {
+
+    // 1. Get the EVENT-GLOBAL information (the Event ID)
   // qua sembrano parlare di come discriminare lo scatter
   // https://www.researchgate.net/post/How-to-stop-particles-tracking-in-GEANT4
   G4Track *track = aStep->GetTrack();
@@ -30,78 +37,26 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   if (track->GetDefinition() != G4Gamma::Definition())
     return false;
 
-  G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
-  G4StepPoint *postStepPoint = aStep->GetPostStepPoint();
+    // Create a new hit object
+  MyHit* newHit = new MyHit();
 
-  G4ThreeVector posPhoton = preStepPoint->GetPosition();
-  // leggo il momento del fotone per calcolarmi la lungheza d'onada
-  G4ThreeVector momPhoton = preStepPoint->GetMomentum();
-  G4double wlen = (1.239841939 * eV / momPhoton.mag()) * 1E+03;
-  G4double en = preStepPoint->GetKineticEnergy();
-
-  auto *info = dynamic_cast<TrackInfo *>(track->GetUserInformation());
-  G4AnalysisManager *analysis = G4AnalysisManager::Instance();
-  //valuto se il fotone viene visto dal detector in base allo spettro di assorbimento dello scintillatore
-  if(scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
-  {
-    // //G4cout<<"photon not detected "<<en<<G4endl;
-    return false; // non viene visto
+  // Get primary info from the TrackInfo user object
+  const G4Event* currentEvent = G4RunManager::GetRunManager()->GetCurrentEvent();
+  EventInfo* info = (EventInfo*)(currentEvent->GetUserInformation());
+  if (info) {
+    newHit->SetPrimaryEnergy(info->primaryEnergy);
+    newHit->SetPrimaryMomentum(info->primaryMomentum);
   }
+  
+  // Get hit info from the current step
+  G4StepPoint* preStepPoint = aStep->GetPreStepPoint();
+  newHit->SetEnergy(preStepPoint->GetKineticEnergy());
+  newHit->SetPosition(preStepPoint->GetPosition());
+  newHit->SetMomentum(preStepPoint->GetMomentum());
 
-  if (info)
-  {
-    G4ThreeVector p = info->primaryMomentum;
-    G4double E = info->primaryEnergy;
-    G4double diffSquared = (momPhoton/momPhoton.mag() - p/p.mag()).mag();
-    const bool isCollinear = (diffSquared <= DBL_EPSILON);
-    G4double deltaEnergy = E-en;
-    // const bool isCollinear = (diffSquared < DBL_EPSILON);
-    // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
-    // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
-    // G4cout<<"primary id "<<info->primaryID<<G4endl;
-    // G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
-    // G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
-    // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
+  // Add the new hit to our collection for this event
+  fHitsCollection->insert(newHit);
+  
+  return true;
 
-    // primary
-    if (isCollinear)
-    {
-      analysis->FillH1(1, en);
-      analysis->FillH2(1, posPhoton.x(), posPhoton.z(),en/keV);
-    }
-    else//scatter
-    {
-      analysis->FillH1(2, en);
-      analysis->FillH2(2, posPhoton.x(), posPhoton.z(),en/keV);
-    }
-    //G4cout<<"actual pos "<<posPhoton<<G4endl;
-
-
-      
-  }
-  else
-  {
-    G4cout<<"asfiojafiojaopdfijapodfijapdosfijapodifjpioj   "<<en<<G4endl;
-  }
-
-  // G4cout<<"energy ararara"<<en<<G4endl;
-
-// const G4VProcess *process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
-//       G4String processName = " UserLimit";
-//       if (process)
-//       {
-//         processName = process->GetProcessName();
-//         if(processName!="Transportation"){
-//           G4cout << "*Gamma - Process:  " << processName  <<G4endl;
-//           const bool isCollinear = (diffSquared < DBL_EPSILON);
-//           G4cout<<"mom angle diff "<<diffSquared<<G4endl;
-//           G4cout<<"parent id "<<track->GetParentID()<<G4endl;
-//           G4cout<<"primary id "<<info->primaryID<<G4endl;
-//           G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
-//           G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
-//           G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl<<G4endl<<G4endl;
-//         }
-//       }
-
-  return false;
 }

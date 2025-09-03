@@ -3,6 +3,7 @@
 #define B1EventAction_h 1
 
 #include "G4UserEventAction.hh"
+#include "G4PhysicsOrderedFreeVector.hh"
 #include "globals.hh"
 
 #include <deque> // Include for std::deque
@@ -36,6 +37,8 @@ class EventAction : public G4UserEventAction
      // New member variables for rolling average ETA
     static const int ETA_WINDOW = 500; // Window size for rolling average
     std::deque<std::chrono::high_resolution_clock::time_point> fEventTimestamps;
+    G4PhysicsOrderedFreeVector* scintillatorDetectorEfficiency; 
+
 };
 
 

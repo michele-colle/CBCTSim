@@ -46,11 +46,11 @@
 #include <TxtWithHeaderReader.hh>
 #include "ICRP110PhantomConstruction.hh"
 
+#ifdef WITH_CELERITAS
 
 #include <CeleritasG4.hh>
 
 using TMI = celeritas::TrackingManagerIntegration;
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
 celeritas::SetupOptions MakeOptions()
 {
@@ -69,6 +69,8 @@ celeritas::SetupOptions MakeOptions()
     opts.output_file = "trackingmanager-offload.out.json";
     return opts;
 }
+#endif
+
 int main(int argc, char** argv)
 {
   // detect interactive mode (if no arguments) and define UI session
@@ -85,7 +87,7 @@ int main(int argc, char** argv)
   // construct the run manager
   auto runManager = G4RunManagerFactory::CreateRunManager();
 
-  // set mandatory initialization classes
+  // set mandatory initialization classesa
   DetectorConstruction* detector = new DetectorConstruction;
   //auto userPhantom = new ICRP110PhantomConstruction();
 
@@ -94,20 +96,27 @@ int main(int argc, char** argv)
 
   // auto userPhantom = new ICRP110PhantomConstruction();
   // runManager -> SetUserInitialization(userPhantom);
-  
+#ifdef WITH_CELERITAS
   auto& tmi = TMI::Instance();
   auto* physics_list = new PhysicsList;
   physics_list->RegisterPhysics(new celeritas::TrackingManagerConstructor(&tmi));
   runManager->SetUserInitialization(physics_list);
+  G4cout<<"Celeritassssss"<<G4endl;
 
-  //runManager->SetUserInitialization(new PhysicsList);
+#else
+  runManager->SetUserInitialization(new PhysicsList);
+  G4cout<<"Geant4 only"<<G4endl;
+#endif
+
+  //
 
   runManager->SetUserInitialization(new ActionInitialization);
 
   Messenger* mess = new Messenger();
-   
-  tmi.SetOptions(MakeOptions());
+   #ifdef WITH_CELERITAS
 
+  tmi.SetOptions(MakeOptions());
+#endif
   // initialize visualization
   G4VisManager* visManager = nullptr;
 
@@ -132,6 +141,8 @@ int main(int argc, char** argv)
       G4String command = "/run/numberOfThreads ";
       G4String nThreads = argv[2]; 
       UImanager->ApplyCommand(command + argv[2]);
+      G4cout<<"numberOfThreads "<<argv[2]<<G4endl;
+
     }
     else
     {
