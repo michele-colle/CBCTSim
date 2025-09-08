@@ -1,0 +1,86 @@
+# Start from the official NVIDIA CUDA base image.
+# This provides the OS (Ubuntu 22.04) and the driver support.
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+# Prevent interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install only the core system utilities and our chosen compiler.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    python3 \
+    gnupg2 \
+    wget \
+    file \
+    # This is the key: we install our chosen, compatible compiler.
+    gcc-12 \
+    g++-12 \
+    gfortran-12 \
+    lsb-release \
+    software-properties-common \
+    python3-dev \
+    file \
+    libssl-dev \
+    pkg-config \
+    zlib1g-dev \
+    libcurl4-openssl-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the default compiler for the image to gcc-12.
+# This ensures any tool running in the container will find it first.
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+    
+# The pmix configure script is unable to find libz.so in the standard
+# multiarch directory. We will create a symbolic link in a place it
+# is guaranteed to look.
+RUN ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/libz.so
+
+# Clone Spack itself, so it's ready to use.
+RUN git clone -c feature.manyFiles=true https://github.com/spack/spack.git /opt/spack
+
+# We now explicitly source the setup script in every RUN command.
+RUN . /opt/spack/share/spack/setup-env.sh && \
+    spack compiler find && \
+    spack external find
+
+#
+# ===== STAGE 3: THE SPACK BUILD =====
+# Each command explicitly sources the spack environment as requested.
+#
+COPY ./spack.yaml /opt/celeritas-env/spack.yaml
+
+# Create the environment.
+RUN . /opt/spack/share/spack/setup-env.sh && \
+    spack env create celeritas /opt/celeritas-env/spack.yaml
+
+# We will now install packages in cached layers, following your instructions precisely.
+# Each command first sources the environment, then activates the environment, then installs.
+
+# Test the problematic MPI dependency first for a fast feedback loop.
+RUN . /opt/spack/share/spack/setup-env.sh && \
+    spack env activate celeritas && \
+    spack install openmpi
+
+# Now, install the rest of the packages. Spack will skip openmpi if it's already done.
+RUN . /opt/spack/share/spack/setup-env.sh && \
+    spack env activate celeritas && \
+    spack install
+    
+RUN apt-get update && apt-get install -y gdb && rm -rf /var/lib/apt/lists/*
+
+#
+# ===== STAGE 4: FINAL IMAGE SETUP =====
+# For the final interactive image, we make the setup permanent and automatic.
+#
+RUN echo "" >> /etc/bash.bashrc && \
+    echo "# Automatically source Spack and activate the Celeritas environment" >> /etc/bash.bashrc && \
+    echo ". /opt/spack/share/spack/setup-env.sh" >> /etc/bash.bashrc && \
+    echo "spack env activate celeritas" >> /etc/bash.bashrc
+
+# Set the final command to just start a bash shell, which will run the .bashrc
+CMD ["/bin/bash"]
