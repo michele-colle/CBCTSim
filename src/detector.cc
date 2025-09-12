@@ -17,12 +17,12 @@ SensitiveDetector::~SensitiveDetector() {}
 void SensitiveDetector::Initialize(G4HCofThisEvent* hce)
 {
   // Create a new hits collection for this event
-  fHitsCollection = new MyHitsCollection(SensitiveDetectorName, collectionName[0]);
+  // fHitsCollection = new MyHitsCollection(SensitiveDetectorName, collectionName[0]);
 
-  // Add this collection to the Geant4 Hits Collection of This Event (HCE)
-  // We get a unique ID for it that we can use to retrieve it later.
-  G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
-  hce->AddHitsCollection(hcID, fHitsCollection);
+  // // Add this collection to the Geant4 Hits Collection of This Event (HCE)
+  // // We get a unique ID for it that we can use to retrieve it later.
+  // G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  // hce->AddHitsCollection(hcID, fHitsCollection);
 }
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
@@ -37,25 +37,25 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   if (track->GetDefinition() != G4Gamma::Definition())
     return false;
 
-    // Create a new hit object
-  MyHit* newHit = new MyHit();
+  //   // Create a new hit object
+  // MyHit* newHit = new MyHit();
 
-  // Get primary info from the TrackInfo user object
-  const G4Event* currentEvent = G4RunManager::GetRunManager()->GetCurrentEvent();
-  EventInfo* info = (EventInfo*)(currentEvent->GetUserInformation());
-  if (info) {
-    newHit->SetPrimaryEnergy(info->primaryEnergy);
-    newHit->SetPrimaryMomentum(info->primaryMomentum);
-  }
+  // // Get primary info from the TrackInfo user object
+  // const G4Event* currentEvent = G4RunManager::GetRunManager()->GetCurrentEvent();
+  // EventInfo* info = (EventInfo*)(currentEvent->GetUserInformation());
+  // if (info) {
+  //   newHit->SetPrimaryEnergy(info->primaryEnergy);
+  //   newHit->SetPrimaryMomentum(info->primaryMomentum);
+  // }
   
-  // Get hit info from the current step
-  G4StepPoint* preStepPoint = aStep->GetPreStepPoint();
-  newHit->SetEnergy(preStepPoint->GetKineticEnergy());
-  newHit->SetPosition(preStepPoint->GetPosition());
-  newHit->SetMomentum(preStepPoint->GetMomentum());
+  // // Get hit info from the current step
+  // G4StepPoint* preStepPoint = aStep->GetPreStepPoint();
+  // newHit->SetEnergy(preStepPoint->GetKineticEnergy());
+  // newHit->SetPosition(preStepPoint->GetPosition());
+  // newHit->SetMomentum(preStepPoint->GetMomentum());
 
-  // Add the new hit to our collection for this event
-  fHitsCollection->insert(newHit);
+  // // Add the new hit to our collection for this event
+  // fHitsCollection->insert(newHit);
   
   return true;
 

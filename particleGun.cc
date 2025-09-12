@@ -57,9 +57,11 @@ celeritas::SetupOptions MakeOptions()
     celeritas::SetupOptions opts;
     // NOTE: these numbers are appropriate for CPU execution and can be set
     // through the UI using `/celer/`
-    opts.max_num_tracks = 8192;
-    opts.initializer_capacity = 8192* 16;
-    opts.cuda_stack_size = 8192; // 16384;
+    //opts.max_num_tracks = 4096;
+    //opts.initializer_capacity = 4096* 64;
+    opts.max_num_tracks = 262144;
+    opts.initializer_capacity = 262144*128;
+    //opts.cuda_stack_size = 8192; // 16384;
     
     // Celeritas does not support EmStandard MSC physics above 200 MeV
     //opts.ignore_processes = {"CoulombScat"};
