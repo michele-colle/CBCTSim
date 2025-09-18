@@ -17,7 +17,7 @@
 blueprint_name: hpc-slurm
 
 vars:
-  project_id:  cbctsim
+  project_id:
   deployment_name: hpc-slurm
   region: europe-west4
   zone: europe-west4-b
