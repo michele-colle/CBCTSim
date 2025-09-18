@@ -104,6 +104,9 @@ Messenger::Messenger()
     fSetPatienStandPositionCmd->SetGuidance("Set object angle in degree.");
     fSetPatienStandPositionCmd->SetParameterName("position", false);
     fSetPatienStandPositionCmd->SetDefaultUnit("cm");
+
+    fSetPhantomCmd = new G4UIcmdWithAString("/mysim/setPhantom", this);
+    fSetPhantomCmd->SetGuidance("Set phantom type, example: 'WaterCylinder', 'HeadFemale'. not setting this value will produce a blank");
 }
 
 Messenger::~Messenger()
@@ -122,6 +125,7 @@ Messenger::~Messenger()
     delete fDir;
     delete fDrawFov;
     delete fSetPatienStandPositionCmd;
+    delete fSetPhantomCmd;
 
 }
 
@@ -202,6 +206,10 @@ void Messenger::SetNewValue(G4UIcommand *command, G4String newValue)
     }
     else if (command == fSetPatienStandPositionCmd) {
         params->SetPatienStandPosition(fSetPatienStandPositionCmd->GetNewDoubleValue(newValue));
+        G4RunManager::GetRunManager()->GeometryHasBeenModified();
+    }
+    else if(command == fSetPhantomCmd) {
+        params->SetPhantom(newValue);
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
     }
     else if (command == fDrawFov) {

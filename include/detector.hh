@@ -5,7 +5,7 @@
 #include <G4AnalysisManager.hh>
 #include <G4RunManager.hh>
 #include <G4SystemOfUnits.hh>
-//#include <MyHit.hh>
+#include <MyHit.hh>
 
 
 class SensitiveDetector : public G4VSensitiveDetector
@@ -17,7 +17,7 @@ public:
 
 private:
     virtual G4bool ProcessHits(G4Step *,G4TouchableHistory *);
-    //MyHitsCollection* fHitsCollection;
+    MyHitsCollection* fHitsCollection;
 };
 
 #endif

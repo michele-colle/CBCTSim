@@ -29,4 +29,5 @@ private:
     G4UIcmdWithAString* fCreateMaterialSpecturm; 
     G4UIcommand* fDrawFov;
     G4UIcmdWithADoubleAndUnit* fSetPatienStandPositionCmd;
+    G4UIcmdWithAString* fSetPhantomCmd;
 };

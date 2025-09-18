@@ -1,0 +1,3 @@
+nThreads; execTime(sec); 
+24;2483;
+1;...;estimate27313

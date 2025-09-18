@@ -119,12 +119,28 @@ void RunAction::EndOfRunAction(const G4Run *run)
   // }
 
   G4cout << "ed of run action" << G4endl;
-  auto end_time = std::chrono::high_resolution_clock::now();
-  auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(end_time - fStartTime).count();
-
+  fEndTime = std::chrono::high_resolution_clock::now();
+  auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(fEndTime - fStartTime).count();
+  G4cout << "Elapsed time (s): " << elapsed_time << G4endl;
   // Use ctime to format the seconds, as it's easier
-  tm *ltm = localtime(&elapsed_time);
-  std::cout << "elapsed time " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << ")" << std::endl;
+  // Get total hours by dividing by seconds-per-hour (3600)
+long long hours = elapsed_time / 3600;
+
+// Get the remaining seconds after subtracting the hours
+long long remainder_after_hours = elapsed_time % 3600;
+
+// Get total minutes from the remainder by dividing by seconds-per-minute (60)
+long long minutes = remainder_after_hours / 60;
+
+// Get the final remaining seconds
+long long seconds = remainder_after_hours % 60;
+
+// Now print the correctly formatted duration
+std::cout << "Elapsed time (formatted): " 
+          << hours << "h:" 
+          << minutes << "m:" 
+          << seconds << "s" 
+          << std::endl;
   std::cout << "=> GetNumberOfEventsToBeProcessed() " << G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed() << std::endl;
   std::cout << "=> total event counter " << fEventsProcessed.fetch_add(0, std::memory_order_relaxed) << std::endl;
 
@@ -138,21 +154,21 @@ void RunAction::EndOfRunAction(const G4Run *run)
     analysisManager->CloseFile();
     G4cout << "Closing histogram... " << file << G4endl;
 
-    // copio il file nella cartella root_macro
-    std::filesystem::path outputPath(file.c_str());
-    std::filesystem::path parentDir = std::filesystem::current_path().parent_path();
-    std::filesystem::path targetDir = parentDir / "root_macro";
-    std::filesystem::path targetPath = targetDir / outputPath.filename();
-    try
-    {
-      std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
-      G4cout << "copied histogram... " << targetPath << G4endl;
-    }
-    catch (const std::exception &e)
-    {
-      G4cerr << "Error copying histogram file: " << e.what() << G4endl;
-      return;
-    }
+    // // copio il file nella cartella root_macro
+    // std::filesystem::path outputPath(file.c_str());
+    // std::filesystem::path parentDir = std::filesystem::current_path().parent_path();
+    // std::filesystem::path targetDir = parentDir / "root_macro";
+    // std::filesystem::path targetPath = targetDir / outputPath.filename();
+    // try
+    // {
+    //   std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
+    //   G4cout << "copied histogram... " << targetPath << G4endl;
+    // }
+    // catch (const std::exception &e)
+    // {
+    //   G4cerr << "Error copying histogram file: " << e.what() << G4endl;
+    //   return;
+    // }
   }
 #ifdef WITH_CELERITAS
   celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);

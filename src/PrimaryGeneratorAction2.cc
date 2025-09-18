@@ -53,7 +53,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(1000000);
+  fParticleGun = new G4ParticleGun(256);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
   // fParticleGun->SetParticleDefinition(G4Proton::Definition());

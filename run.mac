@@ -12,4 +12,4 @@
 
 /analysis/setFileName runtest
 /mysim/setObjectAngle 0 deg
-/run/beamOn 100
+/run/beamOn 100000

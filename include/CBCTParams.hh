@@ -72,6 +72,10 @@ public:
     G4double GetPatienStandPosition() const { return fPatientStandPosition; }
 
 
+    void SetPhantom(G4String val) { fPhantom = val; }
+    G4String GetPhantom() const { return fPhantom; }
+
+
 
 private:
     CBCTParams() = default;
@@ -89,6 +93,7 @@ private:
     G4double objectAngleInDegree = 0.0;
     G4String XRaySourceSpectrum = "120K10DW"; // Added member
     G4double fPatientStandPosition = 0.0;
+    G4String fPhantom;
 
 
 

@@ -58,6 +58,7 @@ class RunAction : public G4UserRunAction
     // Public getter for the atomic counter (for EventAction)
     std::atomic<long>& GetEventsProcessedCounter() { return fEventsProcessed; }
     std::chrono::high_resolution_clock::time_point fStartTime;
+    std::chrono::high_resolution_clock::time_point fEndTime;
 
 
   private:
