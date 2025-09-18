@@ -5,13 +5,8 @@
 spack:
   # add package specs to the `specs` list
   specs:
-  - geant4+data+threads+vecgeom %gcc@12.4.0
-  - vecgeom ~cuda %gcc@12.4.0
-
-
-  # The rest of the configuration is the same
-  config:
-    build_jobs: 32
+  - geant4+data+threads+vecgeom
+  - vecgeom ~cuda
 
   view: true
   concretizer:

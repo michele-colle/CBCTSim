@@ -1,0 +1,25 @@
+# File: hpc-cluster.yaml
+cluster_name: g4-h3-cluster
+gcp_project: cbctsim # Make sure this is your project ID
+gcp_region: europe-west4
+gcp_zone: europe-west4-b
+
+login_node:
+  machine_type: n2-standard-4
+  disk_size_gb: 50
+
+compute_nodes:
+- name: h3-compute # The partition name for our H3 nodes
+  machine_type: h3-standard-88
+  count: 0
+  max_count: 5 # Allow scaling up to 5 H3 nodes
+  enable_placement_policies: true
+
+storage:
+- type: nfs
+  name: shared-apps
+  mount_point: /apps
+  size_gb: 500
+
+post_install_scripts:
+- path: ./setup_software.sh
