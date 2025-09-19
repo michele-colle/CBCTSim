@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1                  # Each task is a single process
 #SBATCH --cpus-per-task=1           # CRITICAL: Each task gets exactly one CPU core
 #SBATCH --array=0-87                # CRITICAL: This creates 89 tasks, numbered 0 through 8/
-#SBATCH --partition=h3_partition      # CRITICAL: This MUST match the name from your blueprint
+#SBATCH --partition=h3      # CRITICAL: This MUST match the name from your blueprint
 
 # Slurm will automatically create separate log files for each task in the array
 # %A is the Job ID of the whole array, %a is the specific task number (0-87)

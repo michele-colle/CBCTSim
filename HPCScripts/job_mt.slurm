@@ -3,7 +3,7 @@
 #SBATCH --nodes=1                   # We want all cores on a single machine
 #SBATCH --ntasks=1                  # The entire job is one single process
 #SBATCH --cpus-per-task=88          # CRITICAL: This task gets all 88 CPU cores
-#SBATCH --partition=h3_partition      # CRITICAL: This MUST match the name from your blueprint
+#SBATCH --partition=h3      # CRITICAL: This MUST match the name from your blueprint
 
 # A single log file for this specific job
 # %j is the unique Job ID for this job
