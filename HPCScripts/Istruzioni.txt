@@ -1,0 +1,24 @@
+per lanciare e creare il cluster:
+
+gcloud init
+gcloud auth login
+gcloud cloud-shell ssh --authorize-session
+gcloud iam service-accounts enable     --project=cbctsim     185407564243-compute@developer.gserviceaccount.com
+gcloud projects add-iam-policy-binding cbctsim     --member=serviceAccount:185407564243-compute@developer.gserviceaccount.com     --role=roles/editor
+
+per creare il cluster:
+sudo git clone https://github.com/michele-colle/CBCTSim.git CBCTSim
+./gcluster create CBCTSim/HPCScripts/hpc-slurm.yaml     -l ERROR --vars project_id=cbctsim
+./gcluster deploy hpc-slurm
+
+poi va lanciato l'ssh server dall'istanza VM con scritto slurm-login qualcosa
+
+da la dentro clono il repos
+sudo git clone https://github.com/michele-colle/CBCTSim.git CBCTSim
+e posso poi lanciare il setup (installazione dell'ambiente spack)
+
+cd CBCTSim/HPCScripts/
+chmod +x setup_software.sh
+sudo ./setup_software.sh
+
+...da capire come e se si puo ri accedere alle vm sospese..
