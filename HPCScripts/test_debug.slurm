@@ -11,7 +11,7 @@
 
 # CRITICAL CHANGE: Set the output log file path to your home directory.
 # We use the '~' shortcut. The filename will be unique for each job.
-#SBATCH --output=~/final_test_log_%j.log
+#SBATCH --output=$HOME/final_test_log_%j.log
 
 
 # --- Execution Block (Commands that run on the compute node) ---
@@ -46,7 +46,7 @@ echo "Copying output ROOT file to home directory..."
 # Define source and destination paths
 SOURCE_FILE="runTest.root"
 # The destination filename will be unique using the Job ID
-DESTINATION_FILE="~/runTest_job_${SLURM_JOB_ID}.root"
+DESTINATION_FILE="$HOME/runTest_job_${SLURM_JOB_ID}.root"
 
 # Copy the file
 cp -v "$SOURCE_FILE" "$DESTINATION_FILE"
