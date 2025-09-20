@@ -25,6 +25,7 @@ echo "========================================================"
 
 
 sleep 10
+ls
 
 # Activate the Spack environment
 echo "Activating Spack environment..."
