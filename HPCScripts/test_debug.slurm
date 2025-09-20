@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=00:10:00
+#SBATCH --time=00:4:00
 
 # CRITICAL CHANGE: Set the output log file path to your home directory.
 # We use the '~' shortcut. The filename will be unique for each job.
