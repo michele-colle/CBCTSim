@@ -32,5 +32,9 @@ cmake --preset cpu-release
 cmake --build --preset cpu-release -j $(nproc)
 python3 generate_macros.py
 
-LANCIO DELLO SCRIPT
+LANCIO DI UNO SCRIPT
 cd HPCScripts/
+sbatch test_debug.slurm
+
+ENTRARE IN UNA PARTIZIONE
+srun --partition=debug --ntasks=1 --time=00:10:00 --pty bash
