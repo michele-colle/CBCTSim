@@ -1,49 +1,57 @@
 #!/bin/bash
 
-# --- SBATCH Directives for the Debug Partition ---
+# --- SBATCH Directives ---
 
-#SBATCH --job-name=debug-test         # A clear name for the job
-#SBATCH --partition=debug             # CRITICAL: Target the healthy 'debug' partition
-
-# Request minimal resources
+#SBATCH --job-name=final-home-test
+#SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=00:10:00               # 10-minute time limit, which is plenty
+#SBATCH --time=00:10:00
 
-# Send the console output to a dedicated log file
-# The %j will be replaced by the unique Job ID
-#SBATCH --output=/apps/CBCTSim/logs/debug_test_%j.log
+# CRITICAL CHANGE: Set the output log file path to your home directory.
+# We use the '~' shortcut. The filename will be unique for each job.
+#SBATCH --output=~/final_test_log_%j.log
 
 
 # --- Execution Block (Commands that run on the compute node) ---
 
 echo "========================================================"
-echo "DEBUG JOB STARTED"
+echo "FINAL TEST JOB STARTED"
+echo "All output will be directed to the home directory."
 echo "Job ID: $SLURM_JOB_ID"
 echo "Running on host: $(hostname)"
 echo "========================================================"
 
-# 1. Activate the Spack environment to find Geant4 and other libraries
+# Activate the Spack environment
 echo "Activating Spack environment..."
 source /apps/spack/share/spack/setup-env.sh
 spack env activate g4_cbct_env
 
-# 2. Navigate to the directory where the executable is located
-# This is crucial because the macro assumes the executable is run from here.
+# Navigate to the directory where the executable is located
 echo "Changing to the build directory..."
 cd /apps/CBCTSim/build/cpu-release/
 
-# 3. Run the lightweight simulation
+# Run the lightweight simulation.
+# This creates runTest.root in the current directory (/apps/CBCTSim/build/cpu-release/).
 echo "Executing particleGun with runTest.mac..."
-./particleGun runTest.mac
+./particleGun ../../runTest.mac
 
+echo "Simulation finished."
+
+# --- Copy the result file to your home directory ---
+echo "--------------------------------------------------------"
+echo "Copying output ROOT file to home directory..."
+
+# Define source and destination paths
+SOURCE_FILE="runTest.root"
+# The destination filename will be unique using the Job ID
+DESTINATION_FILE="~/runTest_job_${SLURM_JOB_ID}.root"
+
+# Copy the file
+cp -v "$SOURCE_FILE" "$DESTINATION_FILE"
+
+echo "--------------------------------------------------------"
 echo "========================================================"
-echo "DEBUG JOB FINISHED"
-echo "Checking for the output ROOT file..."
-
-# Verify that the ROOT file was created. This will be saved in the log.
-ls -l runTest.root
-
+echo "FINAL TEST JOB FINISHED"
 echo "========================================================"
-```    Save and exit the editor (`Ctrl+X`, then `Y`, then `Enter`).
