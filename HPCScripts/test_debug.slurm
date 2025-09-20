@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=00:4:00
+#SBATCH --time=00:10:00
 
 # CRITICAL CHANGE: Set the output log file path to your home directory.
 # We use the '~' shortcut. The filename will be unique for each job.
@@ -22,6 +22,15 @@ echo "All output will be directed to the home directory."
 echo "Job ID: $SLURM_JOB_ID"
 echo "Running on host: $(hostname)"
 echo "========================================================"
+
+# --- THE CRITICAL FIX: A 'WAIT LOOP' FOR THE SHARED DRIVE ---
+echo "Waiting for the /apps directory to be mounted..."
+while [ ! -d "/apps/CBCTSim" ]; do
+  sleep 2
+done
+echo "/apps directory is now available."
+# -------------------------------------------------------------
+
 
 # Activate the Spack environment
 echo "Activating Spack environment..."
