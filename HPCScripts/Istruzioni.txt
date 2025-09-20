@@ -11,6 +11,9 @@ sudo git clone https://github.com/michele-colle/CBCTSim.git CBCTSim
 ./gcluster create CBCTSim/HPCScripts/hpc-slurm.yaml     -l ERROR --vars project_id=cbctsim
 ./gcluster deploy hpc-slurm
 
+nota: per distruggere il cluster (anche direttamente dalla shell di google cloud)
+./gcluster destroy hpc-slurm --auto-approve
+
 poi va lanciato l'ssh server dall'istanza VM con scritto slurm-login qualcosa
 
 da la dentro clono il repos
