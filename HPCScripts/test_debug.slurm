@@ -35,7 +35,7 @@ cd /apps/CBCTSim/build/cpu-release/
 # Run the lightweight simulation.
 # This creates runTest.root in the current directory (/apps/CBCTSim/build/cpu-release/).
 echo "Executing particleGun with runTest.mac..."
-./particleGun ../../runTest.mac
+./particleGun runTest.mac
 
 echo "Simulation finished."
 
