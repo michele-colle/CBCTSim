@@ -24,18 +24,16 @@ echo "Running on host: $(hostname)"
 echo "========================================================"
 
 
-sleep 10
-ls
 
 # Activate the Spack environment
 echo "Activating Spack environment..."
-# source /apps/spack/share/spack/setup-env.sh
+source ~/spack/share/spack/setup-env.sh
 spack env activate g4_cbct_env
 
 # Navigate to the directory where the executable is located
 echo "Changing to the build directory..."
 cd ~/CBCTSim/build/cpu-release/
-ls
+
 # Run the lightweight simulation.
 # This creates runTest.root in the current directory (/apps/CBCTSim/build/cpu-release/).
 echo "Executing particleGun with runTest.mac..."
