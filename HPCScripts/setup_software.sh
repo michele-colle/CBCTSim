@@ -27,7 +27,7 @@ spack env activate g4_cbct_env
 #    Spack is smart and will read the spack.yaml and build all the specs.
 #    This is the step that will take a long time.
 echo "Installing all packages defined in the environment..."
-spack install -j4
+spack install -j $(nproc)
 
 # 4. Make the environment easy to use for everyone
 #    (Optional but recommended)
