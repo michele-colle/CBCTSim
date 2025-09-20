@@ -74,6 +74,24 @@ def generate_files():
     filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
     with open(filepath, 'w') as f:
         f.write(mt_file_content)
+
+    print("\nGenerating the test macro file...")
+    
+    mt_macro_filename = "runTest.mac"
+    mt_analysis_filename = "runTest"
+    
+    # For the MT test, we can just use the first angle (0 degrees)
+    mt_angle = 0.0
+    
+    mt_file_content = MACRO_TEMPLATE.format(
+        analysis_filename=mt_analysis_filename,
+        angle_deg=mt_angle,
+        num_particles=1000
+    )
+    
+    filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
+    with open(filepath, 'w') as f:
+        f.write(mt_file_content)
         
     print(f"Successfully created {mt_macro_filename}")
 
