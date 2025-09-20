@@ -24,7 +24,7 @@ echo "Running on host: $(hostname)"
 echo "========================================================"
 
 
-
+sleep 10
 
 # Activate the Spack environment
 echo "Activating Spack environment..."
