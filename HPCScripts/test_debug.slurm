@@ -11,7 +11,7 @@
 
 # CRITICAL CHANGE: Set the output log file path to your home directory.
 # We use the '~' shortcut. The filename will be unique for each job.
-#SBATCH --output=/home/michelecolle108_gmail_com/final_test_log_%j.log
+#SBATCH --output=test_debug.log
 
 
 # --- Execution Block (Commands that run on the compute node) ---
