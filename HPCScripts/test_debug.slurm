@@ -23,23 +23,17 @@ echo "Job ID: $SLURM_JOB_ID"
 echo "Running on host: $(hostname)"
 echo "========================================================"
 
-# --- THE CRITICAL FIX: A 'WAIT LOOP' FOR THE SHARED DRIVE ---
-echo "Waiting for the /apps directory to be mounted..."
-while [ ! -d "/apps/CBCTSim" ]; do
-  sleep 2
-done
-echo "/apps directory is now available."
-# -------------------------------------------------------------
+
 
 
 # Activate the Spack environment
 echo "Activating Spack environment..."
-source /apps/spack/share/spack/setup-env.sh
+# source /apps/spack/share/spack/setup-env.sh
 spack env activate g4_cbct_env
 
 # Navigate to the directory where the executable is located
 echo "Changing to the build directory..."
-cd /apps/CBCTSim/build/cpu-release/
+cd CBCTSim/build/cpu-release/
 
 # Run the lightweight simulation.
 # This creates runTest.root in the current directory (/apps/CBCTSim/build/cpu-release/).
