@@ -73,6 +73,7 @@ deployment_groups:
       node_count_dynamic_max: 20
       bandwidth_tier: gvnic_enabled
       allow_automatic_updates: false
+      # This partition uses the default C2-standard-60 machine type
 
   - id: compute_partition
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
@@ -101,6 +102,41 @@ deployment_groups:
     settings:
       partition_name: h3
 
+  - id: h4d_nodeset
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [network]
+    settings:
+      node_count_dynamic_max: 10
+      # H4D is in Preview and may have limited zone availability.
+      # You may need to change the global 'zone' variable for this to work.
+      machine_type: h4d-highmem-192-lssd
+      disk_type: hyperdisk-balanced
+      bandwidth_tier: gvnic_enabled
+      allow_automatic_updates: false
+
+  - id: h4d_partition
+    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
+    use:
+    - h4d_nodeset
+    settings:
+      partition_name: h4d
+      
+  - id: c2d_nodeset
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [network]
+    settings:
+      node_count_dynamic_max: 10
+      machine_type: c2d-standard-56
+      bandwidth_tier: gvnic_enabled
+      allow_automatic_updates: false
+
+  - id: c2d_partition
+    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
+    use:
+    - c2d_nodeset
+    settings:
+      partition_name: c2d
+      
   - id: slurm_login
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
     use: [network]
@@ -115,6 +151,8 @@ deployment_groups:
     - debug_partition
     - compute_partition
     - h3_partition
+    - h4d_partition
+    - c2d_partition
     - homefs
     - slurm_login
     settings:
