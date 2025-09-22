@@ -11,8 +11,15 @@
 
 # --- Your Application ---
 
-# Define the path to your executable
-APP_DIR="build/cpu-release"
+# Activate the Spack environment
+echo "Activating Spack environment..."
+source ~/spack/share/spack/setup-env.sh
+spack env activate g4_cbct_env
+
+# Navigate to the directory where the executable is located
+echo "Changing to the build directory..."
+cd ~/CBCTSim/build/cpu-release/
+
 
 # Print some useful information to the log file
 echo "========================================================"
@@ -22,6 +29,6 @@ echo "Allocated CPUs: $SLURM_CPUS_PER_TASK"
 echo "========================================================"
 
 # Launch the multi-threaded application, telling it to use 28 threads
-srun "$APP_DIR/particleGun" "$APP_DIR/runC2D.mac" 28
+srun ./particleGun runC2D.mac 28
 
 echo "--- MT Job ID: $SLURM_JOB_ID finished successfully. ---"
