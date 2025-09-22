@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 # --- Configuration ---
-NUM_ST_JOBS = 88  # Creates run_0.mac through run_87.mac
+NUM_ST_JOBS = 1  # Creates run_0.mac through run_87.mac
 MAX_ANGLE_DEG = 0
 NUM_PARTICLES_ST = 100000
 NUM_PARTICLES_MT = 8800000  # A much larger run for the MT test
@@ -56,11 +56,11 @@ def generate_files():
             
     print(f"Successfully created run_0.mac to run_{NUM_ST_JOBS - 1}.mac")
 
-    # --- Generate the Multi-Threaded (MT) Macro ---
+    # --- Generate the Multi-Threaded H3 Macro ---
     print("\nGenerating the multi-threaded macro file...")
     
-    mt_macro_filename = "runMT.mac"
-    mt_analysis_filename = "runMT"
+    mt_macro_filename = "runH3.mac"
+    mt_analysis_filename = "runH3"
     
     # For the MT test, we can just use the first angle (0 degrees)
     mt_angle = 0.0
@@ -68,12 +68,69 @@ def generate_files():
     mt_file_content = MACRO_TEMPLATE.format(
         analysis_filename=mt_analysis_filename,
         angle_deg=mt_angle,
-        num_particles=NUM_PARTICLES_MT
+        num_particles=8800000
     )
     
     filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
     with open(filepath, 'w') as f:
         f.write(mt_file_content)
+
+    # --- Generate the Multi-Threaded H4D Macro ---
+    print("\nGenerating the multi-threaded H4D macro file...")
+    
+    mt_macro_filename = "runH4D.mac"
+    mt_analysis_filename = "runH4D"
+    
+    # For the MT test, we can just use the first angle (0 degrees)
+    mt_angle = 0.0
+    
+    mt_file_content = MACRO_TEMPLATE.format(
+        analysis_filename=mt_analysis_filename,
+        angle_deg=mt_angle,
+        num_particles=19200000
+    )
+    
+    filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
+    with open(filepath, 'w') as f:
+        f.write(mt_file_content)
+
+    # --- Generate the Multi-Threaded C2D Macro ---
+    print("\nGenerating the multi-threaded C2D macro file...")
+    
+    mt_macro_filename = "runC2D.mac"
+    mt_analysis_filename = "runC2D"
+    
+    # For the MT test, we can just use the first angle (0 degrees)
+    mt_angle = 0.0
+    
+    mt_file_content = MACRO_TEMPLATE.format(
+        analysis_filename=mt_analysis_filename,
+        angle_deg=mt_angle,
+        num_particles=5600000
+    )
+    
+    filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
+    with open(filepath, 'w') as f:
+        f.write(mt_file_content)
+     # --- Generate the Multi-Threaded C2 Macro ---
+    print("\nGenerating the multi-threaded C2 macro file...")
+    
+    mt_macro_filename = "runC2.mac"
+    mt_analysis_filename = "runC2"
+    
+    # For the MT test, we can just use the first angle (0 degrees)
+    mt_angle = 0.0
+    
+    mt_file_content = MACRO_TEMPLATE.format(
+        analysis_filename=mt_analysis_filename,
+        angle_deg=mt_angle,
+        num_particles=6000000
+    )
+    
+    filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
+    with open(filepath, 'w') as f:
+        f.write(mt_file_content)
+
 
     print("\nGenerating the test macro file...")
     
