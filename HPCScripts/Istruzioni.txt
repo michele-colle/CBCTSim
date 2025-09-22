@@ -33,6 +33,7 @@ tempo di installazione : un paio di ore
 
 BUILD DEL SOFTWARE
 credo sia da fare nella home direcotry, ho provato a buildare dentro apps ma non ha funzionato..
+. /home/$TARGET_USER/spack/share/spack/setup-env.sh
 spack env activate g4_cbct_env
 export CC=$(spack location -i llvm@19.1.7)/bin/clang
 export CXX=$(spack location -i llvm@19.1.7)/bin/clang++
@@ -47,3 +48,8 @@ sbatch test_debug.slurm
 
 ENTRARE IN UNA PARTIZIONE
 srun --partition=debug --ntasks=1 --time=00:10:00 --pty bash
+
+COMANDI UTILI
+sinfo
+squeue
+

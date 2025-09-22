@@ -29,7 +29,7 @@ cd /home/$TARGET_USER/CBCTSim
 . /home/$TARGET_USER/spack/share/spack/setup-env.sh
 spack env create g4_cbct_env HPC_env_settings/spack.yaml
 spack env activate g4_cbct_env
-spack install -j \$(nproc)
+spack install -j $(nproc)
 pip3 install numpy
 EOF
 
