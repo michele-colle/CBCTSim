@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=g4_mt_big        # A descriptive name for the MT job
+#SBATCH --job-name=g4_mt_C2        # A descriptive name for the MT job
 #SBATCH --nodes=1                   # We want all cores on a single machine
 #SBATCH --ntasks=1                  # The entire job is one single process
-#SBATCH --cpus-per-task=88          # CRITICAL: This task gets all 88 CPU cores
-#SBATCH --partition=h3      # CRITICAL: This MUST match the name from your blueprint
+#SBATCH --cpus-per-task=60          # CRITICAL: This task gets all 88 CPU cores
+#SBATCH --partition=compute      # CRITICAL: This MUST match the name from your blueprint
 
 # A single log file for this specific job
 # %j is the unique Job ID for this job
@@ -22,6 +22,6 @@ echo "Allocated CPUs: $SLURM_CPUS_PER_TASK"
 echo "========================================================"
 
 # Launch the multi-threaded application, telling it to use 88 threads
-srun "$APP_DIR/particleGun" "$APP_DIR/runMT.mac" 88
+srun "$APP_DIR/particleGun" "$APP_DIR/runC2.mac" 60
 
 echo "--- MT Job ID: $SLURM_JOB_ID finished successfully. ---"
