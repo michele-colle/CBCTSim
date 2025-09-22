@@ -1,14 +1,18 @@
 per lanciare e creare il cluster:
 
+//direttamente dal terminale di linux:
 gcloud init
 gcloud auth login
 gcloud cloud-shell ssh --authorize-session
+
+//dalla shell nel browser partire da qua
 gcloud iam service-accounts enable     --project=cbctsim     185407564243-compute@developer.gserviceaccount.com
 gcloud projects add-iam-policy-binding cbctsim     --member=serviceAccount:185407564243-compute@developer.gserviceaccount.com     --role=roles/editor
 
 per creare il cluster:
 sudo git clone https://github.com/michele-colle/CBCTSim.git CBCTSim
-./gcluster create CBCTSim/HPCScripts/hpc-slurm.yaml     -l ERROR --vars project_id=cbctsim
+cd cluster-toolkit/
+./gcluster create ~/CBCTSim/HPCScripts/hpc-slurm.yaml     -l ERROR --vars project_id=cbctsim -w
 ./gcluster deploy hpc-slurm
 
 nota: per distruggere il cluster (anche direttamente dalla shell di google cloud)
@@ -21,9 +25,10 @@ sudo git clone https://github.com/michele-colle/CBCTSim.git CBCTSim
 e posso poi lanciare il setup (installazione dell'ambiente spack)
 
 cd CBCTSim/HPCScripts/
-chmod +x setup_software.sh
+sudo chmod +x setup_software.sh
 sudo ./setup_software.sh
 
+tempo di installazione : un paio di ore
 ...da capire come e se si puo ri accedere alle vm sospese..
 
 BUILD DEL SOFTWARE
@@ -33,6 +38,7 @@ export CC=$(spack location -i llvm@19.1.7)/bin/clang
 export CXX=$(spack location -i llvm@19.1.7)/bin/clang++
 cmake --preset cpu-release
 cmake --build --preset cpu-release -j $(nproc)
+sudo pip3 install numpy
 python3 generate_macros.py
 
 LANCIO DI UNO SCRIPT

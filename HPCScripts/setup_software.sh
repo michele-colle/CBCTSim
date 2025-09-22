@@ -1,37 +1,41 @@
 #!/bin/bash
 set -ex
-
+# The user who originally ran this script with sudo
+TARGET_USER=$SUDO_USER
 # Install base dependencies
+echo "Installing base dependencies as root..."
+
 yum install -y git cmake3 python3-pip
 
 # Clone Spack
-git clone https://github.com/spack/spack.git ~/spack
-chown -R slurm:slurm ~/spack
-. ~/spack/share/spack/setup-env.sh
+# Switch to the target user to clone and configure Spack
+echo "Cloning and configuring Spack as user: $TARGET_USER"
+sudo -u $TARGET_USER bash <<EOF
+set -ex
+# Clone Spack into the user's home directory
+git clone https://github.com/spack/spack.git /home/$TARGET_USER/spack
+# Source the Spack environment script
+. /home/$TARGET_USER/spack/share/spack/setup-env.sh
+EOF
 
-# Clone your application repository (which contains the spack.yaml)
-git clone https://github.com/michele-colle/CBCTSim.git ~/CBCTSim
-chown -R slurm:slurm ~/CBCTSim
+echo "Cloning application and setting up Spack environment as user: $TARGET_USER"
+sudo -u $TARGET_USER bash <<EOF
+set -ex
+# Clone your application repository
+git clone https://github.com/michele-colle/CBCTSim.git /home/$TARGET_USER/CBCTSim
 
-# --- NEW SECTION: Build the Spack Environment from your YAML file ---
-
-# 1. Create a named Spack environment from your repository's yaml file.
-#    This gives you a persistent environment you can activate later.
-echo "Creating Spack environment from spack.yaml..."
-spack env create g4_cbct_env ~/CBCTSim/HPC_env_settings/spack.yaml
-
-# 2. Activate the new environment.
+# Set up the Spack environment from your YAML file
+cd /home/$TARGET_USER/CBCTSim
+spack env create g4_cbct_env HPC_env_settings/spack.yaml
 spack env activate g4_cbct_env
+spack install -j \$(nproc)
+EOF
 
-# 3. Tell Spack to install everything defined in the environment file.
-#    Spack is smart and will read the spack.yaml and build all the specs.
-#    This is the step that will take a long time.
-echo "Installing all packages defined in the environment..."
-spack install -j $(nproc)
+
 
 # 4. Make the environment easy to use for everyone
 #    (Optional but recommended)
-echo "source ~/spack/share/spack/setup-env.sh" >> /etc/profile.d/spack.sh
+echo "source /home/$TARGET_USER/spack/share/spack/setup-env.sh" > /etc/profile.d/spack.sh
 
 echo "======================================================================"
 echo "Setup complete. To use the software, users should run:"
