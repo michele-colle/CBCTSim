@@ -22,6 +22,6 @@ echo "Allocated CPUs: $SLURM_CPUS_PER_TASK"
 echo "========================================================"
 
 # Launch the multi-threaded application, telling it to use 88 threads
-srun "$APP_DIR/particleGun" "$APP_DIR/runMT.mac" 192
+srun "$APP_DIR/particleGun" "$APP_DIR/runH4D.mac" 192
 
 echo "--- MT Job ID: $SLURM_JOB_ID finished successfully. ---"
