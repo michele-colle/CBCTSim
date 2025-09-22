@@ -22,7 +22,7 @@ echo "Cloning application and setting up Spack environment as user: $TARGET_USER
 sudo -u $TARGET_USER bash <<EOF
 set -ex
 # Clone your application repository
-git clone https://github.com/michele-colle/CBCTSim.git /home/$TARGET_USER/CBCTSim
+# the folder should already exists
 
 # Set up the Spack environment from your YAML file
 cd /home/$TARGET_USER/CBCTSim
