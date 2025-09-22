@@ -106,7 +106,7 @@ def generate_files():
     mt_file_content = MACRO_TEMPLATE.format(
         analysis_filename=mt_analysis_filename,
         angle_deg=mt_angle,
-        num_particles=5600000
+        num_particles=2800000
     )
     
     filepath = os.path.join(OUTPUT_DIR, mt_macro_filename)
