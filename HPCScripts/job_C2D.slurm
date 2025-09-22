@@ -27,7 +27,7 @@ echo "Starting MT Job ID: $SLURM_JOB_ID"
 echo "Running on host: $(hostname)"
 echo "Allocated CPUs: $SLURM_CPUS_PER_TASK"
 echo "========================================================"
-
+ls
 # Launch the multi-threaded application, telling it to use 28 threads
 ./particleGun runC2D.mac 28
 
