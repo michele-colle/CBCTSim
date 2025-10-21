@@ -154,7 +154,7 @@ void EventAction::BeginOfEventAction(const G4Event *anEvent)
 
 void EventAction::EndOfEventAction(const G4Event *anEvent)
 {
-
+  //G4cout<<"EndOfEventAction"<<G4endl;
   // Get the unique ID for our hits collection
   G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID("MyHitsCollection");
 
@@ -170,25 +170,28 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
 
   // Now, loop through the collection and fill histograms
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
+  auto par = CBCTParams::Instance();
+  auto sourcePos = G4ThreeVector(0, -par->GetDSO(), 0);
 
   for (const auto &hit : *hitsCollection->GetVector())
   {
     // Get the data from the hit object
-    G4double primaryEnergy = hit->GetPrimaryEnergy();
-    G4ThreeVector primaryMomentum = hit->GetPrimaryMomentum();
+    //G4double primaryEnergy = hit->GetPrimaryEnergy();
+    //G4ThreeVector primaryMomentum = hit->GetPrimaryMomentum();
     G4double en = hit->GetEnergy();
     G4ThreeVector posPhoton = hit->GetPosition();
-    G4ThreeVector momPhoton = hit->GetMomentum();
+    G4ThreeVector momPhotonDirection = hit->GetMomentum().unit();
     if (scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
     {
       // //G4cout<<"photon not detected "<<en<<G4endl;
-      return; // non viene visto
+      continue; // non viene visto
     }
-    G4ThreeVector p = primaryMomentum;
-    G4double E = primaryEnergy;
-    G4double diffSquared = (momPhoton / momPhoton.mag() - p / p.mag()).mag();
-    const bool isCollinear = (diffSquared <= DBL_EPSILON);
-    G4double deltaEnergy = E - en;
+
+    G4ThreeVector p = (posPhoton - sourcePos).unit();
+    G4double dot = momPhotonDirection.dot(p);
+    //G4double E = primaryEnergy;
+    const bool isCollinear = (dot >= 1.0 - DBL_EPSILON);
+    //G4double deltaEnergy = E - en;
     // const bool isCollinear = (diffSquared < DBL_EPSILON);
     // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
     // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
@@ -211,7 +214,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     // G4cout<<"actual pos "<<posPhoton<<G4endl;
   }
 
-  // G4cout<<"energy ararara"<<en<<G4endl;
+  //G4cout<<"Received Particles: "<<hitsCollection->GetSize()<<G4endl;
 
 // const G4VProcess *process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
 //       G4String processName = " UserLimit";

@@ -50,13 +50,15 @@
 #include <G4EmCalculator.hh>
 #include <algorithm>
 #include <EventInfo.hh>
+#include <G4Geantino.hh>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
 {
-  fParticleGun = new G4ParticleGun(256);
+  G4int n_particle = 1;
+  fParticleGun = new G4ParticleGun(n_particle);
   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
-  fParticleGun->SetParticleDefinition(G4Gamma::Definition());
-  // fParticleGun->SetParticleDefinition(G4Proton::Definition());
+  //fParticleGun->SetParticleDefinition(G4Gamma::Definition());
+   fParticleGun->SetParticleDefinition(G4Geantino::GeantinoDefinition());
 
   auto par = CBCTParams::Instance();
 
@@ -130,9 +132,9 @@ void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
   //dunque de ho particleGun(100) e beamOn 10 mi aspetto 10 direzioni ed energie diverse
   //e 100 particelle per ogni direzione
   fParticleGun->GeneratePrimaryVertex(anEvent);
-  G4PrimaryParticle* primary = anEvent->GetPrimaryVertex()->GetPrimary();
+  //G4PrimaryParticle* primary = anEvent->GetPrimaryVertex()->GetPrimary();
   
-  anEvent->SetUserInformation(new EventInfo(primary->GetMomentum(), primary->GetKineticEnergy(), particleCounter));
+  //anEvent->SetUserInformation(new EventInfo(primary->GetMomentum(), primary->GetKineticEnergy(), particleCounter));
 
   // G4int nVtx = anEvent->GetNumberOfPrimaryVertex();
   // G4cout<<"NUMBER OF VERTEX "<<anEvent->GetNumberOfPrimaryVertex()<<G4endl;

@@ -12,4 +12,5 @@
 
 /analysis/setFileName runtest
 /mysim/setObjectAngle 0 deg
-/run/beamOn 100000
+/gun/number 30000000
+/run/beamOn 100

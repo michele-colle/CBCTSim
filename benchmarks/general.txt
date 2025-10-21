@@ -1,0 +1,4 @@
+/gun/number 10000000
+/run/beamOn 100
+
+-> geantino single thread solo CPU 15 minuto al 5% con particleGun

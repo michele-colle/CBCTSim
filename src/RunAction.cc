@@ -96,14 +96,14 @@ void RunAction::EndOfRunAction(const G4Run *run)
     return;
   }
 
-  auto par = CBCTParams::Instance();
+  // auto par = CBCTParams::Instance();
 
-  auto fX = reader.getColumn("keV");
-  for (auto &x : fX)
-    x *= keV;
-  auto fY = reader.getColumn(par->GetXRaySourceSpectrum());
-  // Create histogram for spectrum
-  // Create ntuple for spectrum
+  // auto fX = reader.getColumn("keV");
+  // for (auto &x : fX)
+  //   x *= keV;
+  // auto fY = reader.getColumn(par->GetXRaySourceSpectrum());
+  // // Create histogram for spectrum
+  // // Create ntuple for spectrum
   // auto analysis = G4AnalysisManager::Instance();
   // auto id = analysis->CreateNtuple("spectrum_ntuple", "X-ray Spectrum Ntuple");
   // analysis->CreateNtupleDColumn(id, "energy_keV"); // or "energy" if you prefer
@@ -117,8 +117,10 @@ void RunAction::EndOfRunAction(const G4Run *run)
   //   analysis->FillNtupleDColumn(id, 1, fY[i]);
   //   analysis->AddNtupleRow(id);
   // }
+  //G4cout << "number of particles received: "<<fX.size() << G4endl;
 
-  G4cout << "ed of run action" << G4endl;
+  G4cout << "end of run action" << G4endl;
+
   fEndTime = std::chrono::high_resolution_clock::now();
   auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(fEndTime - fStartTime).count();
   G4cout << "Elapsed time (s): " << elapsed_time << G4endl;
