@@ -27,6 +27,7 @@ void SensitiveDetector::Initialize(G4HCofThisEvent* hce)
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 {
+  //G4cout << "SensitiveDetector::ProcessHits called" << G4endl;
 
     // 1. Get the EVENT-GLOBAL information (the Event ID)
   // qua sembrano parlare di come discriminare lo scatter
@@ -39,7 +40,9 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 
     // Create a new hit object
   
-
+  auto proc= track->GetCreatorProcess();
+  //if(proc == G4Process::fTransportation)
+    //return false; // primary photon
   // // Get primary info from the TrackInfo user object
   // // const G4Event* currentEvent = G4RunManager::GetRunManager()->GetCurrentEvent();
   // // EventInfo* info = (EventInfo*)(currentEvent->GetUserInformation());

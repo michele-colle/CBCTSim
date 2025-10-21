@@ -12,5 +12,10 @@
 
 /analysis/setFileName runtest
 /mysim/setObjectAngle 0 deg
-/gun/number 30000000
-/run/beamOn 100
+/gps/number 1000000 #10 milioni, circa 8Gb, per saturare lar 2080 12Gb lo devo lanciare con 3 thread
+#celeritas totale particelle: 100 milioni 4 minuti 3 thread-> risultato errato, poche particelle sono finite nell'istogramma
+#celeritas totale particelle: 100 milioni 4.55 minuti 1 thread-> risultato errato, poche particelle sono finite nell'istogramma
+#CPU totale particelle: 100 milioni 24 thread 9 minuti
+#/gps/energy 120 keV
+#/gps/direction 0 1 0 
+/run/beamOn 1

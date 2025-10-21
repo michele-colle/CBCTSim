@@ -52,29 +52,121 @@
 #include <EventInfo.hh>
 #include <G4Geantino.hh>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// PrimaryGeneratorAction2::PrimaryGeneratorAction2()
+// {
+//   G4int n_particle = 1;
+//   fParticleGun = new G4ParticleGun(n_particle);
+//   // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+//   fParticleGun->SetParticleDefinition(G4Gamma::Definition());
+//    //fParticleGun->SetParticleDefinition(G4Geantino::GeantinoDefinition());
+
+//   auto par = CBCTParams::Instance();
+
+//   fParticleGun->SetParticlePosition(G4ThreeVector(0, -par->GetDSO(), 0));
+//   G4cout << "distanza sorgente centro di rotazione: " << par->GetDSO() << G4endl;
+
+//   // energy distribution
+//   //
+//   CreateSourceSpectrumWithFilters();
+// }
+
 PrimaryGeneratorAction2::PrimaryGeneratorAction2()
+ : G4VUserPrimaryGeneratorAction(),
+   fParticleSource(0)
 {
-  G4int n_particle = 1;
-  fParticleGun = new G4ParticleGun(n_particle);
-  // G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
-  //fParticleGun->SetParticleDefinition(G4Gamma::Definition());
-   fParticleGun->SetParticleDefinition(G4Geantino::GeantinoDefinition());
-
-  auto par = CBCTParams::Instance();
-
-  fParticleGun->SetParticlePosition(G4ThreeVector(0, -par->GetDSO(), 0));
-  G4cout << "distanza sorgente centro di rotazione: " << par->GetDSO() << G4endl;
-
-  // energy distribution
-  //
   CreateSourceSpectrumWithFilters();
+  auto par = CBCTParams::Instance();
+//    G4int n_particle = 1;
+//    fParticleGun = new G4ParticleGun(n_particle);
+// fParticleGun->SetParticleEnergy(120*keV);
+//    fParticleGun->SetParticlePosition(G4ThreeVector(0, -par->GetDSO(), 0));
+//    fParticleGun->SetParticleDefinition(G4Gamma::Definition());
+//    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0., 1., 0.));
+
+  // 1. Create the G4GeneralParticleSource object
+  fParticleSource = new G4GeneralParticleSource();
+
+  // 2. Get a pointer to the source to configure it.
+  //    GPS can manage multiple sources, but by default, there is one.
+  G4SingleParticleSource* mySource = fParticleSource->GetCurrentSource();
+
+  // 3. Set the particle type (e.g., a gamma for photons)
+  //G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+  //G4ParticleDefinition* particle = particleTable->FindParticle("gamma");
+  mySource->SetParticleDefinition(G4Gamma::Definition());
+
+
+  //===========================================================================
+  // 4. DEFINE THE ENERGY SPECTRUM (User-defined Histogram)
+  //===========================================================================
+  G4SPSEneDistribution* energyDist = mySource->GetEneDist();
+  energyDist->SetEnergyDisType("User"); // Set distribution type to User-defined
+
+  // Define the histogram points (Energy, Relative Weight)
+  // This creates a simple linear spectrum from 60 keV to 120 keV.
+  // For a real simulation, you would load these from a file.
+
+
+  for (G4int i = 0; i < fNPoints; ++i)
+  {
+    G4double energy = fX[i];
+    G4double weight = fY[i];
+    
+    // Each call adds one (energy, weight) point to the internal histogram.
+    energyDist->UserEnergyHisto(G4ThreeVector(energy, weight, 0.0));
+  }
+  //===========================================================================
+  // 5. DEFINE THE ANGULAR DISTRIBUTION (Beam with a conical spread)
+  //===========================================================================
+  G4SPSAngDistribution* angDist = mySource->GetAngDist();
+  angDist->SetAngDistType("iso"); // A 1D beam along a specified axis
+
+  // Set the central axis of the beam (e.g., along the Z-axis)
+  angDist->SetParticleMomentumDirection(G4ThreeVector(0., 1., 0.));//boh
+
+  // Set the angular spread (sigma) of the beam.
+  // This defines the half-angle of the cone.
+  G4double alpha = std::atan(par->GetDetWidth()/2.0 /  par->GetDSD()); // half-angle in radians
+  G4double beta = std::atan(par->GetDetHeight()/2.0 /  par->GetDSD()); // half-angle in radians
+  angDist->SetMinTheta(90.0*deg - beta*rad); // Minimum theta angle
+  angDist->SetMaxTheta(90.0*deg + beta*rad); // Maximum theta
+  //non chiedetemi perché, ma funziona
+  angDist->SetMinPhi( 270.0*deg-alpha*rad); // Minimum phi angle
+  angDist->SetMaxPhi( 270.0*deg+alpha*rad ); // Maximum phi angle
+
+
+  //===========================================================================
+  // 6. DEFINE THE POSITION DISTRIBUTION (Optional but good practice)
+  //===========================================================================
+  G4SPSPosDistribution* posDist = mySource->GetPosDist();
+  posDist->SetPosDisType("Point"); // A single point source
+  posDist->SetCentreCoords(G4ThreeVector(0., -par->GetDSO(), 0.)); // Set its position
+
+
+  G4int numberOfParticlesPerEvent = 100;
+  mySource->SetNumberOfParticles(numberOfParticlesPerEvent);
 }
+
 PrimaryGeneratorAction2::~PrimaryGeneratorAction2()
 {
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void PrimaryGeneratorAction2::GeneratePrimaries(G4Event* anEvent)
+{
+  // This function is called once per event.
 
-void PrimaryGeneratorAction2::GeneratePrimaries(G4Event *anEvent)
+  // The GPS object already knows everything it needs to do:
+  // - How many particles to generate (from SetNumberOfParticles or /gps/number)
+  // - How to sample the energy for each one (from the EneDist settings)
+  // - How to sample the direction for each one (from the AngDist settings)
+  // - How to sample the position for each one (from the PosDist settings)
+  
+  // This single call tells GPS: "Do your thing for this event."
+  // It will internally loop and generate all N particles according to its rules.
+  fParticleSource->GeneratePrimaryVertex(anEvent);
+  //fParticleGun ->GeneratePrimaryVertex(anEvent);
+}
+void PrimaryGeneratorAction2::GeneratePrimaries2(G4Event *anEvent)
 {
   auto par = CBCTParams::Instance();
   // uniform solid angle

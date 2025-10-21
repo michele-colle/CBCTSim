@@ -37,6 +37,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 #include <G4PhysicsOrderedFreeVector.hh>
+#include <G4GeneralParticleSource.hh>
 
 
 #include <vector>
@@ -54,6 +55,7 @@ class PrimaryGeneratorAction2: public G4VUserPrimaryGeneratorAction
 
   public:
     void GeneratePrimaries(G4Event*) override;
+    void GeneratePrimaries2(G4Event*);
 
   public:
     G4ParticleGun*    GetParticleGun() { return fParticleGun; };
@@ -71,6 +73,8 @@ class PrimaryGeneratorAction2: public G4VUserPrimaryGeneratorAction
 
   private:
     G4ParticleGun* fParticleGun = nullptr;
+    G4GeneralParticleSource* fParticleSource; // Changed from G4ParticleGun
+
 
     G4int fNPoints = 0;  // nb of points
     std::vector<G4double> fX;  // abscisses X

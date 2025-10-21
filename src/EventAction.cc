@@ -154,7 +154,7 @@ void EventAction::BeginOfEventAction(const G4Event *anEvent)
 
 void EventAction::EndOfEventAction(const G4Event *anEvent)
 {
-  //G4cout<<"EndOfEventAction"<<G4endl;
+  G4cout<<"EndOfEventAction"<<G4endl;
   // Get the unique ID for our hits collection
   G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID("MyHitsCollection");
 
@@ -214,7 +214,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     // G4cout<<"actual pos "<<posPhoton<<G4endl;
   }
 
-  //G4cout<<"Received Particles: "<<hitsCollection->GetSize()<<G4endl;
+  G4cout<<"Received Particles: "<<hitsCollection->GetSize()<<G4endl;
 
 // const G4VProcess *process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
 //       G4String processName = " UserLimit";

@@ -19,11 +19,11 @@ public:
   inline void  operator delete(void*);
 
   // You can add your "setter" and "getter" methods here for clean access
-  void SetPrimaryEnergy(G4double val)    { fPrimaryEnergy = val; }
-  G4double GetPrimaryEnergy() const      { return fPrimaryEnergy; }
+  // void SetPrimaryEnergy(G4double val)    { fPrimaryEnergy = val; }
+  // G4double GetPrimaryEnergy() const      { return fPrimaryEnergy; }
 
-  void SetPrimaryMomentum(G4ThreeVector val) { fPrimaryMomentum = val; }
-  const G4ThreeVector& GetPrimaryMomentum() const { return fPrimaryMomentum; }
+  // void SetPrimaryMomentum(G4ThreeVector val) { fPrimaryMomentum = val; }
+  // const G4ThreeVector& GetPrimaryMomentum() const { return fPrimaryMomentum; }
 
   void SetEnergy(G4double val)           { fEnergy = val; }
   G4double GetEnergy() const             { return fEnergy; }
@@ -36,8 +36,8 @@ public:
 
 private:
   // The data members that will store our information
-  G4double      fPrimaryEnergy;
-  G4ThreeVector fPrimaryMomentum;
+  //G4double      fPrimaryEnergy;
+  //G4ThreeVector fPrimaryMomentum;
   G4double      fEnergy;
   G4ThreeVector fPosition;
   G4ThreeVector fMomentum;
