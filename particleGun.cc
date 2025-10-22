@@ -66,6 +66,7 @@ celeritas::SetupOptions MakeOptions()
     // Celeritas does not support EmStandard MSC physics above 200 MeV
     //opts.ignore_processes = {"CoulombScat"};
     //opts.
+    opts.sd.ignore_zero_deposition = false;
 
     // Use a uniform (zero) magnetic field
     opts.make_along_step = celeritas::UniformAlongStepFactory();

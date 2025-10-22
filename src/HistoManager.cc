@@ -86,6 +86,23 @@ void HistoManager::Book()
    analysisManager->SetH2Activation(ih, false);
    G4cout<<"2d histo id"<<ih<<G4endl;
   }
+
+  // --- NEW HISTOGRAM FOR G4ProcessType ---
+
+  // 1. Define the histogram properties
+  G4String processHistId = "6";
+  G4String processHistTitle = "Step-Defining Process Types";
+  
+  // The enum G4ProcessType has 13 values, from fNotDefined (0) to fUCN (12)
+  G4int numProcessTypes = 13;
+  
+  // Create a histogram with 13 bins, from -0.5 to 12.5.
+  // This ensures that the integer enum values (0, 1, 2...) fall in the center of the bins.
+  G4int processHist = analysisManager->CreateH1(processHistId, processHistTitle,
+                                                numProcessTypes, -0.5, 12.5);
+
+  // 3. Explicitly activate this new histogram
+  analysisManager->SetH1Activation(processHist, true);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

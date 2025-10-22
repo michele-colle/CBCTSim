@@ -1,0 +1,42 @@
+#SPDX-FileCopyrightText: 2023 CERN
+#SPDX-License-Identifier: Apache-2.0
+#This Spack environment builds all core dependencies required for a manual build
+#of ADEPT and G4HepEm, ensuring C++20 support throughout the stack for
+#modern compiler features and GPU acceleration.
+
+spack:
+  specs:
+    # --- Core Dependencies required by ADEPT/G4HepEm ---
+    - "cmake@3.25.2:"
+    - "cuda@12:" # Use CUDA 12+ for modern features (matching ADEPT recommendation)
+    - "geant4@11.1: cxxstd=20 +qt +opengl +vecgeom"
+    - "vecgeom@2.0.0-rc.4: +gdml cxxstd=20"
+    - "hepmc3"
+    - "root cxxstd=20"
+    # --- Utility and Build Tools ---
+    - doxygen
+    - git
+    - "googletest@1.10:"
+    - ninja
+    - nlohmann-json
+
+  view: true
+  concretizer:
+    unify: true
+
+  packages:
+    root:
+      # Variants adjusted to work well in an HPC/headless environment
+      variants: ~aqua ~davix ~examples ~opengl ~x ~tbb
+    all:
+    # Apply C++20 and CUDA support universally where possible
+      providers:
+        blas: [openblas]
+        lapack: [openblas]
+        mpi: [openmpi]
+        # This variant applies C++20 to all packages that support it
+      variants: cxxstd=20 +cuda
+      # NOTE: It is critical to add the specific architecture for your HPC cluster
+      # e.g., for V100 or A100/H100 cards.
+      # You can add this line to your Spack configuration using:
+      # spack config add --scope=site packages:all:variants:"cuda_arch=80"

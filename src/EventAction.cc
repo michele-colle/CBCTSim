@@ -18,9 +18,49 @@
 #include <G4EventManager.hh>
 #include <CBCTParams.hh>
 #include <TxtWithHeaderReader.hh>
-
+// We will use 1-based indexing for the bin numbers.
+#define BIN_PHOT  1
+#define BIN_COMPT 2
+#define BIN_CONV  3
+#define BIN_EIONI 4
+#define BIN_OTHER 5
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/**
+ * @brief Maps a Geant4 process name string to a specific histogram bin index.
+ * * This function implements the user's desired process grouping.
+ * * @param processName The G4String obtained from G4VProcess::GetProcessName().
+ * @return int The 1-based histogram bin index (1-5).
+ */
+int GetProcessBinIndex(const G4String& processName) {
 
+    // 1. Check for the common EM processes
+    if (processName == "phot" || processName == "G4PhotoElectricEffect") {
+        return BIN_PHOT;
+    }
+    if (processName == "compt" || processName == "G4ComptonScattering") {
+        return BIN_COMPT;
+    }
+    if (processName == "conv" || processName == "G4GammaConversion") {
+        return BIN_CONV;
+    }
+    if (processName == "eIoni" || processName == "G4eIonisation") {
+        return BIN_EIONI;
+    }
+
+    // 2. Transportation Check
+    // Per the user's implicit code: if(hit->GetProcess() != fTransportation), 
+    // the transportation process is skipped before this function is called.
+    // However, including a check here ensures robustness if the calling logic changes.
+    if (processName == "Transportation") {
+        // Return a sentinel value or handle as an error if it reaches here, 
+        // but typically you would skip filling the histogram entirely for Transportation.
+        return 0; // 0 is a safe sentinel indicating "skip this step"
+    }
+
+    // 3. All other processes (Hadronic, Decay, Optical, Parametrized, other EM)
+    // are grouped into the "Other" bin.
+    return BIN_OTHER;
+}
 // Constructor: Initializes the EventAction with a pointer to the RunAction
 EventAction::EventAction(RunAction *runAction)
     : fRunAction(runAction), fGlobalEventCounter(runAction->GetEventsProcessedCounter())
@@ -175,6 +215,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
 
   for (const auto &hit : *hitsCollection->GetVector())
   {
+
     // Get the data from the hit object
     //G4double primaryEnergy = hit->GetPrimaryEnergy();
     //G4ThreeVector primaryMomentum = hit->GetPrimaryMomentum();
@@ -210,6 +251,10 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     {
       analysis->FillH1(2, en);
       analysis->FillH2(2, posPhoton.x(), posPhoton.z(), en / keV);
+    }
+    if(GetProcessBinIndex(hit->GetProcess())){
+      analysis->FillH1(3, GetProcessBinIndex(hit->GetProcess()));
+//G4cout<<hit->GetProcess()<<G4endl;
     }
     // G4cout<<"actual pos "<<posPhoton<<G4endl;
   }

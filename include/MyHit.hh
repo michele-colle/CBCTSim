@@ -5,6 +5,7 @@
 #include "G4THitsCollection.hh"
 #include "G4ThreeVector.hh"
 #include "G4Allocator.hh" // Required for efficient memory management
+#include "G4VProcess.hh" // Required for efficient memory management
 
 // This is our custom Hit class. It inherits from the Geant4 base class.
 class MyHit : public G4VHit
@@ -33,6 +34,9 @@ public:
   
   void SetMomentum(G4ThreeVector val)    { fMomentum = val; }
   const G4ThreeVector& GetMomentum() const { return fMomentum; }
+  
+  void SetProcess(G4String val)    { fProcess = val; }
+  const G4String& GetProcess() const { return fProcess; }
 
 private:
   // The data members that will store our information
@@ -41,6 +45,7 @@ private:
   G4double      fEnergy;
   G4ThreeVector fPosition;
   G4ThreeVector fMomentum;
+  G4String fProcess;
 };
 
 // This is a special Geant4 template that creates a "vector" of MyHit objects.

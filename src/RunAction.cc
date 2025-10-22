@@ -172,6 +172,21 @@ std::cout << "Elapsed time (formatted): "
     //   return;
     // }
   }
+
+  //stampo l'elenco dei processi usati
+
+      // Define the labels in the exact same order as the G4ProcessType enum.
+    const char* processLabels[] = {"Transportation (not counted)", "phot", "compt","conv","eIoni", "other"
+    };
+    int n = 0;
+    for (auto &&i : processLabels)
+    {
+      G4cout << "ProcessType " << n << " : " << i << G4endl;
+      n++;
+    }
+    
+    
+
 #ifdef WITH_CELERITAS
   celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);
 #endif

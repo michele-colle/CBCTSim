@@ -35,12 +35,22 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   G4Track *track = aStep->GetTrack();
   // questo impedisce la generazione di fotoni nel materiale del detector (glare?)
   track->SetTrackStatus(fStopAndKill);
-  //if (track->GetDefinition() != G4Gamma::Definition())
-    //return false;
+  if (track->GetDefinition() != G4Gamma::Definition())
+    return false;
 
     // Create a new hit object
+
+  // Get the process that defined/limited the current step
+    const G4VProcess* processDefinedStep = 
+        aStep->GetPostStepPoint()->GetProcessDefinedStep();
+  G4String procType = "";
+
+    // Check if the pointer is valid before using it
+    if (processDefinedStep) {
+        procType = processDefinedStep->GetProcessName();
+    } 
   
-  auto proc= track->GetCreatorProcess();
+  
   //if(proc == G4Process::fTransportation)
     //return false; // primary photon
   // // Get primary info from the TrackInfo user object
@@ -58,6 +68,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   newHit->SetEnergy(preStepPoint->GetKineticEnergy());
   newHit->SetPosition(preStepPoint->GetPosition());
   newHit->SetMomentum(preStepPoint->GetMomentum());
+  newHit->SetProcess(procType);
 
   // Add the new hit to our collection for this event
   fHitsCollection->insert(newHit);

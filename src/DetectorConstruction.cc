@@ -125,7 +125,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto solidRadiator3 = new G4Tubs("Radiator",3.01*cm, 5*cm, 4*cm,0, 360*deg);
   auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
   if(par->GetPhantom()=="WaterCylinder") {
-    new G4PVPlacement(0,G4ThreeVector(4*cm,0,4*cm), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
+    new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
   }
   //
 
