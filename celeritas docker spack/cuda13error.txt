@@ -1,0 +1,277 @@
+michele@michele-B850M-Riptide-WiFi:~$ spack env activate celeritas 
+michele@michele-B850M-Riptide-WiFi:~$ spack install -j10
+[+] /usr (external glibc-2.39-4bfivdkeg4jj64esmnemhojxf5wlw2km)
+[+] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo
+[+] /usr/local/cuda-13.0 (external cuda-13.0.88-opshecvkw6vt6kfyyj2zj3gnbmc4jl3o)
+[+] /home/michele/spack/opt/spack/linux-zen4/g4abla-3.3-n7aiujdeltquyubv6llxgqcfhodm5jto
+[+] /home/michele/spack/opt/spack/linux-zen4/g4channeling-1.0-aaqlfjs4cbrfu5odklw4sqryqjpmw6vv
+[+] /home/michele/spack/opt/spack/linux-zen4/g4emlow-8.6.1-7iyrewhi6ob47siqzpidbp6kh74ogkkb
+[+] /home/michele/spack/opt/spack/linux-zen4/g4ensdfstate-3.0-kd4baeq2jumnvbhmp24tmqpob3poblue
+[+] /home/michele/spack/opt/spack/linux-zen4/g4incl-1.2-ppqudrcavztx5pn2d5yuullgatxgpkag
+[+] /home/michele/spack/opt/spack/linux-zen4/g4ndl-4.7.1-zfhkaxc3jbtkxa2zwrhxg6cd75qhmxn2
+[+] /home/michele/spack/opt/spack/linux-zen4/g4nudexlib-1.0-ajrdmxk4tgompguxwgg5qnol6itj62ej
+[+] /home/michele/spack/opt/spack/linux-zen4/g4particlexs-4.1-dxg5vxlrziif3l4hg4ihcnltneo6qv6c
+[+] /home/michele/spack/opt/spack/linux-zen4/g4photonevaporation-6.1-ccj6f3p3eaviyauf327or7weoqfssazw
+[+] /home/michele/spack/opt/spack/linux-zen4/g4pii-1.3-scbbzryomgp5ksncri3a6bu5mmognzfh
+[+] /home/michele/spack/opt/spack/linux-zen4/g4radioactivedecay-6.1.2-xwo3b3tbxznqaqoudl2iiocqmdm3emsc
+[+] /home/michele/spack/opt/spack/linux-zen4/g4realsurface-2.2-mtlpwhko7vyrfg3q2aa5to2yjbthxcap
+[+] /home/michele/spack/opt/spack/linux-zen4/g4saiddata-2.0-zxbm5nrgvdtsafiz6r5x7kgssdqgmcs4
+[+] /home/michele/spack/opt/spack/linux-zen4/g4tendl-1.4-kfqw3z4wqz3pzmpztncfpdrwqmzm2bfh
+[+] /home/michele/spack/opt/spack/linux-zen4/g4urrpt-1.1-5p4irlty7ay3vq4w7ekofhivq5rjcsoi
+[+] /usr (external gcc-13.3.0-dapd3luax3fvmneyw3vcrkp3ft2xtgwv)
+[+] /usr (external ninja-1.11.1-374sumuqfcusjpjmyttp4jzrh32jah2g)
+[+] /home/michele/spack/opt/spack/linux-zen4/geant4-data-11.3.0-6qjpslnvnlpdi3wnrxzaku3eyism2jna
+[+] /home/michele/spack/opt/spack/linux-zen4/gcc-runtime-13.3.0-ux5tchh2umakgp7tgbnamwqsncxoapst
+[+] /home/michele/spack/opt/spack/linux-zen4/gsl-2.8-3nvzq75kbbvcnlfyv5g7hsgdangutpmb
+[+] /home/michele/spack/opt/spack/linux-zen4/zstd-1.5.7-zm5hqkm7y3u2zavwbr2zhp3dc4mp5yvd
+[+] /home/michele/spack/opt/spack/linux-zen4/cli11-2.5.0-37jiqi2wpsttxvhgj76oplxdckv45mk4
+[+] /home/michele/spack/opt/spack/linux-zen4/util-linux-uuid-2.41-oxcgyvtctvezwqurmbw55zuvt5rrr7td
+[+] /home/michele/spack/opt/spack/linux-zen4/veccore-0.8.2-57wffh5g7aeanemtu7f64llwzzfsfmf5
+[+] /home/michele/spack/opt/spack/linux-zen4/pcre-8.45-zlocbf76j6s5n4bin3zavk3dfqrdoqs2
+[+] /home/michele/spack/opt/spack/linux-zen4/xz-5.6.3-cnkfnttw26xthjparpqg7hotjnssin43
+[+] /home/michele/spack/opt/spack/linux-zen4/clhep-2.4.7.1-mjfukviup66he7mr7hjbnbchkpq6qy6f
+[+] /home/michele/spack/opt/spack/linux-zen4/libiconv-1.18-44jpi74xl4i2gueah3ihvphloqwi6e2y
+[+] /home/michele/spack/opt/spack/linux-zen4/vdt-0.4.6-ea7lha44kwppnzrtggn5xhttgh2ktqzb
+[+] /home/michele/spack/opt/spack/linux-zen4/xxhash-0.8.3-4rol6zvaeftnvufoxso6nijzgkwv7vgq
+[+] /home/michele/spack/opt/spack/linux-zen4/zlib-ng-2.2.4-ybiad7ygjcrwxk4inethpilil4wqydhl
+[+] /home/michele/spack/opt/spack/linux-zen4/nlohmann-json-3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl
+[+] /home/michele/spack/opt/spack/linux-zen4/libffi-3.5.2-le2ea3vrfgjehocyrfci7qjdxbbauokj
+[+] /home/michele/spack/opt/spack/linux-zen4/xproto-7.0.31-fy4ga76pleoih7q35jfkyhi4mmw2wstu
+[+] /home/michele/spack/opt/spack/linux-zen4/ncurses-6.5-20250705-6iz2gt3httkrhgnejsjidcmelky56tj2
+[+] /home/michele/spack/opt/spack/linux-zen4/libmd-1.1.0-ddodicc7kn2d7ywe4fzzpqz3fpqyhou5
+[+] /home/michele/spack/opt/spack/linux-zen4/libpciaccess-0.17-pj43x2ohcww7kgwb6zxv4igezsel44ae
+[+] /home/michele/spack/opt/spack/linux-zen4/giflib-5.2.2-bm5w7guhf6bacz2irfop7hxpjbm7r6di
+[+] /home/michele/spack/opt/spack/linux-zen4/nghttp2-1.67.1-2vr6nxzn4mweerpl3aux6qvxcgsuzsr4
+[+] /home/michele/spack/opt/spack/linux-zen4/libjpeg-turbo-3.0.4-3vajabkgmnfburaq52etpwwsoyzvtine
+[+] /home/michele/spack/opt/spack/linux-zen4/gmake-4.4.1-e3uxepnhvgi5jywntargequagzs77kra
+[+] /home/michele/spack/opt/spack/linux-zen4/rapidjson-1.2.0-2024-08-16-nuqtxgsgylq4jhysrp5d75tq6hgdgjik
+[+] /home/michele/spack/opt/spack/linux-zen4/hepmc3-3.3.1-uxcljrrjckfovlkmupxryynqgu2uidfh
+[+] /home/michele/spack/opt/spack/linux-zen4/thrust-1.17.2-nusswwbjg2ljwp7qdr2ne4e5nkpl6pbt
+[+] /home/michele/spack/opt/spack/linux-zen4/libpng-1.6.47-6r7e7noznsghszq2i6pwkr6xzft4pipt
+[+] /home/michele/spack/opt/spack/linux-zen4/libtiff-4.7.0-hleibgmj2yo6yq6kw3q5pfizmfdai3jg
+[+] /home/michele/spack/opt/spack/linux-zen4/libbsd-0.12.2-v5uy5r7fvan3dhloik7kpyizpeyv2crw
+[+] /home/michele/spack/opt/spack/linux-zen4/readline-8.3-wbkysqvtobrby5mnpzmfzvqm3r36lnyu
+[+] /home/michele/spack/opt/spack/linux-zen4/openssl-3.6.0-ggwzemugc4lpj6ltjcz6mlueqxybjhi7
+[+] /home/michele/spack/opt/spack/linux-zen4/xtrans-1.6.0-t2nylg5aezbnccvcxijby4pammopc4jv
+[+] /home/michele/spack/opt/spack/linux-zen4/pigz-2.8-c3xdiqrrgdwcpjuftkzxxhtuircoyvyi
+[+] /home/michele/spack/opt/spack/linux-zen4/rngstreams-1.0.1-nhcehtfvjb7nvro6cou5vxjt47jyfpsh
+[+] /home/michele/spack/opt/spack/linux-zen4/libxml2-2.13.5-hvacv5dkvafp2mpgh472fercpihhqkij
+[+] /home/michele/spack/opt/spack/linux-zen4/bzip2-1.0.8-ajaaj2qmcghbh2do3uvnt7hltgalhfv3
+[+] /home/michele/spack/opt/spack/linux-zen4/lz4-1.10.0-jjwsuyjxpfm5holg7uxphykr5xdzjz2i
+[+] /home/michele/spack/opt/spack/linux-zen4/expat-2.7.3-jqew6e362p6mqljyr5kulmhsrciqwlyt
+[+] /home/michele/spack/opt/spack/linux-zen4/sqlite-3.50.4-xtjrj7xibabifyah7hpimgtt3jxkvao3
+[+] /home/michele/spack/opt/spack/linux-zen4/gdbm-1.25-3y4powyoct5ttoeazk6d3umasfql7sph
+[+] /home/michele/spack/opt/spack/linux-zen4/curl-8.15.0-re7xhac3ibrvwy44uwo56k3ejfaiusc7
+[+] /home/michele/spack/opt/spack/linux-zen4/libice-1.1.2-wosukmyofxtkq36k3wyov46x6ae2g7m3
+[+] /home/michele/spack/opt/spack/linux-zen4/unuran-1.11.0-5pbgtmf2ehrgpnga5vbryiwegxep5woq
+[+] /home/michele/spack/opt/spack/linux-zen4/hwloc-2.12.2-5cbrvo6bfzkwvjkyekh4x3qlviwnhs2v
+[+] /home/michele/spack/opt/spack/linux-zen4/freetype-2.14.1-yz53guzcgayxbckcbdxklvztrpdccruh
+[+] /home/michele/spack/opt/spack/linux-zen4/tar-1.35-gejogsejkf2keq43bpzptiy6edys7mvs
+[+] /home/michele/spack/opt/spack/linux-zen4/davix-0.8.10-klma5ef5lwpzpo37s7evk6bw5opmetup
+[+] /home/michele/spack/opt/spack/linux-zen4/xerces-c-3.3.0-52xtnntmextzho4jnxzagpypdg4czzwo
+[+] /home/michele/spack/opt/spack/linux-zen4/cmake-3.31.9-blirgwgli5floxieqepwc52x74sc3yeg
+[+] /home/michele/spack/opt/spack/linux-zen4/gettext-0.23.1-k3sz35jsbf72453hwctt2xrnmzugfttj
+[+] /home/michele/spack/opt/spack/linux-zen4/geant4-11.3.2-qztcvy4bpnpqvjp3uhdvqair7vpum3tg
+[+] /home/michele/spack/opt/spack/linux-zen4/intel-tbb-2022.2.0-5bcyjeoekfkwpf4zjgbmjjma35or5up2
+[+] /home/michele/spack/opt/spack/linux-zen4/vecgeom-1.2.11-xisfqmtbvtabhduqwe75koe4b62yoqxz
+[+] /home/michele/spack/opt/spack/linux-zen4/python-3.14.0-hxunejiqhwa65vynki3q6vyce4gyclu5
+[+] /home/michele/spack/opt/spack/linux-zen4/g4vg-1.0.5-pzdtadyyvhquj72o2xhrt7gztwzcwfsy
+[+] /home/michele/spack/opt/spack/linux-zen4/root-6.36.04-ipbimqaf6gctxcq4qemjejgnh3z3rrps
+==> No binary for celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh found: installing from source
+==> Installing celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh [78/78]
+==> Using cached archive: /home/michele/spack/var/spack/cache/_source-cache/archive/ef/efca5a7f4797cd29d2b4e0b2251896b9fe4253ed95ff5c18f4d0476d4c34b48d.tar.gz
+==> No patches needed for celeritas
+==> celeritas: Executing phase: 'cmake'
+==> celeritas: Executing phase: 'build'
+==> Error: ProcessError: Command exited with status 1:
+    '/usr/bin/ninja' '-j10' '-v'
+
+3 errors found in build log:
+     64    [6/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.
+           0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mic
+           hele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbc
+           tuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-celer
+           itas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/incl
+           ude -isystem /usr/local/cuda-13.0/targets/x86_64-linux/include -isys
+           tem /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl -Wall -We
+           xtra -pedantic -fdiagnostics-color=always -O3 -DNDEBUG -std=c++17 -f
+           PIC -Wno-dangling-reference -MD -MT src/corecel/CMakeFiles/corecel_m
+           pi_obj.dir/Assert.cc.o -MF src/corecel/CMakeFiles/corecel_mpi_obj.di
+           r/Assert.cc.o.d -o src/corecel/CMakeFiles/corecel_mpi_obj.dir/Assert
+           .cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xo
+           ihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/Assert.cc
+     65    [7/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.
+           0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mic
+           hele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbc
+           tuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-celer
+           itas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/incl
+           ude -Wall -Wextra -pedantic -fdiagnostics-color=always -O3 -DNDEBUG 
+           -std=c++17 -fPIC -fopenmp -Wno-dangling-reference -MD -MT src/corece
+           l/CMakeFiles/corecel_openmp_obj.dir/sys/MultiExceptionHandler.cc.o -
+           MF src/corecel/CMakeFiles/corecel_openmp_obj.dir/sys/MultiExceptionH
+           andler.cc.o.d -o src/corecel/CMakeFiles/corecel_openmp_obj.dir/sys/M
+           ultiExceptionHandler.cc.o -c /tmp/michele/spack-stage/spack-stage-ce
+           leritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel
+           /sys/MultiExceptionHandler.cc
+     66    [8/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.
+           0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mic
+           hele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbc
+           tuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-celer
+           itas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/incl
+           ude -isystem /usr/local/cuda-13.0/targets/x86_64-linux/include -isys
+           tem /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl -Wall -We
+           xtra -pedantic -fdiagnostics-color=always -O3 -DNDEBUG -std=c++17 -f
+           PIC -Wno-dangling-reference -MD -MT src/corecel/CMakeFiles/corecel_m
+           pi_obj.dir/io/Logger.cc.o -MF src/corecel/CMakeFiles/corecel_mpi_obj
+           .dir/io/Logger.cc.o.d -o src/corecel/CMakeFiles/corecel_mpi_obj.dir/
+           io/Logger.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.6
+           .2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/io/Logger.
+           cc
+     67    [9/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.
+           0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mic
+           hele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbc
+           tuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-celer
+           itas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/incl
+           ude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json-
+           3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local/
+           cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.0
+           /targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagnos
+           tics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refere
+           nce -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/Types.cc.o -M
+           F src/corecel/CMakeFiles/corecel_objects.dir/Types.cc.o.d -o src/cor
+           ecel/CMakeFiles/corecel_objects.dir/Types.cc.o -c /tmp/michele/spack
+           -stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/
+           spack-src/src/corecel/Types.cc
+     68    [10/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json
+           -3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local
+           /cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.
+           0/targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagno
+           stics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refer
+           ence -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/data/Copier.
+           cc.o -MF src/corecel/CMakeFiles/corecel_objects.dir/data/Copier.cc.o
+           .d -o src/corecel/CMakeFiles/corecel_objects.dir/data/Copier.cc.o -c
+            /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhu
+           sswoqqhbctuaizbdgh/spack-src/src/corecel/data/Copier.cc
+     69    [11/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /usr/local/cuda-13.0/targets/x86_64-linux/include -isy
+           stem /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl -Wall -W
+           extra -pedantic -fdiagnostics-color=always -O3 -DNDEBUG -std=c++17 -
+           fPIC -Wno-dangling-reference -MD -MT src/corecel/CMakeFiles/corecel_
+           mpi_obj.dir/sys/Device.cc.o -MF src/corecel/CMakeFiles/corecel_mpi_o
+           bj.dir/sys/Device.cc.o.d -o src/corecel/CMakeFiles/corecel_mpi_obj.d
+           ir/sys/Device.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas
+           -0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/sys/De
+           vice.cc
+  >> 70    FAILED: src/corecel/CMakeFiles/corecel_mpi_obj.dir/sys/Device.cc.o
+     71    /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1.0-mpcx7r
+           ujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/michele/spa
+           ck-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdg
+           h/spack-src/src -I/tmp/michele/spack-stage/spack-stage-celeritas-0.6
+           .2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/include -isy
+           stem /usr/local/cuda-13.0/targets/x86_64-linux/include -isystem /usr
+           /local/cuda-13.0/targets/x86_64-linux/include/cccl -Wall -Wextra -pe
+           dantic -fdiagnostics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno
+           -dangling-reference -MD -MT src/corecel/CMakeFiles/corecel_mpi_obj.d
+           ir/sys/Device.cc.o -MF src/corecel/CMakeFiles/corecel_mpi_obj.dir/sy
+           s/Device.cc.o.d -o src/corecel/CMakeFiles/corecel_mpi_obj.dir/sys/De
+           vice.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jv
+           v7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/sys/Device.cc
+     72    /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhus
+           swoqqhbctuaizbdgh/spack-src/src/corecel/sys/Device.cc: In constructo
+           r 'celeritas::Device::Device(int)':
+  >> 73    /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhus
+           swoqqhbctuaizbdgh/spack-src/src/corecel/sys/Device.cc:219:34: error:
+            'using DevicePropT = struct cudaDeviceProp' {aka 'struct cudaDevice
+           Prop'} has no member named 'clockRate'
+     74      219 |     extra_["clock_rate"] = props.clockRate;
+     75          |                                  ^~~~~~~~~
+  >> 76    /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhus
+           swoqqhbctuaizbdgh/spack-src/src/corecel/sys/Device.cc:222:41: error:
+            'using DevicePropT = struct cudaDeviceProp' {aka 'struct cudaDevice
+           Prop'} has no member named 'memoryClockRate'
+     77      222 |     extra_["memory_clock_rate"] = props.memoryClockRate;
+     78          |                                         ^~~~~~~~~~~~~~~
+     79    [12/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json
+           -3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local
+           /cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.
+           0/targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagno
+           stics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refer
+           ence -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/data/AuxInte
+           rface.cc.o -MF src/corecel/CMakeFiles/corecel_objects.dir/data/AuxIn
+           terface.cc.o.d -o src/corecel/CMakeFiles/corecel_objects.dir/data/Au
+           xInterface.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.
+           6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/data/AuxI
+           nterface.cc
+     80    [13/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json
+           -3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local
+           /cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.
+           0/targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagno
+           stics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refer
+           ence -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/data/DeviceA
+           llocation.cc.o -MF src/corecel/CMakeFiles/corecel_objects.dir/data/D
+           eviceAllocation.cc.o.d -o src/corecel/CMakeFiles/corecel_objects.dir
+           /data/DeviceAllocation.cc.o -c /tmp/michele/spack-stage/spack-stage-
+           celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corec
+           el/data/DeviceAllocation.cc
+     81    [14/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json
+           -3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local
+           /cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.
+           0/targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagno
+           stics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refer
+           ence -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/data/AuxStat
+           eVec.cc.o -MF src/corecel/CMakeFiles/corecel_objects.dir/data/AuxSta
+           teVec.cc.o.d -o src/corecel/CMakeFiles/corecel_objects.dir/data/AuxS
+           tateVec.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2
+           -jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/data/AuxStat
+           eVec.cc
+     82    [15/516] /home/michele/spack/opt/spack/linux-zen4/compiler-wrapper-1
+           .0-mpcx7rujquyi7zyqu6jimm3td5yqtcoo/libexec/spack/gcc/g++  -I/tmp/mi
+           chele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhb
+           ctuaizbdgh/spack-src/src -I/tmp/michele/spack-stage/spack-stage-cele
+           ritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-jvv7xoi/inc
+           lude -isystem /home/michele/spack/opt/spack/linux-zen4/nlohmann-json
+           -3.12.0-luamm3m5rq76lyp2scblncxtkwiawhcl/include -isystem /usr/local
+           /cuda-13.0/targets/x86_64-linux/include -isystem /usr/local/cuda-13.
+           0/targets/x86_64-linux/include/cccl -Wall -Wextra -pedantic -fdiagno
+           stics-color=always -O3 -DNDEBUG -std=c++17 -fPIC -Wno-dangling-refer
+           ence -MD -MT src/corecel/CMakeFiles/corecel_objects.dir/grid/VectorU
+           tils.cc.o -MF src/corecel/CMakeFiles/corecel_objects.dir/grid/Vector
+           Utils.cc.o.d -o src/corecel/CMakeFiles/corecel_objects.dir/grid/Vect
+           orUtils.cc.o -c /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2
+           -jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-src/src/corecel/grid/VectorU
+           tils.cc
+
+See build log for details:
+  /tmp/michele/spack-stage/spack-stage-celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh/spack-build-out.txt
+
+==> Error: celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh: ProcessError: Command exited with status 1:
+    '/usr/bin/ninja' '-j10' '-v'
+==> Error: celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh: Package was not installed
+==> Error: celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh: Package was not installed
+==> Error: celeritas-0.6.2-jvv7xoihjdolhusswoqqhbctuaizbdgh: Package was not installed
+==> Error: Installation request failed.  Refer to reported errors for failing package(s).
+michele@michele-B850M-Riptide-WiFi:~$ 
