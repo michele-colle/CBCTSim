@@ -1,0 +1,21 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  # add package specs to the `specs` list
+  specs:
+  - celeritas+cuda+openmp+root
+  view: true
+  concretizer:
+    unify: true
+  packages:
+    cuda:
+      externals:
+      - spec: cuda@12.8.93
+        prefix: /usr/local/cuda-12.8
+    root:
+      # Note: ~gsl and ~math are removed because dd4hep requires them
+      variants: ~aqua ~davix ~examples ~opengl ~x ~tbb
+    all:
+      variants: cxxstd=17 +cuda cuda_arch=120 generator=ninja
