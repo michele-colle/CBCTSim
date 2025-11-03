@@ -51,6 +51,7 @@ class ICRP110PhantomConstruction : public G4VUserDetectorConstruction
     ~ICRP110PhantomConstruction();
      G4VPhysicalVolume* Construct()override;
      void PlacePhantomInVolume(G4LogicalVolume* logicWorld);
+     void PlacePhantomInVolumeUNION(G4LogicalVolume* logicWorld);
 
      G4VPhysicalVolume* GetMotherVolume() {return fMotherVolume;}
      G4VPhysicalVolume* GetPhantumContainer() {return fPhantomContainer;}

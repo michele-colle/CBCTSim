@@ -44,6 +44,8 @@
 #include "G4VisAttributes.hh"
 #include <map>
 #include <cstdlib>
+#include <G4UnionSolid.hh>
+#include <G4SubtractionSolid.hh>
 
 ICRP110PhantomConstruction::ICRP110PhantomConstruction() : fMotherVolume(nullptr), fPhantomContainer(nullptr),
                                                            fNVoxelX(0), fNVoxelY(0), fNVoxelZ(0),
@@ -327,6 +329,239 @@ void ICRP110PhantomConstruction::PlacePhantomInVolume(G4LogicalVolume* logicVolu
 
     param -> SetMaterialIndices(fMateIDs); // fMateIDs is  the vector with Material ID associated to each voxel, from ASCII input data files.
     param -> SetNoVoxel(fNVoxelX,fNVoxelY,fNVoxelZ);
+
+}
+
+
+void ICRP110PhantomConstruction::PlacePhantomInVolumeUNION(G4LogicalVolume* logicVolume)
+{
+  // World Volume// Define Material Air
+  G4double A;  // atomic mass
+  G4double Z;  // atomic number
+  G4double d;  // density
+
+  A = 14.01*g/mole;
+  auto elN = new G4Element("Nitrogen","N",Z = 7.,A);
+  A = 16.00*g/mole;
+  auto elO = new G4Element("Oxygen","O",Z = 8.,A);
+
+  d = 0.001 *g/cm3;
+  auto matAir = new G4Material("Air",d,2);
+  matAir -> AddElement(elN,0.8);
+  matAir -> AddElement(elO,0.2);
+
+ std::vector<G4Material*> pMaterials;
+
+ if(fSex == "female"){
+
+  fMaterial_Female -> DefineMaterials();
+//----- Store materials in a vector
+    pMaterials.push_back(matAir);
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("teeth"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("bone"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("humeri_upper"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("humeri_lower"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("arm_lower"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("hand"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("clavicle"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("cranium"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("femora_upper"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("femora_lower"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("leg_lower"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("foot"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("mandible"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("pelvis"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("ribs"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("scapulae"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("spine_cervical"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("spine_thoratic"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("spine_lumbar"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("sacrum"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("sternum"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("hf_upper"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("hf_lower"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("med_lowerarm"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("med_lowerleg"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("cartilage"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("skin"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("blood"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("muscle"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("liver"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("pancreas"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("brain"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("heart"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("eye"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("kidney"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("stomach"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("intestine_sml"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("intestine_lrg"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("spleen"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("thyroid"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("bladder"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("ovaries_testes"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("adrenals"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("oesophagus"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("misc"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("uterus_prostate"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("lymph"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("breast_glandular"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("breast_adipose"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("lung"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("gastro_content"));
+    pMaterials.push_back(fMaterial_Female -> GetMaterial("urine"));
+ }
+ else if (fSex == "male"){
+ // MATT do the same here
+    fMaterial_Male -> DefineMaterials();
+
+//----- Store materials in a vector
+    pMaterials.push_back(matAir);
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("teeth"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("bone"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("humeri_upper"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("humeri_lower"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("arm_lower"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("hand"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("clavicle"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("cranium"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("femora_upper"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("femora_lower"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("leg_lower"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("foot"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("mandible"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("pelvis"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("ribs"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("scapulae"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("spine_cervical"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("spine_thoratic"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("spine_lumbar"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("sacrum"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("sternum"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("hf_upper"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("hf_lower"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("med_lowerarm"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("med_lowerleg"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("cartilage"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("skin"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("blood"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("muscle"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("liver"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("pancreas"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("brain"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("heart"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("eye"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("kidney"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("stomach"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("intestine_sml"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("intestine_lrg"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("spleen"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("thyroid"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("bladder"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("ovaries_testes"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("adrenals"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("oesophagus"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("misc"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("uterus_prostate"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("lymph"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("breast_glandular"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("breast_adipose"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("lung"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("gastro_content"));
+    pMaterials.push_back(fMaterial_Male -> GetMaterial("urine"));
+
+}
+
+  ReadPhantomData(fSex, fSection);
+
+  G4cout << "Number of X,Y,Z voxels = " << fNVoxelX << ", " << fNVoxelY << ", " << fNVoxelZ << G4endl;
+
+//----- Define the volume that contains all the voxels
+  G4Box* fContainer_solid = new G4Box("phantomContainer",fNVoxelX*fVoxelHalfDimX*mm,
+                               fNVoxelY*fVoxelHalfDimY*mm,
+                               fNVoxelZ*fVoxelHalfDimZ*mm);
+
+  auto fContainer_logic = new G4LogicalVolume( fContainer_solid,
+                                                            matAir,
+                                                            "phantomContainer",
+                                                             nullptr, nullptr, nullptr);
+
+  fMaxX = fNVoxelX*fVoxelHalfDimX*mm; // Max X along X axis of the voxelised geometry
+  fMaxY = fNVoxelY*fVoxelHalfDimY*mm; // Max Y
+  fMaxZ = fNVoxelZ*fVoxelHalfDimZ*mm; // Max Z
+
+  fMinX = -fNVoxelX*fVoxelHalfDimX*mm;// Min X
+  fMinY = -fNVoxelY*fVoxelHalfDimY*mm;// Min Y
+  fMinZ = -fNVoxelZ*fVoxelHalfDimZ*mm;// Min Z
+
+  //G4ThreeVector posCentreVoxels(0*cm,0*cm,-35*cm);
+  G4ThreeVector posCentreVoxels((fMinX+fMaxX)/2.,(fMinY+fMaxY)/2.,(fMinZ+fMaxZ)/2.);
+  // Position of the phantom container in the world volume
+
+  G4cout << " placing voxel container volume at " << posCentreVoxels << G4endl;
+
+  fPhantomContainer
+  = new G4PVPlacement(nullptr,                     // rotation
+                      posCentreVoxels,
+                      fContainer_logic,     // The logic volume
+                      "phantomContainer",  // Name
+                      logicVolume,         // Mother
+                      false,            // No op. bool.
+                      1);              // Copy number
+
+  fContainer_logic -> SetVisAttributes(new G4VisAttributes(G4Colour(1.,0.,0.,0.)));
+   // Parameterisation to define the material of each voxel
+  G4ThreeVector halfVoxelSize(fVoxelHalfDimX,fVoxelHalfDimY,fVoxelHalfDimZ);
+  auto param =  new ICRP110PhantomNestedParameterisation(halfVoxelSize, pMaterials);
+  param -> SetMaterialIndices(fMateIDs); // fMateIDs is  the vector with Material ID associated to each voxel, from ASCII input data files.
+  param -> SetNoVoxel(fNVoxelX,fNVoxelY,fNVoxelZ);
+
+
+  G4VSolid* box = new G4Box("Box", 20, 30, 40);
+  G4VSolid* box2= new G4Box("Box2", 20, 30, 40);
+  //G4VSolid* box2 = nullptr;
+  G4VSolid* unions = new G4UnionSolid("Box+Cylinder", box, box2, nullptr,G4ThreeVector(0,0,0)); 
+  G4VSolid* subtr = new G4SubtractionSolid("Box+Cylinder", box, box2, nullptr,G4ThreeVector(0,0,0)); 
+
+  G4double volumeu = unions->GetCubicVolume();
+  G4double volumes = subtr->GetCubicVolume();
+  G4double volume = box->GetCubicVolume();
+  G4cout << " volume union " << volumeu << " volume subtr " << volumes << " volume box " << volume << G4endl;
+
+  std::vector<G4VSolid*> voxelSolids;
+
+  //creo il vettore di solidi, nb poi questi verranno tutti sottratti, perdo il primo voxel, speriamo che sia aria..
+  for (size_t i = 0; i < pMaterials.size(); i++)
+    voxelSolids.push_back(new G4Box("phantom",fVoxelHalfDimX, fVoxelHalfDimY,fVoxelHalfDimZ));
+  
+
+
+  for (size_t iz = 0; iz < fNVoxelZ; iz++)
+  {
+    for (size_t iy = 0; iy < fNVoxelY; iy++)
+    {
+      for (size_t ix = 0; ix < fNVoxelX; ix++)
+      {
+        G4VSolid* voxel = new G4Box("Box", fVoxelHalfDimX, fVoxelHalfDimY, fVoxelHalfDimZ);
+        G4ThreeVector voxelPos( ( (G4double)ix + 0.5 ) * 2.0 * fVoxelHalfDimX - fMaxX/2.0,
+                                ( (G4double)iy + 0.5 ) * 2.0 * fVoxelHalfDimY - fMaxY/2.0,
+                                ( (G4double)iz + 0.5 ) * 2.0 * fVoxelHalfDimZ - fMaxZ/2.0);
+        G4int index = ix + iy * fNVoxelX + iz * fNVoxelX * fNVoxelY;
+        G4int mateID = fMateIDs[index];
+        
+        voxelSolids[mateID] = new G4UnionSolid(std::to_string(mateID),voxelSolids[mateID], voxel, nullptr, voxelPos);
+        G4cout << " voxel position " << voxelPos << " index " << index << " mateID " << mateID << G4endl;
+      }
+    }
+  }
+
+  for (size_t i = 0; i < pMaterials.size(); i++)
+    voxelSolids[i] = new G4SubtractionSolid(std::to_string(i)+"subtr", voxelSolids[0], voxelSolids[i], nullptr, G4ThreeVector(0,0,0));
+
+  
+  for (size_t i = 0; i < pMaterials.size(); i++)
+    G4cout << " volume solid " << i << " is " << voxelSolids[i]->GetCubicVolume() << G4endl;
+
+
 
 }
 
