@@ -18,4 +18,4 @@ spack:
       # Note: ~gsl and ~math are removed because dd4hep requires them
       variants: ~aqua ~davix ~examples ~opengl ~x ~tbb
     all:
-      variants: cxxstd=17 +cuda cuda_arch=120 generator=ninja
+      variants: cxxstd=17 +cuda cuda_arch=75 generator=ninja

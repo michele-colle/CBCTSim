@@ -44,7 +44,7 @@
 #include "G4VisAttributes.hh"
 #include <map>
 #include <cstdlib>
-#include <G4UnionSolid.hh>
+#include <G4MultiUnion.hh>
 #include <G4SubtractionSolid.hh>
 
 ICRP110PhantomConstruction::ICRP110PhantomConstruction() : fMotherVolume(nullptr), fPhantomContainer(nullptr),
@@ -514,27 +514,13 @@ void ICRP110PhantomConstruction::PlacePhantomInVolumeUNION(G4LogicalVolume* logi
   auto param =  new ICRP110PhantomNestedParameterisation(halfVoxelSize, pMaterials);
   param -> SetMaterialIndices(fMateIDs); // fMateIDs is  the vector with Material ID associated to each voxel, from ASCII input data files.
   param -> SetNoVoxel(fNVoxelX,fNVoxelY,fNVoxelZ);
-
-
-  G4VSolid* box = new G4Box("Box", 20, 30, 40);
-  G4VSolid* box2= new G4Box("Box2", 20, 30, 40);
-  //G4VSolid* box2 = nullptr;
-  G4VSolid* unions = new G4UnionSolid("Box+Cylinder", box, box2, nullptr,G4ThreeVector(0,0,0)); 
-  G4VSolid* subtr = new G4SubtractionSolid("Box+Cylinder", box, box2, nullptr,G4ThreeVector(0,0,0)); 
-
-  G4double volumeu = unions->GetCubicVolume();
-  G4double volumes = subtr->GetCubicVolume();
-  G4double volume = box->GetCubicVolume();
-  G4cout << " volume union " << volumeu << " volume subtr " << volumes << " volume box " << volume << G4endl;
-
-  std::vector<G4VSolid*> voxelSolids;
+  std::vector<G4MultiUnion*> voxelSolids;
 
   //creo il vettore di solidi, nb poi questi verranno tutti sottratti, perdo il primo voxel, speriamo che sia aria..
   for (size_t i = 0; i < pMaterials.size(); i++)
-    voxelSolids.push_back(new G4Box("phantom",fVoxelHalfDimX, fVoxelHalfDimY,fVoxelHalfDimZ));
-  
+    voxelSolids.push_back(new G4MultiUnion(std::to_string(i)));  
 
-
+  G4ThreeVector fPhantomContainerCorner(fMinX, fMinY, fMinZ);
   for (size_t iz = 0; iz < fNVoxelZ; iz++)
   {
     for (size_t iy = 0; iy < fNVoxelY; iy++)
@@ -542,24 +528,41 @@ void ICRP110PhantomConstruction::PlacePhantomInVolumeUNION(G4LogicalVolume* logi
       for (size_t ix = 0; ix < fNVoxelX; ix++)
       {
         G4VSolid* voxel = new G4Box("Box", fVoxelHalfDimX, fVoxelHalfDimY, fVoxelHalfDimZ);
-        G4ThreeVector voxelPos( ( (G4double)ix + 0.5 ) * 2.0 * fVoxelHalfDimX - fMaxX/2.0,
-                                ( (G4double)iy + 0.5 ) * 2.0 * fVoxelHalfDimY - fMaxY/2.0,
-                                ( (G4double)iz + 0.5 ) * 2.0 * fVoxelHalfDimZ - fMaxZ/2.0);
+        G4ThreeVector voxelPos( ( (G4double)ix + 0.5 ) * 2.0 * fVoxelHalfDimX,
+                                ( (G4double)iy + 0.5 ) * 2.0 * fVoxelHalfDimY,
+                                ( (G4double)iz + 0.5 ) * 2.0 * fVoxelHalfDimZ);
         G4int index = ix + iy * fNVoxelX + iz * fNVoxelX * fNVoxelY;
         G4int mateID = fMateIDs[index];
+        G4Transform3D transform(G4RotationMatrix(), voxelPos+fPhantomContainerCorner);
+        voxelSolids[mateID] ->AddNode(*voxel, transform);
         
-        voxelSolids[mateID] = new G4UnionSolid(std::to_string(mateID),voxelSolids[mateID], voxel, nullptr, voxelPos);
-        G4cout << " voxel position " << voxelPos << " index " << index << " mateID " << mateID << G4endl;
+         //
+        //G4cout << " voxel position " << voxelPos << " index " << index << " mateID " << mateID << G4endl;
       }
     }
   }
+  //parto da 1 cosi non creo l' aria
+  for (size_t i = 1; i < pMaterials.size(); i++){
+    if(voxelSolids[i]->GetNumberOfSolids() == 0) continue;
+    voxelSolids[i]->Voxelize();
+    G4LogicalVolume* logicVoxelUnion = new G4LogicalVolume( voxelSolids[i],
+                                                            pMaterials[i],
+                                                            "voxelUnion_"+std::to_string(i),
+                                                             nullptr, nullptr, nullptr);
 
-  for (size_t i = 0; i < pMaterials.size(); i++)
-    voxelSolids[i] = new G4SubtractionSolid(std::to_string(i)+"subtr", voxelSolids[0], voxelSolids[i], nullptr, G4ThreeVector(0,0,0));
+    // --- ADD VISUALIZATION ATTRIBUTES HERE ---
+    G4VisAttributes* visAtt = new G4VisAttributes(param->GetVisAttributes(pMaterials[i]->GetName()));
+    
+    new G4PVPlacement(nullptr,                     // rotation
+                      G4ThreeVector(0,0,0),
+                      logicVoxelUnion,     // The logic volume
+                      "voxelUnion_"+std::to_string(i),  // Name
+                      fContainer_logic,         // Mother
+                      false,            // No op. bool.
+                      0);              // Copy number
+    G4cout <<"Material: "<<pMaterials[i]->GetName() <<" voxel number " << voxelSolids[i]->GetNumberOfSolids()<< " index: "<<i << G4endl;
 
-  
-  for (size_t i = 0; i < pMaterials.size(); i++)
-    G4cout << " volume solid " << i << " is " << voxelSolids[i]->GetCubicVolume() << G4endl;
+  }
 
 
 

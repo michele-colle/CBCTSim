@@ -85,6 +85,15 @@ void ICRP110PhantomNestedParameterisation::ReadColourData()
        // G4cout << mateName << " colour set :  "  << colour << G4endl;
     }
 }
+G4VisAttributes* ICRP110PhantomNestedParameterisation::GetVisAttributes(G4String matName) const
+{
+    if(0 < fColours.count(matName)) {
+        return fColours.find(matName)->second;
+    } 
+    else {
+        return fColours.begin()->second; // Default color
+    }
+}
 
 void ICRP110PhantomNestedParameterisation::
 SetNoVoxel( G4int nx, G4int ny, G4int nz )

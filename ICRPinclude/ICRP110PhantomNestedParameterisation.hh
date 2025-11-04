@@ -82,6 +82,8 @@ public:
   G4Material* GetMaterial(G4int idx) const;
 
   G4int GetMaterialIndex( G4int copyNo) const;
+
+  G4VisAttributes* GetVisAttributes(G4String matName) const;
   
   void SetMaterialIndices( size_t* matInd ){ fMaterialIndices = matInd;}
   // This method passes the information of the matID associated to each voxel
