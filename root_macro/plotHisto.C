@@ -373,10 +373,10 @@ void StandaloneApplication(int argc, char **argv)
   // eventually, evaluate the application parameters argc, argv
   // ==>> here the ROOT macro is called
   // plotHistoIPEMPrimary();
-  plotHitMaps("../air_penelope.root");
-  plotHitMaps("../air_standardEM.root");
-  plotHitMaps("../water_cylinder_penelope.root");
-  plotHitMaps("../water_cylinder_standardEM.root");
+  //plotHitMaps("../air_penelope.root");
+  //plotHitMaps("../air_standardEM.root");
+  //plotHitMaps("../water_cylinder_penelope.root");
+  plotHitMaps("../head_phantom_penelope.root");
   std::cout << "Finished plotHitMaps" << endl;
 }
 // This is the standard "main" of C++ starting

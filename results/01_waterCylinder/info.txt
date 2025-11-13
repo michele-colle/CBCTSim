@@ -16,3 +16,9 @@ penelope: libreria di fisica a basse energie che dovrebbe essere piu precisa del
 tutti i parametri sono gli stessi di prima
 solo aria 6m:49s
 water cylinder 9m:55s
+
+nota sui tempi: in questo caso ho solo un cilindro dunque la simulazione é molto semplice.
+con il phantom del cranio voxellizzato (tra l'altro ho visto che ci sono implementazioni forse piu efficienti di quella che sto usando al momento) 
+con dimensioni 299x137x45 il tempo di esecuzione é di:
+nparticle 10^8
+head phantom 20m:24s
