@@ -141,7 +141,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   //creo il phantmo antropomorfo
   if(par->GetPhantom()=="HeadFemale") {
     auto userPhantom = new ICRP110PhantomConstruction();
-    userPhantom->PlacePhantomInVolume(logicReconCyl);
+    userPhantom->PlacePhantomInVolumeUNION(logicReconCyl);
   }
   
 

@@ -9,10 +9,12 @@ project(cbctsim)
 # to build a batch mode only executable
 #
 option(WITH_CELERITAS "Enable Celeritas GPU offloading" ON)
-
 if(WITH_CELERITAS)
   find_package(Celeritas 0.6 REQUIRED)
 endif()
+# if(WITH_ADEPT)
+#   find_package(AdePT REQUIRED)
+# endif()
 
 option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
 if(WITH_GEANT4_UIVIS)

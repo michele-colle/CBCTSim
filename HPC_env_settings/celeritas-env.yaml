@@ -1,0 +1,20 @@
+spack:
+  specs:
+    - "celeritas"
+    - "vecgeom@2.0.0-rc.4: +gdml +cuda cxxstd=20"
+   # - "g4vg@1.0.5"
+
+  view: true
+  concretizer:
+    unify: true
+
+  packages:
+    all:
+    # Apply C++20 and CUDA support universally where possible
+      providers:
+        blas: [openblas]
+        lapack: [openblas]
+        mpi: [openmpi]
+        # This variant applies C++20 to all packages that support it
+      variants: cxxstd=20 +cuda cuda_arch=75
+#note: sul mio pc non funziona perch'e non posso usare g4vg@1.0.5 e si incasina con le librerie cuda
