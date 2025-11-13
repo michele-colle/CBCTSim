@@ -32,9 +32,9 @@
 /mysim/setFilter2Thickness 0.6 mm
 /mysim/setPatienStandPosition 13 cm
 
-/mysim/setPhantom WaterCylinder
-#/mysim/setPhantom HeadFemale
+#/mysim/setPhantom WaterCylinder
+/mysim/setPhantom HeadFemale
 #tenere commentato per le simulazioni in loop
 # Set object angle (rotation of the reconstruction cylinder)
 #/mysim/setObjectAngle 30 deg
-#/run/reinitializeGeometry
+#/run/reinitializeGeometry 
