@@ -122,7 +122,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
   //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
 
-  auto solidRadiator3 = new G4Tubs("Radiator",3.01*cm, 5*cm, 4*cm,0, 360*deg);
+  auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 4*cm, 6*cm,0, 360*deg);
   auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
   if(par->GetPhantom()=="WaterCylinder") {
     new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
@@ -141,7 +141,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   //creo il phantmo antropomorfo
   if(par->GetPhantom()=="HeadFemale") {
     auto userPhantom = new ICRP110PhantomConstruction();
-    userPhantom->PlacePhantomInVolumeUNION(logicReconCyl);
+    userPhantom->PlacePhantomInVolume(logicReconCyl);
   }
   
 

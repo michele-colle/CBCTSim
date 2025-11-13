@@ -1,0 +1,1010 @@
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT8 > Received Particles: 76135
+G4WT10 > Received Particles: 76373
+G4WT0 > Received Particles: 76041
+G4WT1 > EndOfEventAction
+G4WT1 > Received Particles: 76592
+G4WT11 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT11 > Received Particles: 76391
+G4WT8 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT4 > Received Particles: 76275
+G4WT8 > Received Particles: 76589
+G4WT10 > Received Particles: 76393
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76358
+G4WT1 > EndOfEventAction
+G4WT1 > Received Particles: 76372
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76435
+G4WT11 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT11 > Received Particles: 76277
+G4WT10 > EndOfEventAction
+G4WT8 > EndOfEventAction
+G4WT4 > Received Particles: 76441
+G4WT10 > Received Particles: 76380
+G4WT8 > Received Particles: 76157
+G4WT1 > EndOfEventAction
+G4WT1 > Received Particles: 76435
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76412
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76460
+G4WT10 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT8 > EndOfEventAction
+G4WT10 > Received Particles: 76319
+G4WT4 > Received Particles: 76457
+G4WT0 > Received Particles: 76239
+G4WT8 > Received Particles: 76214
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76542
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76413
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT8 > EndOfEventAction
+G4WT10 > Received Particles: 76482
+G4WT0 > Received Particles: 76101
+G4WT4 > Received Particles: 76436
+G4WT8 > Received Particles: 76123
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76380
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76409
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT8 > EndOfEventAction
+G4WT10 > Received Particles: 76473
+G4WT0 > Received Particles: 76577
+G4WT4 > Received Particles: 76213
+G4WT8 > Received Particles: 76378
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76416
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76438
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76520
+G4WT10 > Received Particles: 76307
+G4WT8 > EndOfEventAction
+G4WT4 > EndOfEventAction
+G4WT8 > Received Particles: 76239
+G4WT4 > Received Particles: 76324
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76369
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76342
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76276
+G4WT4 > EndOfEventAction
+G4WT10 > Received Particles: 76440
+G4WT4 > Received Particles: 76499
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76366
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76381
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76456
+G4WT10 > Received Particles: 76493
+G4WT4 > EndOfEventAction
+G4WT4 > Received Particles: 76509
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76308
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76584
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76529
+G4WT10 > Received Particles: 76435
+G4WT4 > EndOfEventAction
+G4WT4 > Received Particles: 76410
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76163
+G4WT11 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT11 > Received Particles: 76273
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76290
+G4WT10 > Received Particles: 76290
+G4WT4 > EndOfEventAction
+G4WT4 > Received Particles: 76455
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76484
+G4WT11 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT11 > Received Particles: 76404
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76394
+G4WT10 > Received Particles: 76127
+G4WT4 > EndOfEventAction
+G4WT4 > Received Particles: 76260
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76368
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76309
+G4WT11 > Received Particles: 76516
+G4WT10 > Received Particles: 76525
+G4WT4 > EndOfEventAction
+G4WT4 > Received Particles: 76442
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76433
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76458
+G4WT11 > Received Particles: 76245
+G4WT10 > Received Particles: 76378
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76276
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76357
+G4WT11 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT11 > Received Particles: 76473
+G4WT10 > Received Particles: 76534
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76430
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76496
+G4WT11 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT11 > Received Particles: 76436
+G4WT10 > Received Particles: 76095
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76464
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76304
+G4WT10 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76481
+G4WT11 > Received Particles: 76358
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76380
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76402
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76555
+G4WT11 > Received Particles: 76308
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76534
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT0 > Received Particles: 76418
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76449
+G4WT11 > Received Particles: 76297
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76613
+G4WT0 > EndOfEventAction
+G4WT10 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76348
+G4WT10 > Received Particles: 76474
+G4WT11 > Received Particles: 76318
+--------------------------------------------------------
+=> Event 9700 started at 2025-11-13 10:52:20 runStart: 2025-11-13 10:45:46
+   Progress: 97.00% complete. Remaining: 0d 0h 2m 21s
+   ETA: 2025-11-13 10:54:41
+--------------------------------------------------------
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76277
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76558
+G4WT0 > Received Particles: 76235
+G4WT11 > Received Particles: 76601
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76510
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76493
+G4WT0 > Received Particles: 76329
+G4WT11 > Received Particles: 76674
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76416
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT10 > Received Particles: 76200
+G4WT0 > Received Particles: 76201
+G4WT11 > Received Particles: 76437
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76400
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT10 > Received Particles: 76381
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76330
+G4WT11 > Received Particles: 76436
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76300
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT10 > Received Particles: 76408
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76389
+G4WT11 > Received Particles: 76471
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76667
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT10 > Received Particles: 76339
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76430
+G4WT11 > Received Particles: 76565
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76434
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT10 > Received Particles: 76422
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76324
+G4WT11 > Received Particles: 76484
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76331
+G4WT10 > EndOfEventAction
+G4WT0 > EndOfEventAction
+G4WT10 > Received Particles: 76551
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76409
+G4WT11 > Received Particles: 76392
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76485
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76475
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76560
+G4WT11 > Received Particles: 76278
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76389
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76442
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76653
+G4WT11 > Received Particles: 76517
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76292
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76571
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76318
+G4WT11 > Received Particles: 76401
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76642
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76308
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76385
+G4WT11 > Received Particles: 76547
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76659
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76137
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76255
+G4WT11 > Received Particles: 76382
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76359
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76244
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76371
+G4WT11 > Received Particles: 76367
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76364
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76449
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76298
+G4WT11 > Received Particles: 76331
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76369
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76210
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76421
+G4WT11 > Received Particles: 76717
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76399
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76278
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76487
+G4WT11 > Received Particles: 76465
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76348
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76520
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76063
+G4WT11 > Received Particles: 76506
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76539
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76274
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76238
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76392
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76156
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76089
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76389
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76365
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76310
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76466
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76510
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76209
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76541
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76315
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76385
+G4WT11 > Received Particles: 76435
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76359
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76441
+G4WT0 > EndOfEventAction
+G4WT11 > EndOfEventAction
+G4WT0 > Received Particles: 76260
+G4WT11 > Received Particles: 76286
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76354
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76494
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76486
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76320
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76527
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76322
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76381
+G4WT11 > EndOfEventAction
+--------------------------------------------------------
+=> Event 9800 started at 2025-11-13 10:52:26 runStart: 2025-11-13 10:45:46
+   Progress: 98.00% complete. Remaining: 0d 0h 1m 32s
+   ETA: 2025-11-13 10:53:58
+--------------------------------------------------------
+G4WT11 > Received Particles: 76396
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76467
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76299
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76153
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76434
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76570
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76528
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76472
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76339
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76204
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76045
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76529
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76536
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76437
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76295
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76234
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76261
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76321
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76181
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76424
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76203
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76357
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76490
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76232
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76412
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76509
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76559
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76308
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76616
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76507
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76471
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76231
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76371
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76598
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76231
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76301
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76414
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76361
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76570
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76433
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76350
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76573
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76369
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76499
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76503
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76276
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76386
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76420
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76532
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76408
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76428
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76414
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76629
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76408
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76383
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76345
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76357
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76616
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76254
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76120
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76407
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76216
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76363
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76434
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76406
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76567
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76322
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76259
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76666
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76463
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76346
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76450
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76432
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76619
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76394
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76394
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76578
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76738
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76250
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76231
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76320
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76271
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76622
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76299
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76494
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76434
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76257
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76415
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76478
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76514
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76151
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76501
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76389
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76666
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76433
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76396
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76397
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76424
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76325
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76406
+--------------------------------------------------------
+=> Event 9900 started at 2025-11-13 10:52:33 runStart: 2025-11-13 10:45:46
+   Progress: 99.00% complete. Remaining: 0d 0h 0m 45s
+   ETA: 2025-11-13 10:53:18
+--------------------------------------------------------
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76480
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76248
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76387
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76409
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76470
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76453
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76261
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76381
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76307
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76395
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76385
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76369
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76337
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76320
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76560
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76182
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76378
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76481
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76142
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76474
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76378
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76417
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76233
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76552
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76391
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76245
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76279
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76352
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76388
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76487
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76225
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76485
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76139
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76406
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76459
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76249
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76234
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76466
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76203
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76517
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76306
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76308
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76308
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76485
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76430
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76149
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76279
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76340
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76340
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76061
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76407
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76390
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76690
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76346
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76412
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76515
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76485
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76409
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76423
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76236
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76562
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76412
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76695
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76352
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76237
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76498
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76585
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76390
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76094
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76289
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76466
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76363
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76572
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76517
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76339
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76412
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76297
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76398
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76559
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76628
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76559
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76256
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76138
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76257
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76476
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76450
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76439
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76389
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76314
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76505
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76247
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76521
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76190
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76385
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76541
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76482
+G4WT11 > EndOfEventAction
+G4WT11 > Received Particles: 76462
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76257
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76525
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76300
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76590
+--------------------------------------------------------
+=> Event 10000 started at 2025-11-13 10:52:39 runStart: 2025-11-13 10:45:46
+   Progress: 100.00% complete. Remaining: 0d 0h 0m 0s
+   ETA: 2025-11-13 10:52:39
+--------------------------------------------------------
+G4WT10 > EndOfEventAction
+G4WT10 > Received Particles: 76672
+G4WT0 > EndOfEventAction
+G4WT0 > Received Particles: 76420
+G4WT2 > EndOfEventAction
+G4WT2 > Received Particles: 76631
+G4WT2 > end of run action
+G4WT2 > Elapsed time (s): 413
+Elapsed time (formatted): G4WT4 > end of run action
+0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT4 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT11 > end of run action
+G4WT8 > end of run action
+G4WT0 > end of run action
+G4WT0 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT6 > end of run action
+G4WT1 > end of run action
+G4WT5 > end of run action
+G4WT5 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT3 > end of run action
+G4WT3 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() G4WT10 > end of run action
+G4WT10 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+10000=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT6 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT7 > end of run action
+G4WT7 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT1 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT11 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+
+=> total event counter 10000
+G4WT8 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT9 > end of run action
+G4WT9 > Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+G4WT2 > ... write file : runtest_t2.root - done
+G4WT4 > ... write file : runtest_t4.root - done
+G4WT2 > ... close file : runtest_t2.root - done
+G4WT2 > ... delete empty file : runtest_t2.root - done
+G4WT2 > Closing histogram... runtest.root
+G4WT2 > ProcessType 0 : Transportation (not counted)
+G4WT2 > ProcessType 1 : phot
+G4WT2 > ProcessType 2 : compt
+G4WT2 > ProcessType 3 : conv
+G4WT2 > ProcessType 4 : eIoni
+G4WT2 > ProcessType 5 : other
+G4WT4 > ... close file : runtest_t4.root - done
+G4WT4 > ... delete empty file : runtest_t4.root - done
+G4WT5 > ... write file : runtest_t5.root - done
+G4WT4 > Closing histogram... runtest.root
+G4WT4 > ProcessType 0 : Transportation (not counted)
+G4WT4 > ProcessType 1 : phot
+G4WT4 > ProcessType 2 : compt
+G4WT4 > ProcessType 3 : conv
+G4WT4 > ProcessType 4 : eIoni
+G4WT4 > ProcessType 5 : other
+G4WT5 > ... close file : runtest_t5.root - done
+G4WT5 > ... delete empty file : runtest_t5.root - done
+G4WT10 > ... write file : runtest_t10.root - done
+G4WT5 > Closing histogram... runtest.root
+G4WT5 > ProcessType 0 : Transportation (not counted)
+G4WT5 > ProcessType 1 : phot
+G4WT5 > ProcessType 2 : compt
+G4WT5 > ProcessType 3 : conv
+G4WT5 > ProcessType 4 : eIoni
+G4WT5 > ProcessType 5 : other
+G4WT10 > ... close file : runtest_t10.root - done
+G4WT10 > ... delete empty file : runtest_t10.root - done
+G4WT1 > ... write file : runtest_t1.root - done
+G4WT10 > Closing histogram... runtest.root
+G4WT10 > ProcessType 0 : Transportation (not counted)
+G4WT10 > ProcessType 1 : phot
+G4WT10 > ProcessType 2 : compt
+G4WT10 > ProcessType 3 : conv
+G4WT10 > ProcessType 4 : eIoni
+G4WT10 > ProcessType 5 : other
+G4WT1 > ... close file : runtest_t1.root - done
+G4WT1 > ... delete empty file : runtest_t1.root - done
+G4WT3 > ... write file : runtest_t3.root - done
+G4WT1 > Closing histogram... runtest.root
+G4WT1 > ProcessType 0 : Transportation (not counted)
+G4WT1 > ProcessType 1 : phot
+G4WT1 > ProcessType 2 : compt
+G4WT1 > ProcessType 3 : conv
+G4WT1 > ProcessType 4 : eIoni
+G4WT1 > ProcessType 5 : other
+G4WT3 > ... close file : runtest_t3.root - done
+G4WT3 > ... delete empty file : runtest_t3.root - done
+G4WT9 > ... write file : runtest_t9.root - done
+G4WT3 > Closing histogram... runtest.root
+G4WT3 > ProcessType 0 : Transportation (not counted)
+G4WT3 > ProcessType 1 : phot
+G4WT3 > ProcessType 2 : compt
+G4WT3 > ProcessType 3 : conv
+G4WT3 > ProcessType 4 : eIoni
+G4WT3 > ProcessType 5 : other
+G4WT9 > ... close file : runtest_t9.root - done
+G4WT9 > ... delete empty file : runtest_t9.root - done
+G4WT6 > ... write file : runtest_t6.root - done
+G4WT9 > Closing histogram... runtest.root
+G4WT9 > ProcessType 0 : Transportation (not counted)
+G4WT9 > ProcessType 1 : phot
+G4WT9 > ProcessType 2 : compt
+G4WT9 > ProcessType 3 : conv
+G4WT9 > ProcessType 4 : eIoni
+G4WT9 > ProcessType 5 : other
+G4WT6 > ... close file : runtest_t6.root - done
+G4WT6 > ... delete empty file : runtest_t6.root - done
+G4WT11 > ... write file : runtest_t11.root - done
+G4WT6 > Closing histogram... runtest.root
+G4WT6 > ProcessType 0 : Transportation (not counted)
+G4WT6 > ProcessType 1 : phot
+G4WT6 > ProcessType 2 : compt
+G4WT6 > ProcessType 3 : conv
+G4WT6 > ProcessType 4 : eIoni
+G4WT6 > ProcessType 5 : other
+G4WT11 > ... close file : runtest_t11.root - done
+G4WT11 > ... delete empty file : runtest_t11.root - done
+G4WT0 > ... write file : runtest_t0.root - done
+G4WT11 > Closing histogram... runtest.root
+G4WT11 > ProcessType 0 : Transportation (not counted)
+G4WT11 > ProcessType 1 : phot
+G4WT11 > ProcessType 2 : compt
+G4WT11 > ProcessType 3 : conv
+G4WT11 > ProcessType 4 : eIoni
+G4WT11 > ProcessType 5 : other
+G4WT8 > ... write file : runtest_t8.root - done
+G4WT0 > ... close file : runtest_t0.root - done
+G4WT0 > ... delete empty file : runtest_t0.root - done
+G4WT0 > Closing histogram... runtest.root
+G4WT0 > ProcessType 0 : Transportation (not counted)
+G4WT0 > ProcessType 1 : phot
+G4WT0 > ProcessType 2 : compt
+G4WT0 > ProcessType 3 : conv
+G4WT0 > ProcessType 4 : eIoni
+G4WT0 > ProcessType 5 : other
+G4WT8 > ... close file : runtest_t8.root - done
+G4WT8 > ... delete empty file : runtest_t8.root - done
+G4WT7 > ... write file : runtest_t7.root - done
+G4WT8 > Closing histogram... runtest.root
+G4WT8 > ProcessType 0 : Transportation (not counted)
+G4WT8 > ProcessType 1 : phot
+G4WT8 > ProcessType 2 : compt
+G4WT8 > ProcessType 3 : conv
+G4WT8 > ProcessType 4 : eIoni
+G4WT8 > ProcessType 5 : other
+G4WT7 > ... close file : runtest_t7.root - done
+G4WT7 > ... delete empty file : runtest_t7.root - done
+G4WT7 > Closing histogram... runtest.root
+G4WT7 > ProcessType 0 : Transportation (not counted)
+G4WT7 > ProcessType 1 : phot
+G4WT7 > ProcessType 2 : compt
+G4WT7 > ProcessType 3 : conv
+G4WT7 > ProcessType 4 : eIoni
+G4WT7 > ProcessType 5 : other
+end of run action
+Elapsed time (s): 413
+Elapsed time (formatted): 0h:6m:53s
+=> GetNumberOfEventsToBeProcessed() 10000
+=> total event counter 10000
+... write file : runtest.root - done
+... close file : runtest.root - done
+Closing histogram... runtest.root
+(base) michele@michele-B850M-Riptide-WiFi:~/Desktop/celeritas_dev/CBCTSim/build/cpu-release$ 

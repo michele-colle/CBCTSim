@@ -18,6 +18,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 using namespace std;
 
@@ -195,51 +196,50 @@ void saveTH2DAsBinary(TH2D *hist, const std::string &filename)
   }
   out.close();
 }
-void plotHitMaps()
+void plotHitMaps(std::string filename)
 {
-  TFile *f(TFile::Open("../runtest0.root"));
+  TFile *f(TFile::Open(filename.c_str()));
 
-  TH2D *airMap = (TH2D *)(f->Get("3"));
   TH2D *primaryMap = (TH2D *)(f->Get("4"));
   TH2D *scatterMap = (TH2D *)(f->Get("5"));
   f->ls();
   gStyle->SetOptStat(0);
 
-  // Calculate average of airMap (excluding under/overflow bins)
-  double sum = 0;
-  int nBins = 0;
-  for (int ix = 1; ix <= airMap->GetNbinsX(); ++ix)
-  {
-    for (int iy = 1; iy <= airMap->GetNbinsY(); ++iy)
-    {
-      double val = airMap->GetBinContent(ix, iy);
-      sum += val;
-      nBins++;
-    }
-  }
-  double avg = (nBins > 0) ? sum / nBins : 0;
+  // // Calculate average of airMap (excluding under/overflow bins)
+  // double sum = 0;
+  // int nBins = 0;
+  // for (int ix = 1; ix <= airMap->GetNbinsX(); ++ix)
+  // {
+  //   for (int iy = 1; iy <= airMap->GetNbinsY(); ++iy)
+  //   {
+  //     double val = airMap->GetBinContent(ix, iy);
+  //     sum += val;
+  //     nBins++;
+  //   }
+  // }
+  // double avg = (nBins > 0) ? sum / nBins : 0;
 
-  // Scale primaryMap and scatterMap
-  for (int ix = 1; ix <= airMap->GetNbinsX(); ++ix)
-  {
-    for (int iy = 1; iy <= airMap->GetNbinsY(); ++iy)
-    {
-      double airVal = airMap->GetBinContent(ix, iy);
-      if (airVal != 0)
-      {
-        double scale = avg / airVal;
-        primaryMap->SetBinContent(ix, iy, primaryMap->GetBinContent(ix, iy) * scale);
-        scatterMap->SetBinContent(ix, iy, scatterMap->GetBinContent(ix, iy) * scale);
-      }
-    }
-  }
+  // // Scale primaryMap and scatterMap
+  // for (int ix = 1; ix <= airMap->GetNbinsX(); ++ix)
+  // {
+  //   for (int iy = 1; iy <= airMap->GetNbinsY(); ++iy)
+  //   {
+  //     double airVal = airMap->GetBinContent(ix, iy);
+  //     if (airVal != 0)
+  //     {
+  //       double scale = avg / airVal;
+  //       primaryMap->SetBinContent(ix, iy, primaryMap->GetBinContent(ix, iy) * scale);
+  //       scatterMap->SetBinContent(ix, iy, scatterMap->GetBinContent(ix, iy) * scale);
+  //     }
+  //   }
+  // }
 
   // Plot airEnergy2D
-  TCanvas *c2D1 = new TCanvas("c2D1", "Air Energy Deposition", 600, 600);
-  c2D1->SetRightMargin(0.15);
-  // c2D1->SetLogz(); // optional
-  airMap->Draw("COLZ");
-  c2D1->Update();
+  // TCanvas *c2D1 = new TCanvas("c2D1", "Air Energy Deposition", 600, 600);
+  // c2D1->SetRightMargin(0.15);
+  // // c2D1->SetLogz(); // optional
+  // airMap->Draw("COLZ");
+  // c2D1->Update();
 
   // Plot primaryEnergy2D
   TCanvas *c2D2 = new TCanvas("c2D2", "Primary Energy Deposition", 600, 600);
@@ -256,18 +256,17 @@ void plotHitMaps()
   scatterMap->Draw("COLZ");
   c2D3->Update();
 
-
+  std::filesystem::path p(filename);
+  std::string baseName = p.stem().string();
     // Save with dimensions in filename
   int nx = primaryMap->GetNbinsX();
   int ny = primaryMap->GetNbinsY();
   std::ostringstream oss1, oss2, oss3;
-  oss1 << "primaryMap float " << nx << "x" << ny << ".raw";
-  oss2 << "scatterMap float " << nx << "x" << ny << ".raw";
-  oss3 << "airMap float " << nx << "x" << ny << ".raw";
+  oss1 << baseName<<" primaryMap double " << nx << "x" << ny << ".raw";
+  oss2 << baseName<<" scatterMap double " << nx << "x" << ny << ".raw";
 
   saveTH2DAsBinary(primaryMap, oss1.str());
   saveTH2DAsBinary(scatterMap, oss2.str());
-  saveTH2DAsBinary(airMap, oss3.str());
 }
 void plotHistoScatterEnergy()
 {
@@ -374,7 +373,11 @@ void StandaloneApplication(int argc, char **argv)
   // eventually, evaluate the application parameters argc, argv
   // ==>> here the ROOT macro is called
   // plotHistoIPEMPrimary();
-  plotHitMaps();
+  plotHitMaps("../air_penelope.root");
+  plotHitMaps("../air_standardEM.root");
+  plotHitMaps("../water_cylinder_penelope.root");
+  plotHitMaps("../water_cylinder_standardEM.root");
+  std::cout << "Finished plotHitMaps" << endl;
 }
 // This is the standard "main" of C++ starting
 // a ROOT application

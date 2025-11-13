@@ -1,0 +1,18 @@
+geant4 standard EM physics 
+CPU amd ryzen 12 core (usandoli tutti)
+  auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 4*cm, 6*cm,0, 360*deg);
+  auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
+  if(par->GetPhantom()=="WaterCylinder") {
+    new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
+  }
+
+nparticle: 100000*10000 = 10^9
+Tempo di esecuzione:
+solo aria 5m:14s
+water cylinder 6m:53s 
+
+
+penelope: libreria di fisica a basse energie che dovrebbe essere piu precisa della em standard
+tutti i parametri sono gli stessi di prima
+solo aria 6m:49s
+water cylinder 9m:55s
