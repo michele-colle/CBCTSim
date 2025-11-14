@@ -212,7 +212,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
   auto par = CBCTParams::Instance();
   auto sourcePos = G4ThreeVector(0, -par->GetDSO(), 0);
-
+  auto detectorPos = G4ThreeVector(0, par->GetDSD()-par->GetDSO(), 0);
   for (const auto &hit : *hitsCollection->GetVector())
   {
 
@@ -227,11 +227,17 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
       // //G4cout<<"photon not detected "<<en<<G4endl;
       continue; // non viene visto
     }
+    auto diff =(posPhoton.y() - detectorPos.y())/mm;
+    if(std::abs(diff)> 0){
+      // //G4cout<<"photon out of detector height "<<posPhoton.y()<<G4endl;
+          G4cout<<"yparticle ydet diff "<<diff<<G4endl;
 
+      continue;
+    }
     G4ThreeVector p = (posPhoton - sourcePos).unit();
     G4double dot = momPhotonDirection.dot(p);
     //G4double E = primaryEnergy;
-    const bool isCollinear = (dot >= 1.0 - DBL_EPSILON);
+    const bool isCollinear = (std::abs(dot) >= 1.0 - DBL_EPSILON);
     //G4double deltaEnergy = E - en;
     // const bool isCollinear = (diffSquared < DBL_EPSILON);
     // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
