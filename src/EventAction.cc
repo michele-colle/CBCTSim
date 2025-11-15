@@ -237,7 +237,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     G4ThreeVector p = (posPhoton - sourcePos).unit();
     G4double dot = momPhotonDirection.dot(p);
     //G4double E = primaryEnergy;
-    const bool isCollinear = (std::abs(dot) >= 1.0 - DBL_EPSILON);
+    const bool isCollinear = (1.0-std::abs(dot) <= DBL_EPSILON);
     //G4double deltaEnergy = E - en;
     // const bool isCollinear = (diffSquared < DBL_EPSILON);
     // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
