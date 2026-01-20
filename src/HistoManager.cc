@@ -61,6 +61,7 @@ void HistoManager::Book()
     "I0",  // 0
     "primary energy",  // 1
     "scatter non collinear energy",  // 2
+    
   };
   const G4int kMaxHisto2 = 3;
   const G4String id2[] = {"3", "4", "5"};
@@ -103,6 +104,15 @@ void HistoManager::Book()
 
   // 3. Explicitly activate this new histogram
   analysisManager->SetH1Activation(processHist, true);
+
+  
+  // Create a histogram with 13 bins, from -0.5 to 12.5.
+  // This ensures that the integer enum values (0, 1, 2...) fall in the center of the bins.
+  G4int angleScatterHist = analysisManager->CreateH1("7", "Scatter angle distribution (degrees)",
+                                                1024, 0, 20.0);
+
+  // 3. Explicitly activate this new histogram
+  analysisManager->SetH1Activation(angleScatterHist, true);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

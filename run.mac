@@ -12,7 +12,7 @@
 
 /analysis/setFileName runtest
 /mysim/setObjectAngle 0 deg
-/gps/number 100000 #10 milioni, circa 8Gb, per saturare lar 2080 12Gb lo devo lanciare con 3 thread
+/gps/number 10000 #10 milioni, circa 8Gb, per saturare lar 2080 12Gb lo devo lanciare con 3 thread
 #celeritas totale particelle: 100 milioni 4 minuti 3 thread-> risultato errato, poche particelle sono finite nell'istogramma
 #celeritas totale particelle: 100 milioni 4.55 minuti 1 thread-> risultato errato, poche particelle sono finite nell'istogramma
 #CPU totale particelle: 100 milioni 24 thread 9 minuti

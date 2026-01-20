@@ -4,7 +4,6 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 
-class MyTrackInfo;  // Forward declaration of your custom TrackInfo
 class DetectorConstruction;
 class EventAction;
 

@@ -1,6 +1,6 @@
 #include <detector.hh>
 #include <G4Gamma.hh>
-//#include <TrackInfo.hh>
+#include <TrackInfo.hh>
 #include <TxtWithHeaderReader.hh>
 #include <CBCTParams.hh>
 #include <EventInfo.hh>
@@ -10,13 +10,12 @@
 SensitiveDetector::SensitiveDetector(G4String name) : G4VSensitiveDetector(name)
 {
   collectionName.insert("MyHitsCollection");
-
 }
 SensitiveDetector::~SensitiveDetector() {}
 
-void SensitiveDetector::Initialize(G4HCofThisEvent* hce)
+void SensitiveDetector::Initialize(G4HCofThisEvent *hce)
 {
-  //Create a new hits collection for this event
+  // Create a new hits collection for this event
   fHitsCollection = new MyHitsCollection(SensitiveDetectorName, collectionName[0]);
   auto name = collectionName[0];
   // Add this collection to the Geant4 Hits Collection of This Event (HCE)
@@ -27,9 +26,9 @@ void SensitiveDetector::Initialize(G4HCofThisEvent* hce)
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 {
-  //G4cout << "SensitiveDetector::ProcessHits called" << G4endl;
+  // G4cout << "SensitiveDetector::ProcessHits called" << G4endl;
 
-    // 1. Get the EVENT-GLOBAL information (the Event ID)
+  // 1. Get the EVENT-GLOBAL information (the Event ID)
   // qua sembrano parlare di come discriminare lo scatter
   // https://www.researchgate.net/post/How-to-stop-particles-tracking-in-GEANT4
   G4Track *track = aStep->GetTrack();
@@ -38,32 +37,29 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   if (track->GetDefinition() != G4Gamma::Definition())
     return false;
 
-    // Create a new hit object
+  // Retrieve our minimal TrackInfo
+  TrackInfo* info = static_cast<TrackInfo*>(track->GetUserInformation());
 
-  // Get the process that defined/limited the current step
-    const G4VProcess* processDefinedStep = 
-        aStep->GetPostStepPoint()->GetProcessDefinedStep();
-  G4String procType = "";
+  G4String procType = "Unknown";
 
-    // Check if the pointer is valid before using it
-    if (processDefinedStep) {
-        procType = processDefinedStep->GetProcessName();
-    } 
-  
-  
-  //if(proc == G4Process::fTransportation)
-    //return false; // primary photon
-  // // Get primary info from the TrackInfo user object
-  // // const G4Event* currentEvent = G4RunManager::GetRunManager()->GetCurrentEvent();
-  // // EventInfo* info = (EventInfo*)(currentEvent->GetUserInformation());
-  // // if (info) {
-  // //   newHit->SetPrimaryEnergy(info->primaryEnergy);
-  // //   newHit->SetPrimaryMomentum(info->primaryMomentum);
-  // // }
-  
-  // // Get hit info from the current step
-   G4StepPoint* preStepPoint = aStep->GetPreStepPoint();
-  MyHit* newHit = new MyHit();
+  if (info) {
+      // 1. PRIMARY: No parent AND the isScattered flag is still false
+      if (track->GetParentID() == 0 && !info->isScattered) {
+          procType = "Primary";
+      }
+      // 2. SCATTERED: No parent (it's the original track) but flag is true
+      else if (track->GetParentID() == 0 && info->isScattered) {
+          procType = "Scatter";
+      }
+      // 3. SECONDARY: Has a parent (Fluorescence, etc.)
+      else if (track->GetParentID() > 0) {
+          procType = "Secondary"; 
+          // Optional: if (info->isFluo) procType = "Fluorescence";
+      }
+  }
+
+  G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
+  MyHit *newHit = new MyHit();
 
   newHit->SetEnergy(preStepPoint->GetKineticEnergy());
   newHit->SetPosition(preStepPoint->GetPosition());
@@ -72,35 +68,6 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 
   // Add the new hit to our collection for this event
   fHitsCollection->insert(newHit);
-    //G4cout << fHitsCollection->GetSize() << G4endl;
-
-  //   G4AnalysisManager *analysis = G4AnalysisManager::Instance();
-  // auto par = CBCTParams::Instance();
-  // auto sourcePos = G4ThreeVector(0, -par->GetDSO(), 0);
-
-  //   G4double en = preStepPoint->GetKineticEnergy();
-  //   G4ThreeVector posPhoton = preStepPoint->GetPosition();
-  //   G4ThreeVector momPhotonDirection = preStepPoint->GetMomentum().unit();
-    
-
-  //   G4ThreeVector p = (posPhoton - sourcePos).unit();
-  //   G4double dot = momPhotonDirection.dot(p);
-  //   //G4double E = primaryEnergy;
-  //   const bool isCollinear = (dot >= 1.0 - DBL_EPSILON);
-  //   //G4double deltaEnergy = E - en;
-
-  //   // primary
-  //   if (isCollinear)
-  //   {
-  //     analysis->FillH1(1, en);
-  //     analysis->FillH2(1, posPhoton.x(), posPhoton.z(), en / keV);
-  //   }
-  //   else // scatter
-  //   {
-  //     analysis->FillH1(2, en);
-  //     analysis->FillH2(2, posPhoton.x(), posPhoton.z(), en / keV);
-  //   }
 
   return true;
-
 }

@@ -44,17 +44,17 @@
 
 PhysicsList::PhysicsList()
 {
-    //G4PhysListFactory factory;
-    //G4VModularPhysicsList* physList=factory.GetReferencePhysList("LIV");
-    //physList->RegisterPhysics(new G4OpticalPhysics);
-    // physList->RegisterPhysics(new G4EmStandardPhysics);
-    // physList->ReplacePhysics(new G4EmLivermorePhysics);
-
-    //RegisterPhysics(new G4EmStandardPhysics());
     RegisterPhysics(new G4EmPenelopePhysics());
-    // RegisterPhysics(new G4EmLivermorePhysics());
-    // RegisterPhysics(new G4OpticalPhysics()); 
+    // --- Configure Atomic De-excitation ---
+    G4EmParameters* param = G4EmParameters::Instance();
     
+    param->SetFluo(true);               // Enable Fluorescence
+    param->SetAuger(true);              // Enable Auger electrons
+    param->SetPixe(false);              // Only needed if you have ions/protons
+    
+    // This is crucial: by default, Geant4 won't produce secondaries 
+    // smaller than your range cut. This force-enables them.
+    param->SetDeexcitationIgnoreCut(true);
 }
 
 PhysicsList::~PhysicsList(){}

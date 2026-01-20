@@ -228,16 +228,24 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
       continue; // non viene visto
     }
     auto diff =(posPhoton.y() - detectorPos.y())/mm;
-    if(std::abs(diff)> 0){
-      // //G4cout<<"photon out of detector height "<<posPhoton.y()<<G4endl;
-          G4cout<<"yparticle ydet diff "<<diff<<G4endl;
+    // if(std::abs(diff)> 0){
+    //   // //G4cout<<"photon out of detector height "<<posPhoton.y()<<G4endl;
+    //     //  G4cout<<"yparticle ydet diff "<<diff<<G4endl;
 
-      continue;
-    }
+    //   continue;
+    // }
     G4ThreeVector p = (posPhoton - sourcePos).unit();
     G4double dot = momPhotonDirection.dot(p);
     //G4double E = primaryEnergy;
-    const bool isCollinear = (1.0-std::abs(dot) <= DBL_EPSILON);
+    bool isCollinear = (1.0-std::abs(dot) <= DBL_EPSILON);
+
+    if (dot > 1.0) dot = 1.0;
+    if (dot < -1.0) dot = -1.0;
+    // 4. Calculate the angle in radians
+    G4double angleRad = std::acos(dot);
+
+    // 5. Convert to degrees using Geant4 units
+    G4double angleDeg = angleRad / CLHEP::degree;
     //G4double deltaEnergy = E - en;
     // const bool isCollinear = (diffSquared < DBL_EPSILON);
     // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
@@ -246,6 +254,14 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     // G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
     // G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
     // G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl;
+
+    auto hitProcess = hit->GetProcess();
+    if (hitProcess != "Primary"){
+      isCollinear = false;
+      if(hitProcess != "Scatter")
+        G4cout<<hitProcess <<G4endl;
+    }
+    else isCollinear = true;
 
     // primary
     if (isCollinear)
@@ -257,6 +273,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     {
       analysis->FillH1(2, en);
       analysis->FillH2(2, posPhoton.x(), posPhoton.z(), en / keV);
+      analysis->FillH1(4, angleDeg);
     }
     if(GetProcessBinIndex(hit->GetProcess())){
       analysis->FillH1(3, GetProcessBinIndex(hit->GetProcess()));

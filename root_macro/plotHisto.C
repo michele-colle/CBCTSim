@@ -376,7 +376,7 @@ void StandaloneApplication(int argc, char **argv)
   //plotHitMaps("../air_penelope.root");
   //plotHitMaps("../air_standardEM.root");
   //plotHitMaps("../water_cylinder_penelope.root");
-  plotHitMaps("../head_phantom_penelope.root");
+  plotHitMaps("../runtest.root");
   std::cout << "Finished plotHitMaps" << endl;
 }
 // This is the standard "main" of C++ starting

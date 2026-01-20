@@ -3,20 +3,17 @@
 
 #include "G4VUserTrackInformation.hh"
 #include "globals.hh"
-#include "G4ThreeVector.hh"
 
-class TrackInfo : public G4VUserTrackInformation 
-{
+class TrackInfo : public G4VUserTrackInformation {
 public:
-    G4ThreeVector primaryMomentum;
-    G4double primaryEnergy;
-    G4int primaryID;
+    TrackInfo() : isScattered(false), isFluo(false) {}
+    virtual ~TrackInfo() {}
 
-    //is called a member initializer list. It initializes the member variables before the constructor body runs.
-    TrackInfo(G4ThreeVector mom, G4double energy, G4int pid)
-        : primaryMomentum(mom), primaryEnergy(energy), primaryID(pid) {}
+    // Minimal bool flags
+    G4bool isScattered; 
+    G4bool isFluo;
 
-    virtual ~TrackInfo() = default;
+    // Necessary for propagation logic
     virtual void Print() const override {}
 };
 
