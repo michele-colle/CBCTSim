@@ -54,8 +54,15 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   newHit->SetPosition(preStepPoint->GetPosition());
   newHit->SetMomentum(preStepPoint->GetMomentum());
 
+  auto processName = track->GetParentID() == 0 ? "Primary" : track->GetCreatorProcess() ? track->GetCreatorProcess()->GetProcessName() : "Transportation_m";
+  if(track->GetParentID() != 0)
+  {
+    auto ciao = 0;
+  }
+  newHit->SetProcessName(processName);
   // Add the new hit to our collection for this event
   fHitsCollection->insert(newHit);
+
   
   return true;
 

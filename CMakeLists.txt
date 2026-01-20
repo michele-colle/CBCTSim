@@ -72,12 +72,14 @@ ExternalProject_Add(ICRPdata
 #
 add_executable(particleGun particleGun.cc ${sources} ${headers})
 add_executable(ICRP110phantoms ICRP110phantoms.cc ${sources} ${headers})
+add_executable(ICRPtoPenelope ICRPtoPenelope.cc ${sources} ${headers})
 if(WITH_CELERITAS)
   celeritas_target_link_libraries(particleGun Celeritas::G4 ${Geant4_LIBRARIES} )
   celeritas_target_link_libraries(ICRP110phantoms Celeritas::G4 ${Geant4_LIBRARIES} )
 else()
   target_link_libraries(particleGun ${Geant4_LIBRARIES} )
   target_link_libraries(ICRP110phantoms ${Geant4_LIBRARIES} )
+  target_link_libraries(ICRPtoPenelope ${Geant4_LIBRARIES} )
 endif()
 
 if(WITH_CELERITAS)

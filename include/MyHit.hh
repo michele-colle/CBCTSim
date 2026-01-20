@@ -33,6 +33,11 @@ public:
   
   void SetMomentum(G4ThreeVector val)    { fMomentum = val; }
   const G4ThreeVector& GetMomentum() const { return fMomentum; }
+  
+  void SetProcessName(G4String val)      { fProcessName = val; }
+  G4String GetProcessName() const        { return fProcessName; }
+
+
 
 private:
   // The data members that will store our information
@@ -41,6 +46,7 @@ private:
   G4double      fEnergy;
   G4ThreeVector fPosition;
   G4ThreeVector fMomentum;
+  G4String     fProcessName;
 };
 
 // This is a special Geant4 template that creates a "vector" of MyHit objects.

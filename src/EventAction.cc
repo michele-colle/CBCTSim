@@ -187,8 +187,15 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     G4ThreeVector p = primaryMomentum;
     G4double E = primaryEnergy;
     G4double diffSquared = (momPhoton / momPhoton.mag() - p / p.mag()).mag();
-    const bool isCollinear = (diffSquared <= DBL_EPSILON);
+    bool isCollinear = (diffSquared <= DBL_EPSILON);
     G4double deltaEnergy = E - en;
+    G4String processName = hit->GetProcessName();
+
+    if(processName!="Primary"){
+      isCollinear = false;
+      G4cout << "*Gamma - Process:  " << processName << G4endl;
+    } 
+
     // const bool isCollinear = (diffSquared < DBL_EPSILON);
     // G4cout<<"mom angle diff "<<diffSquared<<G4endl;
     // G4cout<<"parent id "<<track->GetParentID()<<G4endl;
