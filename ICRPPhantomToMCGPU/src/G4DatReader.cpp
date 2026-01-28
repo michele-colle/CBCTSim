@@ -1,18 +1,9 @@
 #include "G4DatReader.hpp"
-#include <itkDirectory.h>
 #include <fstream>
 #include <algorithm>
 #include <limits>
 
-// Helper for natural sorting (slice1, slice2...)
-bool naturalSort(const std::string& a, const std::string& b) {
-    auto extractNum = [](const std::string& s) {
-        std::string n;
-        for(char c : s) if(std::isdigit(c)) n+=c;
-        return n.empty() ? 0 : std::stoi(n);
-    };
-    return extractNum(a) < extractNum(b);
-}
+
 // --- Helper function to simulate "ls" ---
 void ListDirectory(const std::string& path) {
     auto directory = itk::Directory::New();
@@ -31,60 +22,7 @@ void ListDirectory(const std::string& path) {
     }
     std::cout << "------------------------------------------\n" << std::endl;
 }
-G4DatReader::LabelImageType::Pointer G4DatReader::LoadPhantom(const std::string& basePath, PhantomSex sex) {
-    std::string dataFilePath = basePath + (sex == PhantomSex::Male ? "/MaleData.dat" : "/FemaleData.dat");
-    std::string slicesDir = basePath + "/ICRP110_g4dat" + (sex == PhantomSex::Male ? "/AM/" : "/AF/");
 
-    //ListDirectory(basePath);
-    // 1. Parse Metadata Header
-    std::ifstream master(dataFilePath);
-    if (!master.is_open()) {
-        std::cerr << "ERROR: Could not open master file: " << dataFilePath << std::endl;
-        return nullptr;
-    }
-    Metadata meta;
-    master >> meta.nz >> meta.nx >> meta.ny >> meta.dx >> meta.dy >> meta.dz >> meta.numMaterials;
-
-    // 2. Initialize ITK Image
-    auto image = LabelImageType::New();
-    LabelImageType::RegionType region;
-    LabelImageType::SizeType size = {{ (size_t)meta.nx, (size_t)meta.ny, (size_t)meta.nz }};
-    region.SetSize(size);
-    image->SetRegions(region);
-    image->Allocate();
-    
-    double spacing[3] = {meta.dx, meta.dy, meta.dz};
-    image->SetSpacing(spacing);
-
-    // 3. Find and sort .g4dat files
-    auto itkDir = itk::Directory::New();
-    itkDir->Load(slicesDir.c_str());
-    std::vector<std::string> sliceFiles;
-    for(size_t i=0; i<itkDir->GetNumberOfFiles(); ++i) {
-        std::string f = itkDir->GetFile(i);
-        if(f.find(".g4dat") != std::string::npos) sliceFiles.push_back(slicesDir + f);
-    }
-    std::sort(sliceFiles.begin(), sliceFiles.end(), naturalSort);
-
-    // 4. Load Voxel Data
-    std::cout << "Loading " << sliceFiles.size() << " slices into 3D volume..." << std::endl;
-    for (int z = 0; z < meta.nz; ++z) {
-        std::ifstream sliceFile(sliceFiles[z]);
-        int junkX, junkY, junkExtra;
-        sliceFile >> junkX >> junkY >> junkExtra; // Skip slice header
-
-        for (int y = 0; y < meta.ny; ++y) {
-            for (int x = 0; x < meta.nx; ++x) {
-                int orgID;
-                sliceFile >> orgID;
-                LabelImageType::IndexType idx = {{x, y, z}};
-                image->SetPixel(idx, static_cast<unsigned short>(orgID));
-            }
-        }
-    }
-
-    return image;
-}
 
 int G4DatReader::MapOrganToMaterial(int OrgID){
 
@@ -364,4 +302,21 @@ int G4DatReader::MapOrganToMaterial(int OrgID){
     mateID_out = OrgID;
     }
     return mateID_out;
+}
+
+float G4DatReader::MapMaterialToHU(int materialID) {
+    // This function maps material IDs to Hounsfield Units (HU) based on ICRP110 definitions
+    switch (materialID) {
+        case 0: return -1000.0f; // Air
+        case 1: return -950.0f;  // Lung
+        case 2: return 30.0f;    // Soft Tissue
+        case 3: return 40.0f;    // Adipose Tissue
+        case 4: return 100.0f;   // Muscle
+        case 5: return 200.0f;   // Cartilage
+        case 6: return 300.0f;   // Spongiosa Bone
+        case 7: return 400.0f;   // Cortical Bone
+        case 8: return 500.0f;   // Teeth
+        // Add more mappings as needed...
+        default: return 0.0f;    // Default for unknown materials
+    }
 }

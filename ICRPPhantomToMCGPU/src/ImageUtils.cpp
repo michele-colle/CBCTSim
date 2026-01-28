@@ -1,5 +1,8 @@
 #include "ImageUtils.hpp"
 #include <iomanip> // For std::setprecision
+#include <itkResampleImageFilter.h>
+#include <itkLinearInterpolateImageFunction.h>
+#include <itkNearestNeighborInterpolateImageFunction.h>
 // Function to get the cropping region from a binary mask
 G4DatReader::LabelImageType::RegionType ImageUtils::GetRegionFromMask(G4DatReader::LabelImageType::Pointer mask) {
     using IteratorType = itk::ImageRegionConstIterator<G4DatReader::LabelImageType>;
@@ -95,3 +98,5 @@ infoFile.close();
 
 std::cout << "MCGPU info file generated: " << filename << ".info" << std::endl;
 }
+
+

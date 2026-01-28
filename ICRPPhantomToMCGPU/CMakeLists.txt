@@ -53,5 +53,5 @@ add_executable(raw_converter src/raw_converter.cpp)
 target_link_libraries(raw_converter ConverterLogic)
 
 # EXE 2: preprocessor (HU Map + Resample + Padding)
-add_executable(preprocessor src/main.cpp)
+add_executable(preprocessor src/dicom_fitter.cpp)
 target_link_libraries(preprocessor ConverterLogic)
