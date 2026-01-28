@@ -293,8 +293,8 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
     }
   }
 
-  for (auto &x : fY)
-    G4cout << x << G4endl;
+  // for (auto &x : fY)
+  //   G4cout << x << G4endl;
 
   // tabulated function
   // Y is assumed positive, linear per segment, continuous
@@ -330,7 +330,7 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
 
   // codice duplicato ma vabe, c'e' di peggio nella vita
   TxtWithHeaderReader reader;
-  std::cout << "Loading scintillator detector efficiency for material: " << par->GetDetectorMaterial() + ".txt" << std::endl;
+  G4cout << "Loading scintillator detector efficiency for material: " << par->GetDetectorMaterial() + ".txt" << std::endl;
   if (reader.loadFromFile(par->GetDetectorMaterial() + ".txt"))
   {
     scintillatorDetectorEfficiency = new G4PhysicsOrderedFreeVector();
@@ -339,7 +339,7 @@ void PrimaryGeneratorAction2::CreateSourceSpectrumWithFilters()
     for (size_t i = 0; i < enflt.size(); ++i)
     {
       scintillatorDetectorEfficiency->InsertValues(enflt[i] * keV, 1 - exp(-par->GetDetectorThickness() * att[i] / cm));
-      std::cout << enflt[i] << " " << 1 - exp(-par->GetDetectorThickness() * att[i] / cm) << std::endl;
+      //G4cout << "scintillatorDetectorEfficiency"<< enflt[i] << " " << 1 - exp(-par->GetDetectorThickness() * att[i] / cm) << std::endl;
     }
   }
   else

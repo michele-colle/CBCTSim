@@ -106,14 +106,14 @@ void plotHistoNIST()
   std::vector<std::vector<double>> data = readColumnWiseData(filename);
 
   // Print to verify
-  for (size_t row = 0; row < data[0].size(); ++row)
-  {
-    for (size_t col = 0; col < data.size(); ++col)
-    {
-      std::cout << data[col][row] << " ";
-    }
-    std::cout << endl;
-  }
+  // for (size_t row = 0; row < data[0].size(); ++row)
+  // {
+  //   for (size_t col = 0; col < data.size(); ++col)
+  //   {
+  //     std::cout << data[col][row] << " ";
+  //   }
+  //   std::cout << endl;
+  // }
   for (double &val : data[0])
   {
     val *= 1e3; // MeV->keV
@@ -190,20 +190,47 @@ void saveTH2DAsBinary(TH2D *hist, const std::string &filename)
   {
     for (int ix = 1; ix <= nx; ++ix)
     {
-      double val = hist->GetBinContent(ix, iy);
-      out.write(reinterpret_cast<const char *>(&val), sizeof(double));
+      float val = (float)(hist->GetBinContent(ix, iy));
+      out.write(reinterpret_cast<const char *>(&val), sizeof(float));
     }
   }
   out.close();
 }
-void plotHitMaps(std::string filename)
+void plotHitMaps(std::string filename,double scale)
 {
   TFile *f(TFile::Open(filename.c_str()));
 
   TH2D *primaryMap = (TH2D *)(f->Get("4"));
   TH2D *scatterMap = (TH2D *)(f->Get("5"));
-  f->ls();
+  primaryMap->Scale(scale);
+  scatterMap->Scale(scale);
+  // 1. Create a copy of the primary map to store the result
+  TH2D *totalMap = (TH2D*)primaryMap->Clone("totalMap");
+  totalMap->SetTitle("Total Image (Primary + Scatter)");
+
+  // 2. Add the scatter map to it
+  // The '1.0' is a weight factor (Result = primary + 1.0 * scatter)
+  totalMap->Add(scatterMap, 1.0);
+  //f->ls();
   gStyle->SetOptStat(0);
+
+  std::filesystem::path p(filename);
+  std::string baseName = p.stem().string();
+    // Save with dimensions in filename
+  int nx = primaryMap->GetNbinsX();
+  int ny = primaryMap->GetNbinsY();
+  std::ostringstream oss1, oss2, oss3;
+  oss1 << baseName<<" primaryMap float " << nx << "x" << ny << ".raw";
+  oss2 << baseName<<" scatterMap float " << nx << "x" << ny << ".raw";
+  oss3 << baseName<<" totalMap float " << nx << "x" << ny << ".raw";
+
+  saveTH2DAsBinary(primaryMap, oss1.str());
+  saveTH2DAsBinary(scatterMap, oss2.str());
+  saveTH2DAsBinary(totalMap, oss3.str());
+
+  std::cout << "Saved primary map to " << oss1.str() << std::endl;
+  std::cout << "Saved scatter map to " << oss2.str() << std::endl;
+  std::cout << "Saved total map to " << oss3.str() << std::endl;
 
   // // Calculate average of airMap (excluding under/overflow bins)
   // double sum = 0;
@@ -256,17 +283,7 @@ void plotHitMaps(std::string filename)
   scatterMap->Draw("COLZ");
   c2D3->Update();
 
-  std::filesystem::path p(filename);
-  std::string baseName = p.stem().string();
-    // Save with dimensions in filename
-  int nx = primaryMap->GetNbinsX();
-  int ny = primaryMap->GetNbinsY();
-  std::ostringstream oss1, oss2, oss3;
-  oss1 << baseName<<" primaryMap double " << nx << "x" << ny << ".raw";
-  oss2 << baseName<<" scatterMap double " << nx << "x" << ny << ".raw";
 
-  saveTH2DAsBinary(primaryMap, oss1.str());
-  saveTH2DAsBinary(scatterMap, oss2.str());
 }
 void plotHistoScatterEnergy()
 {
@@ -376,7 +393,15 @@ void StandaloneApplication(int argc, char **argv)
   //plotHitMaps("../air_penelope.root");
   //plotHitMaps("../air_standardEM.root");
   //plotHitMaps("../water_cylinder_penelope.root");
-  plotHitMaps("../runtest.root");
+  int nPhotons = 1e9;
+  double detSide_cm = 29.34;
+  double detNPixelSide = 256;
+  double detPixelArea_cm2 = (detSide_cm * detSide_cm) / (detNPixelSide * detNPixelSide);
+  double scale = 1.0 / detPixelArea_cm2 / nPhotons*1000.0;
+  std::cout << "Scale factor: " << scale << std::endl;
+
+
+  plotHitMaps("../../out/runtest.root", scale);
   std::cout << "Finished plotHitMaps" << endl;
 }
 // This is the standard "main" of C++ starting

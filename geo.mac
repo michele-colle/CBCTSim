@@ -28,7 +28,7 @@
 /mysim/setFilter2Material G4_BRASS
 
 # Set filter 1 and filter 2 thicknesses
-/mysim/setFilter1Thickness 1 mm
+/mysim/setFilter1Thickness 1.5 mm
 /mysim/setFilter2Thickness 0.6 mm
 /mysim/setPatienStandPosition 13 cm
 

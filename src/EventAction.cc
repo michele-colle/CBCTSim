@@ -213,6 +213,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
   auto par = CBCTParams::Instance();
   auto sourcePos = G4ThreeVector(0, -par->GetDSO(), 0);
   auto detectorPos = G4ThreeVector(0, par->GetDSD()-par->GetDSO(), 0);
+
   for (const auto &hit : *hitsCollection->GetVector())
   {
 
@@ -222,7 +223,7 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     G4double en = hit->GetEnergy();
     G4ThreeVector posPhoton = hit->GetPosition();
     G4ThreeVector momPhotonDirection = hit->GetMomentum().unit();
-    if (scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(en))
+    if (scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(59.6*keV))
     {
       // //G4cout<<"photon not detected "<<en<<G4endl;
       continue; // non viene visto

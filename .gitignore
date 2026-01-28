@@ -591,3 +591,5 @@ root_macro/cranio7g/runtest1.root
 root_macro/cranio7g/runtest2.root
 root_macro/cranio7g/runtest3.root
 root_macro/cranio7g/runtest4.root
+ICRPPhantomToMCGPU/data/
+ICRPPhantomToMCGPU/output/

@@ -61,7 +61,7 @@ DetectorConstruction::~DetectorConstruction(){}
 void DetectorConstruction::DefineMaterial()
 {
   G4NistManager *nist = G4NistManager::Instance();
-  air = nist->FindOrBuildMaterial("G4_AIR");
+  air = nist->FindOrBuildMaterial("G4_Galactic");
   H2O = nist->FindOrBuildMaterial("G4_WATER");
   tungsteen = nist->FindOrBuildMaterial("G4_W");
 }
@@ -113,16 +113,16 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto rotRecon = new G4RotationMatrix();
   rotRecon->rotateZ(scanAngle);
 
-  auto solidRadiator = new G4Tubs("Radiator",2*cm, 3*cm, 8*cm,0, 360*deg);
-  //auto solidRadiator = new G4Box("Radiator",5*cm, 5*cm/2.0,5*cm);
-  auto logicRadiator = new G4LogicalVolume(solidRadiator, al,"Radiator");
-  //physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
+  // auto solidRadiator = new G4Tubs("Radiator",2*cm, 3*cm, 8*cm,0, 360*deg);
+  // //auto solidRadiator = new G4Box("Radiator",5*cm, 5*cm/2.0,5*cm);
+  // auto logicRadiator = new G4LogicalVolume(solidRadiator, al,"Radiator");
+  // //physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
 
-  auto solidRadiator2 = new G4Tubs("Radiator2",0, 5*cm, 8*cm,0, 360*deg);;
-  auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
-  //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
+  // auto solidRadiator2 = new G4Tubs("Radiator2",0, 5*cm, 8*cm,0, 360*deg);;
+  // auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
+  // //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
 
-  auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 4*cm, 6*cm,0, 360*deg);
+  auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 5*cm, 7.5*cm,0, 360*deg);
   auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
   if(par->GetPhantom()=="WaterCylinder") {
     new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",logicReconCyl,false,0 );

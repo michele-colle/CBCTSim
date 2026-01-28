@@ -156,21 +156,25 @@ std::cout << "Elapsed time (formatted): "
     analysisManager->CloseFile();
     G4cout << "Closing histogram... " << file << G4endl;
 
-    // // copio il file nella cartella root_macro
-    // std::filesystem::path outputPath(file.c_str());
-    // std::filesystem::path parentDir = std::filesystem::current_path().parent_path();
-    // std::filesystem::path targetDir = parentDir / "root_macro";
-    // std::filesystem::path targetPath = targetDir / outputPath.filename();
-    // try
-    // {
-    //   std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
-    //   G4cout << "copied histogram... " << targetPath << G4endl;
-    // }
-    // catch (const std::exception &e)
-    // {
-    //   G4cerr << "Error copying histogram file: " << e.what() << G4endl;
-    //   return;
-    // }
+    // copio il file nella cartella root_macro
+    std::filesystem::path outputPath(file.c_str());
+    std::filesystem::path exeDir = std::filesystem::current_path();
+    std::filesystem::path projectDir = std::filesystem::current_path().parent_path().parent_path();
+    std::filesystem::path outDir = projectDir / "out";
+    std::filesystem::path targetPath = outDir / outputPath.filename();
+    if (!std::filesystem::exists(outDir)) {
+      std::filesystem::create_directories(outDir);
+    }
+    try
+    {
+      std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
+      G4cout << "copied histogram... " << targetPath << G4endl;
+    }
+    catch (const std::exception &e)
+    {
+      G4cerr << "Error copying histogram file: " << e.what() << G4endl;
+      return;
+    }
   }
 
   //stampo l'elenco dei processi usati

@@ -41,6 +41,7 @@
 #include <G4GammaConversion.hh>
 #include <G4RayleighScattering.hh>
 #include <G4ProcessManager.hh>
+#include <G4SystemOfUnits.hh>
 
 PhysicsList::PhysicsList()
 {
@@ -48,13 +49,15 @@ PhysicsList::PhysicsList()
     // --- Configure Atomic De-excitation ---
     G4EmParameters* param = G4EmParameters::Instance();
     
-    param->SetFluo(true);               // Enable Fluorescence
-    param->SetAuger(true);              // Enable Auger electrons
+    param->SetFluo(false);               // Enable Fluorescence
+    param->SetAuger(false);              // Enable Auger electrons
     param->SetPixe(false);              // Only needed if you have ions/protons
     
     // This is crucial: by default, Geant4 won't produce secondaries 
     // smaller than your range cut. This force-enables them.
     param->SetDeexcitationIgnoreCut(true);
+    //G4cout<<param->MinKinEnergy()/eV<<G4endl;
+    param->SetMinEnergy(5000*eV);        // Set minimum energy for de-excitation
 }
 
 PhysicsList::~PhysicsList(){}
