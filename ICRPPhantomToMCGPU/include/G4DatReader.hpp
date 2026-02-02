@@ -9,6 +9,7 @@
 
 class G4DatReader {
     public:
+    
         enum PhantomSex{Male, Female};
         struct Metadata {
             int nx, ny, nz;
@@ -40,6 +41,9 @@ class G4DatReader {
             }
             Metadata meta;
             master >> meta.nz >> meta.nx >> meta.ny >> meta.dx >> meta.dy >> meta.dz >> meta.numMaterials;
+            meta.dx *= 2.0; // Convert from mm to cm
+            meta.dy *= 2.0;
+            meta.dz *= 2.0;
 
             // 2. Initialize ITK Image
             auto image = LabelImageType::New();

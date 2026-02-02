@@ -9,6 +9,7 @@
 #include <itkNearestNeighborInterpolateImageFunction.h>
 class ImageUtils {
 public: 
+
     static G4DatReader::LabelImageType::RegionType GetRegionFromMask(G4DatReader::LabelImageType::Pointer mask);
     static void OrganLabelToMaterialLabelRawFile(G4DatReader::LabelImageType::Pointer image, const std::string& filename);
     // Function to resample an image to a new isotropic resolution
@@ -45,5 +46,10 @@ public:
     resampler->Update();
     return resampler->GetOutput();
     };
+
+    static G4DatReader::LabelImageType::Pointer GetSegmentedLabelsFromFullPhantom(
+        G4DatReader::LabelImageType::Pointer fullPhantom,
+        std::string maskPath);
 };
 #endif
+

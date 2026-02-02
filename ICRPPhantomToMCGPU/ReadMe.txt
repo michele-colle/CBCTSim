@@ -8,8 +8,10 @@ ICRP PHANTOM TO MCGPU PREPROCESSING PIPELINE
 - Use the 'Segment Editor' to define a Volume of Interest (VOI).
 - Recommended: Use the 'Scissors' tool in 3D view to create a 
   bounding box or freeform mask around the target anatomy.
-- Export the segment as a binary Labelmap (.nrrd), ensuring 
+- Export the segment as a binary Labelmap (.nrrd): vai in data -> tasto destro sulla segmentazione -> export to labels
+ensuring 
   'Compression' is turned OFF.
+  -salva in data/ICRP_segmentation_data/<nome>.nrrd
 
 2. C++ PREPROCESSING (RAW_CONVERTER)
 ------------------------------------
@@ -40,3 +42,7 @@ ICRP PHANTOM TO MCGPU PREPROCESSING PIPELINE
 - Apply the resulting transform to the phantom coordinates 
   for final Monte Carlo dose calculation.
 ============================================================
+
+
+nota: ho usato questo per evitare che si creassero gli zone identfier:
+https://stackoverflow.com/questions/4496697/what-are-zone-identifier-files-and-how-do-i-prevent-them-from-being-created

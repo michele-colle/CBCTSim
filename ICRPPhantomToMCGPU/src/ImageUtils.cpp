@@ -3,6 +3,8 @@
 #include <itkResampleImageFilter.h>
 #include <itkLinearInterpolateImageFunction.h>
 #include <itkNearestNeighborInterpolateImageFunction.h>
+#include <itkRegionOfInterestImageFilter.h>
+#include <itkMaskImageFilter.h>
 // Function to get the cropping region from a binary mask
 G4DatReader::LabelImageType::RegionType ImageUtils::GetRegionFromMask(G4DatReader::LabelImageType::Pointer mask) {
     using IteratorType = itk::ImageRegionConstIterator<G4DatReader::LabelImageType>;
@@ -99,4 +101,39 @@ infoFile.close();
 std::cout << "MCGPU info file generated: " << filename << ".info" << std::endl;
 }
 
+G4DatReader::LabelImageType::Pointer ImageUtils::GetSegmentedLabelsFromFullPhantom(
+    G4DatReader::LabelImageType::Pointer fullPhantom,
+    std::string maskPath){
+
+    // 2. Load the VOI mask you exported from Slicer
+    auto maskReader = itk::ImageFileReader<G4DatReader::LabelImageType>::New();
+    maskReader->SetFileName(maskPath);
+    maskReader->Update();
+
+    using MaskFilterType = itk::MaskImageFilter<G4DatReader::LabelImageType, G4DatReader::LabelImageType>;
+    auto maskFilter = MaskFilterType::New();
+
+    maskFilter->SetInput(fullPhantom);      // Input 1: The whole ICRP volume
+    maskFilter->SetMaskImage(maskReader->GetOutput()); // Input 2: Your Slicer VOI
+    maskFilter->SetOutsideValue(0);         // Pixels outside the mask become Air (0)
+    // 3. Find the region and Crop
+    auto voiRegion = ImageUtils::GetRegionFromMask(maskReader->GetOutput());
+
+    auto roiFilter = itk::RegionOfInterestImageFilter<G4DatReader::LabelImageType, G4DatReader::LabelImageType>::New();
+    roiFilter->SetInput(maskFilter->GetOutput());
+    roiFilter->SetRegionOfInterest(voiRegion);
+    roiFilter->Update();
+
+    //resetto l'origine al centro del volumi
+    auto vol = roiFilter->GetOutput();
+    double origin[3];
+    origin[0] = static_cast<double>(voiRegion.GetSize()[0]) * vol->GetSpacing()[0]/2.0;
+    origin[1] = static_cast<double>(voiRegion.GetSize()[1]) * vol->GetSpacing()[1]/2.0;
+    origin[2] = static_cast<double>(voiRegion.GetSize()[2]) * vol->GetSpacing()[2]/2.0;
+    origin[0] = 0;
+    origin[1] = 0;
+    origin[2] = 0;
+    vol->SetOrigin(origin);
+    return vol;
+}
 

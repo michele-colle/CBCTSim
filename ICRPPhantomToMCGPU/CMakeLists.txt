@@ -15,6 +15,9 @@ find_package(ITK REQUIRED COMPONENTS
 )
 include(${ITK_USE_FILE})
 
+find_package(Geant4 REQUIRED)
+include(${Geant4_USE_FILE})
+
 # -----------------------------------------------------------------------------
 # 2. Project Settings
 # -----------------------------------------------------------------------------
@@ -22,17 +25,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Include the 'include' folder so we can use #include "G4DatReader.hpp"
-include_directories(include)
+include_directories(include
+                    ${Geant4_INCLUDE_DIRS})
 
 # -----------------------------------------------------------------------------
 # 3. Shared Library (The logic used by both EXEs)
 # -----------------------------------------------------------------------------
 # This avoids compiling the same code twice for each executable
-add_library(ConverterLogic 
-    src/G4DatReader.cpp 
-    src/ImageUtils.cpp
-)
-target_link_libraries(ConverterLogic ${ITK_LIBRARIES})
+
+# 1. Collect all .cpp files in the src directory
+file(GLOB CONVERTER_SOURCES "src/*.c*")
+
+# 2. Create the library using that list
+add_library(ConverterLogic ${CONVERTER_SOURCES})
+
+# add_library(ConverterLogic 
+#     src/G4DatReader.cpp 
+#     src/ImageUtils.cpp
+# )
+target_link_libraries(ConverterLogic ${ITK_LIBRARIES} ${Geant4_LIBRARIES})
 
 include(ExternalProject)
 ExternalProject_Add(ICRPdata
@@ -49,9 +60,9 @@ ExternalProject_Add(ICRPdata
 # -----------------------------------------------------------------------------
 
 # EXE 1: raw_converter (g4dat -> Organ NRRD)
-add_executable(raw_converter src/raw_converter.cpp)
+add_executable(raw_converter raw_converter.cpp)
 target_link_libraries(raw_converter ConverterLogic)
 
 # EXE 2: preprocessor (HU Map + Resample + Padding)
-add_executable(preprocessor src/dicom_fitter.cpp)
-target_link_libraries(preprocessor ConverterLogic)
+add_executable(dicom_fitter dicom_fitter.cpp)
+target_link_libraries(dicom_fitter ConverterLogic)
