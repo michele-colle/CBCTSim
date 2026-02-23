@@ -109,7 +109,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   //Added tissues for phantom including their tissue ID
   //Teeth -> Tissue ID 1
   d = 2.750 *g/cm3;
-  fTeeth = new G4Material("teeth",d,7);
+  fTeeth = new G4Material("teethm",d,7);
   fTeeth -> AddElement(elH,0.022);
   fTeeth -> AddElement(elC,0.095);
   fTeeth -> AddElement(elN,0.029);
@@ -120,7 +120,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Mineral Bone -> Tissue ID 2
   d = 1.920 *g/cm3;
-  fBone = new G4Material("bone",d,9);
+  fBone = new G4Material("bonem",d,9);
   fBone -> AddElement(elH,0.036);
   fBone -> AddElement(elC,0.159);
   fBone -> AddElement(elN,0.042);
@@ -133,7 +133,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Humeri, upper half, spongiosa -> ID 3
   d = 1.205 *g/cm3;
-  fHumeri_upper = new G4Material("humeri_upper",d,10);
+  fHumeri_upper = new G4Material("humeri_upperm",d,10);
   fHumeri_upper -> AddElement(elH,0.085) ;
   fHumeri_upper -> AddElement(elC,0.288);
   fHumeri_upper -> AddElement(elN,0.026);
@@ -147,7 +147,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Humeri, lower half, spongiosa -> ID 4
   d = 1.108 *g/cm3;
-  fHumeri_lower = new G4Material("humeri_lower",d,9);
+  fHumeri_lower = new G4Material("humeri_lowerm",d,9);
   fHumeri_lower -> AddElement(elH,0.097);
   fHumeri_lower -> AddElement(elC,0.439);
   fHumeri_lower -> AddElement(elN,0.017);
@@ -160,7 +160,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lower arm bones, spongiosa -> ID 5
   d = 1.108 *g/cm3;
-  fArm_lower = new G4Material("arm_lower",d,9);
+  fArm_lower = new G4Material("arm_lowerm",d,9);
   fArm_lower -> AddElement(elH,0.097);
   fArm_lower -> AddElement(elC,0.439);
   fArm_lower -> AddElement(elN,0.017);
@@ -173,7 +173,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Hand Bones, Spongiosa ->ID 6
   d = 1.108 *g/cm3;
-  fHand = new G4Material("hand",d,9);
+  fHand = new G4Material("handm",d,9);
   fHand -> AddElement(elH,0.097);
   fHand -> AddElement(elC,0.439);
   fHand -> AddElement(elN,0.017);
@@ -186,7 +186,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Clavicles, spongiosa -> ID 7
   d = 1.151 *g/cm3;
-  fClavicle = new G4Material("clavicle",d,9);
+  fClavicle = new G4Material("claviclem",d,9);
   fClavicle -> AddElement(elH,0.091);
   fClavicle -> AddElement(elC,0.348);
   fClavicle -> AddElement(elN,0.024);
@@ -199,7 +199,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //cranium, spongiosa -> ID 8
   d = 1.157 *g/cm3;
-  fCranium = new G4Material("cranium",d,10);
+  fCranium = new G4Material("craniumm",d,10);
   fCranium -> AddElement(elH,0.090);
   fCranium -> AddElement(elC,0.335);
   fCranium -> AddElement(elN,0.025);
@@ -213,7 +213,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //femora, upper half, spongiosa -> ID 9
   d = 1.124 *g/cm3;
-  fFemora_upper = new G4Material("femora_upper",d,9);
+  fFemora_upper = new G4Material("femora_upperm",d,9);
   fFemora_upper->AddElement(elH,0.094);
   fFemora_upper->AddElement(elC,0.385);
   fFemora_upper->AddElement(elN,0.022);
@@ -226,7 +226,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //femora, lower half, spongiosa -> ID 10
   d = 1.108 *g/cm3;
-  fFemora_lower = new G4Material("femora_lower",d,9);
+  fFemora_lower = new G4Material("femora_lowerm",d,9);
   fFemora_lower->AddElement(elH,0.097);
   fFemora_lower->AddElement(elC,0.439);
   fFemora_lower->AddElement(elN,0.017);
@@ -239,7 +239,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lower leg bones, spongiosa -> ID 11
   d = 1.108 *g/cm3;
-  fLeg_lower = new G4Material("leg_lower",d,9);
+  fLeg_lower = new G4Material("leg_lowerm",d,9);
   fLeg_lower -> AddElement(elH,0.097);
   fLeg_lower -> AddElement(elC,0.439);
   fLeg_lower -> AddElement(elN,0.017);
@@ -252,7 +252,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Foot bones, spongiosa ->ID 12
   d = 1.108 *g/cm3;
-  fFoot = new G4Material("foot",d,9);
+  fFoot = new G4Material("footm",d,9);
   fFoot -> AddElement(elH,0.097);
   fFoot -> AddElement(elC,0.439);
   fFoot -> AddElement(elN,0.017);
@@ -265,7 +265,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Mandible, spongiosa -> ID 13
   d = 1.228 *g/cm3;
-  fMandible = new G4Material("mandible",d,10);
+  fMandible = new G4Material("mandiblem",d,10);
   fMandible -> AddElement(elH,0.083);
   fMandible -> AddElement(elC,0.266);
   fMandible -> AddElement(elN,0.027);
@@ -279,7 +279,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Pelvis, Spongiosa -> ID 14
   d = 1.123 *g/cm3;
-  fPelvis = new G4Material("pelvis",d,10);
+  fPelvis = new G4Material("pelvism",d,10);
   fPelvis -> AddElement(elH,0.094);
   fPelvis -> AddElement(elC,0.360);
   fPelvis -> AddElement(elN,0.025);
@@ -293,7 +293,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Ribs, spongiosa -> ID 15
   d = 1.165 *g/cm3;
-  fRibs = new G4Material("ribs",d,10);
+  fRibs = new G4Material("ribsm",d,10);
   fRibs -> AddElement(elH,0.089);
   fRibs -> AddElement(elC,0.292);
   fRibs -> AddElement(elN,0.029);
@@ -307,7 +307,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //scapulae, spongiosa -> ID 16
   d = 1.183 *g/cm3;
-  fScapulae = new G4Material("scapulae",d,10);
+  fScapulae = new G4Material("scapulaem",d,10);
   fScapulae -> AddElement(elH,0.087);
   fScapulae -> AddElement(elC,0.309);
   fScapulae -> AddElement(elN,0.026);
@@ -321,7 +321,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Cervical fSpine, spongiosa -> ID 17
   d = 1.050 *g/cm3;
-  fSpine_cervical = new G4Material("spine_cervical",d,11);
+  fSpine_cervical = new G4Material("spine_cervicalm",d,11);
   fSpine_cervical -> AddElement(elH,0.103);
   fSpine_cervical -> AddElement(elC,0.400);
   fSpine_cervical -> AddElement(elN,0.027);
@@ -336,7 +336,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Thoratic spine, spongiosa -> ID 18
   d = 1.074 *g/cm3;
-  fSpine_thoratic = new G4Material("spine_thoratic",d,11);
+  fSpine_thoratic = new G4Material("spine_thoraticm",d,11);
   fSpine_thoratic -> AddElement(elH,0.099);
   fSpine_thoratic -> AddElement(elC,0.376);
   fSpine_thoratic -> AddElement(elN,0.027);
@@ -351,7 +351,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lumbar spine, spongiosa -> ID 19
   d = 1.112 *g/cm3;
-  fSpine_lumbar = new G4Material("spine_lumbar",d,10);
+  fSpine_lumbar = new G4Material("spine_lumbarm",d,10);
   fSpine_lumbar -> AddElement(elH,0.095);
   fSpine_lumbar -> AddElement(elC,0.340);
   fSpine_lumbar -> AddElement(elN,0.028);
@@ -365,7 +365,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //sacrum, spongiosa -> ID 20
   d = 1.031 *g/cm3;
-  fSacrum = new G4Material("sacrum",d,11);
+  fSacrum = new G4Material("sacrumm",d,11);
   fSacrum -> AddElement(elH,0.105);
   fSacrum -> AddElement(elC,0.419);
   fSacrum -> AddElement(elN,0.027);
@@ -380,7 +380,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //sternum, spongiosa -> ID 21
   d = 1.041 *g/cm3;
-  fSternum = new G4Material("sternum",d,11);
+  fSternum = new G4Material("sternumm",d,11);
   fSternum->AddElement(elH,0.104);
   fSternum->AddElement(elC,0.409);
   fSternum->AddElement(elN,0.027);
@@ -395,7 +395,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Humeri and femora, upper halves, medullary cavity -> ID 22
   d = 0.980 *g/cm3;
-  fHf_upper = new G4Material("hf_upper",d,7);
+  fHf_upper = new G4Material("hf_upperm",d,7);
   fHf_upper -> AddElement(elH,0.115);
   fHf_upper -> AddElement(elC,0.636);
   fHf_upper -> AddElement(elN,0.007);
@@ -406,7 +406,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Humeri and femora, lower halves, medullary cavity -> ID 23
   d = 0.980 *g/cm3;
-  fHf_lower = new G4Material("hf_lower",d,7);
+  fHf_lower = new G4Material("hf_lowerm",d,7);
   fHf_lower -> AddElement(elH,0.115);
   fHf_lower -> AddElement(elC,0.636);
   fHf_lower -> AddElement(elN,0.007);
@@ -417,7 +417,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lower arm bones, medullary cavity -> ID 24
   d = 0.980 *g/cm3;
-  fMed_lowerarm = new G4Material("med_lowerarm",d,7);
+  fMed_lowerarm = new G4Material("med_lowerarmm",d,7);
   fMed_lowerarm -> AddElement(elH,0.115);
   fMed_lowerarm -> AddElement(elC,0.636);
   fMed_lowerarm -> AddElement(elN,0.007);
@@ -428,7 +428,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lower leg bones, medullary cavity -> ID 25
   d = 0.980 *g/cm3;
-  fMed_lowerleg = new G4Material("med_lowerleg",d,7);
+  fMed_lowerleg = new G4Material("med_lowerlegm",d,7);
   fMed_lowerleg -> AddElement(elH,0.115);
   fMed_lowerleg -> AddElement(elC,0.636);
   fMed_lowerleg -> AddElement(elN,0.007);
@@ -439,7 +439,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Cartilage -> ID 26
   d = 1.100 *g/cm3;
-  fCartilage = new G4Material("cartilage",d,8);
+  fCartilage = new G4Material("cartilagem",d,8);
   fCartilage -> AddElement(elH,0.096);
   fCartilage -> AddElement(elC,0.099);
   fCartilage -> AddElement(elN,0.022);
@@ -451,7 +451,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Skin -> Id 27
   d = 1.090 *g/cm3;
-  fSkin = new G4Material("skin",d,9);
+  fSkin = new G4Material("skinm",d,9);
   fSkin -> AddElement(elH,0.100);
   fSkin -> AddElement(elC,0.199);
   fSkin -> AddElement(elN,0.042);
@@ -464,7 +464,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Blood -> ID 28
   d = 1.060 *g/cm3;
-  fBlood = new G4Material("blood",d,10);
+  fBlood = new G4Material("bloodm",d,10);
   fBlood -> AddElement(elH,0.102);
   fBlood -> AddElement(elC,0.110);
   fBlood -> AddElement(elN,0.033);
@@ -478,7 +478,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Muscular Tissue -> ID 29
   d = 1.050 *g/cm3;
-  fMuscle = new G4Material("muscle",d,9);
+  fMuscle = new G4Material("musclem",d,9);
   fMuscle -> AddElement(elH,0.102);
   fMuscle -> AddElement(elC,0.142);
   fMuscle -> AddElement(elN,0.034);
@@ -491,7 +491,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Liver -> ID 30
   d = 1.050 *g/cm3;
-  fLiver = new G4Material("liver",d,9);
+  fLiver = new G4Material("liverm",d,9);
   fLiver -> AddElement(elH,0.102);
   fLiver -> AddElement(elC,0.130);
   fLiver -> AddElement(elN,0.031);
@@ -504,7 +504,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Pancreas ->ID 31
   d = 1.050 *g/cm3;
-  fPancreas = new G4Material("pancreas",d,9);
+  fPancreas = new G4Material("pancreasm",d,9);
   fPancreas -> AddElement(elH,0.105);
   fPancreas -> AddElement(elC,0.155);
   fPancreas -> AddElement(elN,0.025);
@@ -517,7 +517,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Brain -> ID 32
   d = 1.050 *g/cm3;
-  fBrain = new G4Material("brain",d,9);
+  fBrain = new G4Material("brainm",d,9);
   fBrain -> AddElement(elH,0.107);
   fBrain -> AddElement(elC,0.143);
   fBrain -> AddElement(elN,0.023);
@@ -530,7 +530,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Heart -> ID 33
   d = 1.050 *g/cm3;
-  fHeart = new G4Material("heart",d,9);
+  fHeart = new G4Material("heartm",d,9);
   fHeart -> AddElement(elH,0.104);
   fHeart -> AddElement(elC,0.138);
   fHeart -> AddElement(elN,0.029);
@@ -543,7 +543,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Eye ->ID 34
   d = 1.050 *g/cm3;
-  fEye = new G4Material("eye",d,8);
+  fEye = new G4Material("eyem",d,8);
   fEye -> AddElement(elH,0.097);
   fEye -> AddElement(elC,0.181);
   fEye -> AddElement(elN,0.053);
@@ -555,7 +555,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Kidneys -> ID 35
   d = 1.050 *g/cm3;
-  fKidney = new G4Material("kidney",d,10);
+  fKidney = new G4Material("kidneym",d,10);
   fKidney -> AddElement(elH,0.103);
   fKidney -> AddElement(elC,0.124);
   fKidney -> AddElement(elN,0.031);
@@ -569,7 +569,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Stomach ->ID 36
   d = 1.040 *g/cm3;
-  fStomach = new G4Material("stomach",d,9);
+  fStomach = new G4Material("stomachm",d,9);
   fStomach -> AddElement(elH,0.105);
   fStomach -> AddElement(elC,0.114);
   fStomach -> AddElement(elN,0.025);
@@ -582,7 +582,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Small intestine ->ID 37
   d = 1.040 *g/cm3;
-  fIntestine_sml = new G4Material("intestine_sml",d,9);
+  fIntestine_sml = new G4Material("intestine_smlm",d,9);
   fIntestine_sml -> AddElement(elH,0.105);
   fIntestine_sml -> AddElement(elC,0.113);
   fIntestine_sml -> AddElement(elN,0.026);
@@ -595,7 +595,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Large intestine ->ID 38
   d = 1.040 *g/cm3;
-  fIntestine_lrg = new G4Material("intestine_lrg",d,9);
+  fIntestine_lrg = new G4Material("intestine_lrgm",d,9);
   fIntestine_lrg -> AddElement(elH,0.105);
   fIntestine_lrg -> AddElement(elC,0.113);
   fIntestine_lrg -> AddElement(elN,0.026);
@@ -608,7 +608,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Spleen -> ID 39
   d = 1.040 *g/cm3;
-  fSpleen = new G4Material("spleen",d,10);
+  fSpleen = new G4Material("spleenm",d,10);
   fSpleen -> AddElement(elH,0.102);
   fSpleen -> AddElement(elC,0.111);
   fSpleen -> AddElement(elN,0.033);
@@ -622,7 +622,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Thyroid -> ID 40
   d = 1.040 *g/cm3;
-  fThyroid = new G4Material("thyroid",d,10);
+  fThyroid = new G4Material("thyroidm",d,10);
   fThyroid -> AddElement(elH,0.104);
   fThyroid -> AddElement(elC,0.117);
   fThyroid -> AddElement(elN,0.026);
@@ -636,7 +636,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Urinary Bladder -> ID 41
   d = 1.040 *g/cm3;
-  fBladder = new G4Material("bladder",d,9);
+  fBladder = new G4Material("bladderm",d,9);
   fBladder -> AddElement(elH,0.105);
   fBladder -> AddElement(elC,0.096);
   fBladder -> AddElement(elN,0.026);
@@ -649,7 +649,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //  Testes (Defined as ovaries_testes for visualisation purposes) -> ID 42
   d = 1.040 *g/cm3;
-  fOvaries_testes = new G4Material("ovaries_testes",d,9);
+  fOvaries_testes = new G4Material("ovaries_testesm",d,9);
   fOvaries_testes -> AddElement(elH,0.106);
   fOvaries_testes -> AddElement(elC,0.100);
   fOvaries_testes -> AddElement(elN,0.021);
@@ -662,7 +662,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Adrenals -> ID 43
   d = 1.030 *g/cm3;
-  fAdrenals = new G4Material("adrenals",d,9);
+  fAdrenals = new G4Material("adrenalsm",d,9);
   fAdrenals -> AddElement(elH,0.104);
   fAdrenals -> AddElement(elC,0.221);
   fAdrenals -> AddElement(elN,0.028);
@@ -675,7 +675,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Oesophagus -> ID 44
   d = 1.030 *g/cm3;
-  fOesophagus = new G4Material("oesophagus",d,9);
+  fOesophagus = new G4Material("oesophagusm",d,9);
   fOesophagus -> AddElement(elH,0.104);
   fOesophagus -> AddElement(elC,0.213);
   fOesophagus -> AddElement(elN,0.029);
@@ -688,7 +688,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Miscillaneous (Gallbladder, Trachea, Thymus, Tonsils, Ureters, ...) -> ID 45
   d = 1.030 *g/cm3;
-  fMisc = new G4Material("misc",d,9);
+  fMisc = new G4Material("miscm",d,9);
   fMisc -> AddElement(elH,0.104);
   fMisc -> AddElement(elC,0.231);
   fMisc -> AddElement(elN,0.028);
@@ -701,7 +701,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Prostate (Defined as Uterus_Prostate for visualisation purposes) -> ID 46
   d = 1.030 *g/cm3;
-  fUterus_prostate = new G4Material("uterus_prostate",d,9);
+  fUterus_prostate = new G4Material("uterus_prostatem",d,9);
   fUterus_prostate -> AddElement(elH,0.104);
   fUterus_prostate -> AddElement(elC,0.231);
   fUterus_prostate -> AddElement(elN,0.028);
@@ -714,7 +714,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lymph -> ID 47
   d = 1.030 *g/cm3;
-  fLymph = new G4Material("lymph",d,7);
+  fLymph = new G4Material("lymphm",d,7);
   fLymph -> AddElement(elH,0.108);
   fLymph -> AddElement(elC,0.042);
   fLymph -> AddElement(elN,0.011);
@@ -725,7 +725,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
 
   //Breast (Mammary Gland)-> ID 48
   d = 1.020 *g/cm3;
-  fBreast_glandular = new G4Material("breast_glandular",d,7);
+  fBreast_glandular = new G4Material("breast_glandularm",d,7);
   fBreast_glandular -> AddElement(elH,0.112);
   fBreast_glandular -> AddElement(elC,0.516);
   fBreast_glandular -> AddElement(elN,0.011);
@@ -736,7 +736,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Adipose tissue (fBreast) -> ID 49
   d = 0.950 *g/cm3;
-  fBreast_adipose = new G4Material("breast_adipose",d,7);
+  fBreast_adipose = new G4Material("breast_adiposem",d,7);
   fBreast_adipose -> AddElement(elH,0.114);
   fBreast_adipose -> AddElement(elC,0.588);
   fBreast_adipose -> AddElement(elN,0.008);
@@ -747,7 +747,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Lung Tissue (Compressed Lung) -> ID 50
   d = 0.382 *g/cm3;
-  fLung = new G4Material("lung",d,9);
+  fLung = new G4Material("lungm",d,9);
   fLung -> AddElement(elH,0.103);
   fLung -> AddElement(elC,0.107);
   fLung -> AddElement(elN,0.032);
@@ -760,7 +760,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Contents of Gastro-intestinal tract -> ID 51
   d = 1.040 *g/cm3;
-  fGastro_content = new G4Material("gastro_content",d,10);
+  fGastro_content = new G4Material("gastro_contentm",d,10);
   fGastro_content -> AddElement(elH,0.100);
   fGastro_content -> AddElement(elC,0.222);
   fGastro_content -> AddElement(elN,0.022);
@@ -774,7 +774,7 @@ void ICRP110PhantomMaterial_Male::DefineMaterials()
   
   //Urine -> ID 52
   d = 1.040 *g/cm3;
-  fUrine = new G4Material("urine",d,7);
+  fUrine = new G4Material("urinem",d,7);
   fUrine -> AddElement(elH,0.107);
   fUrine -> AddElement(elC,0.003);
   fUrine -> AddElement(elN,0.010);

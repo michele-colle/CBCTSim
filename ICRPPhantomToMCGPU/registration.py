@@ -14,6 +14,8 @@ par_map = par_obj.GetDefaultParameterMap('rigid')
 par_map["Registration"] = ["MultiResolutionRegistration"]
 par_map["NumberOfResolutions"] = ["3"]
 par_map["MaximumNumberOfIterations"] = ["500"]
+par_map["FixedImageThreshold"] = ["250"]
+par_map["MovingImageThreshold"] = ["350"]
 
 # INITIALIZATION: This snaps the centers of the volumes together
 par_map["AutomaticTransformInitialization"] = ["true"]

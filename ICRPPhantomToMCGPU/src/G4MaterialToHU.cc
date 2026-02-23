@@ -28,59 +28,114 @@
 #include "G4ParticleGun.hh"
 std::vector<std::string> materialNames = {
   "air",
-  "lung",
   "teeth",
-  "bone",
-  "humeri_upper",
-  "humeri_lower",
-  "arm_lower",
-  "hand",
-  "clavicle",
-  "cranium",
-  "femora_upper",
-  "femora_lower",
-  "leg_lower",
-  "foot",
-  "mandible",
-  "pelvis",
-  "ribs",
-  "scapulae",
-  "spine_cervical",
-  "spine_lumbar",
-  "spine_thoratic",
-  "sacrum",
-  "sternum",
-  "hf_upper",
-  "hf_lower",
-  "med_lowerleg",
-  "med_lowerarm",
-  "cartilage",
-  "skin",
-  "blood",
-  "muscle",
-  "liver",
-  "pancreas",
-  "brain",
-  "heart",
-  "eye",
-  "kidney",
-  "stomach",
-  "intestine_sml",
-  "intestine_lrg",
-  "spleen",
-  "thyroid",
-  "bladder",
-  "ovaries_testes",
-  "adrenals",
-  "oesophagus",
-  "misc",
-  "uterus_prostate",
-  "lymph",
-  "breast_glandular",
-  "breast_adipose",
-  "gastro_content",
-  "urine"};
-
+    "bone",
+    "humeri_upper",
+    "humeri_lower",
+    "arm_lower",
+    "hand",
+    "clavicle",
+    "cranium",
+    "femora_upper",
+    "femora_lower",
+    "leg_lower",
+    "foot",
+    "mandible",
+    "pelvis",
+    "ribs",
+    "scapulae",
+    "spine_cervical",
+    "spine_thoratic",
+    "spine_lumbar",
+    "sacrum",
+    "sternum",
+    "hf_upper",
+    "hf_lower",
+    "med_lowerarm",
+    "med_lowerleg",
+    "cartilage",
+    "skin",
+    "blood",
+    "muscle",
+    "liver",
+    "pancreas",
+    "brain",
+    "heart",
+    "eye",
+    "kidney",
+    "stomach",
+    "intestine_sml",
+    "intestine_lrg",
+    "spleen",
+    "thyroid",
+    "bladder",
+    "ovaries_testes",
+    "adrenals",
+    "oesophagus",
+    "misc",
+    "uterus_prostate",
+    "lymph",
+    "breast_glandular",
+    "breast_adipose",
+    "lung",
+    "gastro_content",
+    "urine"};
+std::vector<std::string> materialNamesMale = {
+  "air",
+  "teethm",
+    "bonem",
+    "humeri_upperm",
+    "humeri_lowerm",
+    "arm_lowerm",
+    "handm",
+    "claviclem",
+    "craniumm",
+    "femora_upperm",
+    "femora_lowerm",
+    "leg_lowerm",
+    "footm",
+    "mandiblem",
+    "pelvism",
+    "ribsm",
+    "scapulaem",
+    "spine_cervicalm",
+    "spine_thoraticm",
+    "spine_lumbarm",
+    "sacrumm",
+    "sternumm",
+    "hf_upperm",
+    "hf_lowerm",
+    "med_lowerarmm",
+    "med_lowerlegm",
+    "cartilagem",
+    "skinm",
+    "bloodm",
+    "musclem",
+    "liverm",
+    "pancreasm",
+    "brainm",
+    "heartm",
+    "eyem",
+    "kidneym",
+    "stomachm",
+    "intestine_smlm",
+    "intestine_lrgm",
+    "spleenm",
+    "thyroidm",
+    "bladderm",
+    "ovaries_testesm",
+    "adrenalsm",
+    "oesophagusm",
+    "miscm",
+    "uterus_prostatem",
+    "lymphm",
+    "breast_glandularm",
+    "breast_adiposem",
+    "lungm",
+    "gastro_contentm",
+    "urinem"};
+// Near the top of G4MaterialToHU.cc, after your includes
+bool G4MaterialToHU::initialized = false;
 // 1. MINIMAL GEOMETRY: Just a box of air
 class MiniDetector : public G4VUserDetectorConstruction {
 public:
@@ -111,13 +166,24 @@ public:
 G4MaterialToHU::G4MaterialToHU(G4double energy, G4DatReader::PhantomSex sex) : fEnergy(energy), fSex(sex)
 {
     //1. Setup the bare minimum Geant4 environment
-    G4RunManager* runManager = new G4RunManager();
-    runManager->SetUserInitialization(new MiniDetector());
-    runManager->SetUserInitialization(new FTFP_BERT); // Pre-defined physics
-    runManager->SetUserInitialization(new MiniAction());
+    runManager = G4RunManager::GetRunManager();
+    // 2. If it's NULL, we are the first ones here—build the house!
+    if (!runManager) {
+        runManager = new G4RunManager();
+        std::cout << "Geant4 runManager Initialized." << std::endl;
 
-    runManager->Initialize();
-    runManager->BeamOn(10);
+    }
+    if(!G4MaterialToHU::initialized){
+        G4MaterialToHU::initialized = true;
+
+        runManager->SetUserInitialization(new MiniDetector());
+        runManager->SetUserInitialization(new FTFP_BERT); // Pre-defined physics
+        runManager->SetUserInitialization(new MiniAction());
+
+        runManager->Initialize();
+        runManager->BeamOn(10);
+        std::cout << "Geant4 Environment Initialized for Material to HU conversion." << std::endl;
+    }
     
     G4EmCalculator emCalculator;
     G4NistManager* nist = G4NistManager::Instance();
@@ -135,8 +201,8 @@ G4MaterialToHU::G4MaterialToHU(G4double energy, G4DatReader::PhantomSex sex) : f
 
     G4double muWater = 1.0 / (emCalculator.ComputeGammaAttenuationLength(energy, water)/cm);
     fMaterialToHUMap.resize(materialNames.size(),0.0f);
-    if(sex == G4DatReader::PhantomSex::Male){
-        // Initialize Male Material to HU Map
+    if(sex == G4DatReader::PhantomSex::Female){
+        // Initialize Female Material to HU Map
         auto pFemale = ICRP110PhantomMaterial_Female();
         pFemale.DefineMaterials();
         for(size_t i=0; i<materialNames.size(); ++i){
@@ -152,8 +218,8 @@ G4MaterialToHU::G4MaterialToHU(G4double energy, G4DatReader::PhantomSex sex) : f
         // Initialize Male Material to HU Map
         auto pMale = ICRP110PhantomMaterial_Male();
         pMale.DefineMaterials();
-        for(size_t i=0; i<materialNames.size(); ++i){
-            G4Material* mat = pMale.GetMaterial(materialNames[i]);
+        for(size_t i=0; i<materialNamesMale.size(); ++i){
+            G4Material* mat = pMale.GetMaterial(materialNamesMale[i]);
             if(mat){
                 G4double muMat = 1.0 / (emCalculator.ComputeGammaAttenuationLength(energy, mat)/cm);
                 float hu = static_cast<float>(1000.0 * (muMat - muWater) / muWater);
@@ -161,5 +227,4 @@ G4MaterialToHU::G4MaterialToHU(G4double energy, G4DatReader::PhantomSex sex) : f
             }
         }         
     }
-    
 }
