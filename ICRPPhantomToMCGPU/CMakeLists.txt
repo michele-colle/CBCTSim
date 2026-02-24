@@ -26,6 +26,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Include the 'include' folder so we can use #include "G4DatReader.hpp"
 include_directories(include
+                    MCRP_include
                     ${Geant4_INCLUDE_DIRS})
 
 # -----------------------------------------------------------------------------
@@ -66,3 +67,10 @@ target_link_libraries(raw_converter ConverterLogic)
 # EXE 2: preprocessor (HU Map + Resample + Padding)
 add_executable(dicom_fitter dicom_fitter.cpp)
 target_link_libraries(dicom_fitter ConverterLogic)
+
+# EXE 3: mcrp_to_vox (TET MRCP -> voxelized MCGPU phantom)
+add_executable(mcrp_to_vox
+    mcrp_to_vox.cpp
+    MCRP_src/TETModelImport.cc
+)
+target_link_libraries(mcrp_to_vox ConverterLogic ${Geant4_LIBRARIES})

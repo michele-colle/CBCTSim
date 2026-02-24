@@ -27,23 +27,30 @@
 // \file   MRCP_GEANT4/Internal/src/TETModelImport.cc
 // \author HUREL
 //
+#include <G4String.hh>
 #include <filesystem>
 #include "TETModelImport.hh"
 
-TETModelImport::TETModelImport(G4String phantom, G4UIExecutive* ui)
+TETModelImport::TETModelImport(G4String phantom, G4UIExecutive* ui, G4String phantomPath)
 {
 	// set path for phantom data
-	char* pPATH = getenv("PHANTOM_PATH");
-	if( pPATH == 0 ){
-		// exception for the case when PHANTOM_PATH environment variable was not set
-		G4Exception("TETModelImport::TETModelImport","",JustWarning,
-				G4String("PHANTOM_PATH environment variable was not set.").c_str());
-		phantomDataPath = "../../phantoms";
+	if(phantomPath == nullptr){
+		char* pPATH = getenv("PHANTOM_PATH");
+		if( pPATH == 0 ){
+			// exception for the case when PHANTOM_PATH environment variable was not set
+			G4Exception("TETModelImport::TETModelImport","",JustWarning,
+					G4String("PHANTOM_PATH environment variable was not set.").c_str());
+			phantomDataPath = "../../phantoms";
+		}
+		else {
+			// set path for phantom data as PHANTOM_PATH
+			phantomDataPath = pPATH;
+		}
 	}
 	else {
-		// set path for phantom data as PHANTOM_PATH
-		phantomDataPath = pPATH;
+		phantomDataPath = phantomPath;
 	}
+
 
 	// set phantom name
 	if(phantom == "MRCP-00F") phantomName = "MRCP-00F";

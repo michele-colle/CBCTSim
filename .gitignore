@@ -593,4 +593,6 @@ root_macro/cranio7g/runtest3.root
 root_macro/cranio7g/runtest4.root
 ICRPPhantomToMCGPU/data/
 ICRPPhantomToMCGPU/output/
-ICRPPhantomToMCGPU/MCRP_phantoms/
+ICRPPhantomToMCGPU/phantoms/
+ICRPPhantomToMCGPU/.cache/
+
