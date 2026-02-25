@@ -259,8 +259,8 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     auto hitProcess = hit->GetProcess();
     if (hitProcess != "Primary"){
       isCollinear = false;
-      if(hitProcess != "Scatter")
-        G4cout<<hitProcess <<G4endl;
+      //if(hitProcess != "Scatter")
+        //G4cout<<hitProcess <<G4endl;
     }
     else isCollinear = true;
 
@@ -283,24 +283,6 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     // G4cout<<"actual pos "<<posPhoton<<G4endl;
   }
 
-  //G4cout<<"Received Particles: "<<hitsCollection->GetSize()<<G4endl;
-
-// const G4VProcess *process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
-//       G4String processName = " UserLimit";
-//       if (process)
-//       {
-//         processName = process->GetProcessName();
-//         if(processName!="Transportation"){
-//           G4cout << "*Gamma - Process:  " << processName  <<G4endl;
-//           const bool isCollinear = (diffSquared < DBL_EPSILON);
-//           G4cout<<"mom angle diff "<<diffSquared<<G4endl;
-//           G4cout<<"parent id "<<track->GetParentID()<<G4endl;
-//           G4cout<<"primary id "<<info->primaryID<<G4endl;
-//           G4cout<<"actual id "<<track->GetTrackID() <<G4endl;
-//           G4cout<<"primary momdir "<<p/p.mag()<<G4endl;
-//           G4cout<<"actual momdir "<<momPhoton/momPhoton.mag()<<G4endl<<G4endl<<G4endl;
-//         }
-//       }
 }
 
 
