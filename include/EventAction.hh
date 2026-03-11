@@ -37,7 +37,7 @@ class EventAction : public G4UserEventAction
      // New member variables for rolling average ETA
     static const int ETA_WINDOW = 500; // Window size for rolling average
     std::deque<std::chrono::high_resolution_clock::time_point> fEventTimestamps;
-    G4PhysicsOrderedFreeVector* scintillatorDetectorEfficiency; 
+    G4PhysicsOrderedFreeVector* scintillatorMu;  // mu [G4 units: 1/mm] vs energy
 
 };
 

@@ -69,12 +69,13 @@ EventAction::EventAction(RunAction *runAction)
   CBCTParams *params = CBCTParams::Instance();
   if (reader.loadFromFile(params->GetDetectorMaterial() + ".txt"))
   {
-    scintillatorDetectorEfficiency = new G4PhysicsOrderedFreeVector();
+    scintillatorMu = new G4PhysicsOrderedFreeVector();
     auto enflt = reader.getColumn("keV");
     auto att = reader.getColumn("att");
     for (size_t i = 0; i < enflt.size(); ++i)
     {
-      scintillatorDetectorEfficiency->InsertValues(enflt[i] * keV, 1 - exp(-params->GetDetectorThickness() * att[i] / cm));
+      // Store mu in G4 units [1/mm]: att[i] is in cm^-1, divided by cm (=10mm)
+      scintillatorMu->InsertValues(enflt[i] * keV, att[i] / cm);
     }
   }
 }
@@ -223,10 +224,22 @@ void EventAction::EndOfEventAction(const G4Event *anEvent)
     G4double en = hit->GetEnergy();
     G4ThreeVector posPhoton = hit->GetPosition();
     G4ThreeVector momPhotonDirection = hit->GetMomentum().unit();
-    if (scintillatorDetectorEfficiency && G4UniformRand() > scintillatorDetectorEfficiency->Value(59.6*keV))
+
+    // --- Scintillator depth test (equivalent to MCGPU tally_image) ---
+    // MCGPU samples a random interaction depth: d = -mfp * log(rand)
+    // projected onto the detector normal, and discards if d > thickness.
+    // This is equivalent to: P_detect = 1 - exp(-mu * thickness / cos_theta)
+    // where cos_theta = direction . detector_normal (y-axis here).
+    if (scintillatorMu)
     {
-      // //G4cout<<"photon not detected "<<en<<G4endl;
-      continue; // non viene visto
+      G4double cos_theta = momPhotonDirection.y();
+      // Discard photons nearly parallel to the detector surface (same cut as MCGPU: ~1 deg)
+      if (cos_theta < 0.0175)
+        continue;
+      G4double mu = scintillatorMu->Value(en);
+      G4double P_detect = 1.0 - std::exp(-mu * par->GetDetectorThickness() / cos_theta);
+      if (G4UniformRand() > P_detect)
+        continue;
     }
     auto diff =(posPhoton.y() - detectorPos.y())/mm;
     // if(std::abs(diff)> 0){

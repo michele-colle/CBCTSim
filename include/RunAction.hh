@@ -35,11 +35,12 @@
 #define RunAction_h 1
 
 #include "G4UserRunAction.hh"
+#include "G4AnalysisManager.hh"
 #include "globals.hh"
 #include "G4RunManager.hh"
-#include <chrono> // Include for std::chrono.
-#include <atomic> // Include for std::atomic
-
+#include <chrono>
+#include <atomic>
+#include <filesystem>
 
 class G4Run;
 class HistoManager;
@@ -66,7 +67,15 @@ class RunAction : public G4UserRunAction
 
     
     /// @brief Contatore atomico, serve per fare la stima del tiempo di completamento
-    static std::atomic<long> fEventsProcessed; 
+    static std::atomic<long> fEventsProcessed;
+
+  public:
+    /// Called from PrimaryGeneratorAction to register the GPS photons-per-event value
+    /// (needed to compute total photons = nEvents * nPhotonsPerEvent for normalization)
+    static void SetNPhotonsPerEvent(G4int n) { fNPhotonsPerEvent = n; }
+
+  private:
+    static G4int fNPhotonsPerEvent;
 
 };
 

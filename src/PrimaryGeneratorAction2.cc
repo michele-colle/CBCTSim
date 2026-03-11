@@ -32,6 +32,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "PrimaryGeneratorAction2.hh"
+#include "RunAction.hh"
 #include <CBCTParams.hh>
 
 #include "G4Event.hh"
@@ -153,16 +154,10 @@ PrimaryGeneratorAction2::~PrimaryGeneratorAction2()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void PrimaryGeneratorAction2::GeneratePrimaries(G4Event* anEvent)
 {
-  // This function is called once per event.
+  // Register the GPS photons-per-event for normalization (set by /gps/number).
+  // This is idempotent — all threads store the same value every call.
+  RunAction::SetNPhotonsPerEvent(fParticleSource->GetCurrentSource()->GetNumberOfParticles());
 
-  // The GPS object already knows everything it needs to do:
-  // - How many particles to generate (from SetNumberOfParticles or /gps/number)
-  // - How to sample the energy for each one (from the EneDist settings)
-  // - How to sample the direction for each one (from the AngDist settings)
-  // - How to sample the position for each one (from the PosDist settings)
-  
-  // This single call tells GPS: "Do your thing for this event."
-  // It will internally loop and generate all N particles according to its rules.
   fParticleSource->GeneratePrimaryVertex(anEvent);
   //fParticleGun ->GeneratePrimaryVertex(anEvent);
 }

@@ -74,3 +74,10 @@ add_executable(mcrp_to_vox
     MCRP_src/TETModelImport.cc
 )
 target_link_libraries(mcrp_to_vox ConverterLogic ${Geant4_LIBRARIES})
+
+# EXE 4: mcrp_to_mcgpu_materials (TET MRCP -> Penelope .mat -> MC-GPU .mcgpu)
+add_executable(mcrp_to_mcgpu_materials
+    mcrp_to_mcgpu_materials.cpp
+    MCRP_src/TETModelImport.cc
+)
+target_link_libraries(mcrp_to_mcgpu_materials ConverterLogic ${Geant4_LIBRARIES})

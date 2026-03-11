@@ -61,18 +61,14 @@ DetectorConstruction::~DetectorConstruction(){}
 void DetectorConstruction::DefineMaterial()
 {
   G4NistManager *nist = G4NistManager::Instance();
-  air = nist->FindOrBuildMaterial("G4_Galactic");
+  galactic = nist->FindOrBuildMaterial("G4_Galactic");
+  air = nist->FindOrBuildMaterial("G4_AIR");
   H2O = nist->FindOrBuildMaterial("G4_WATER");
   tungsteen = nist->FindOrBuildMaterial("G4_W");
 }
 
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
-
-
-
-
-
   auto par = CBCTParams::Instance();
   auto dsd = par->GetDSD();
   auto dso = par->GetDSO();
@@ -97,7 +93,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   G4double zWorld = maxz+10*cm;
   
   solidWorld = new G4Box("World", xWorld, yWorld, zWorld);
-  logicWorld = new G4LogicalVolume(solidWorld, air, "World");
+  logicWorld = new G4LogicalVolume(solidWorld, galactic, "World");
   physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicWorld,"World", 0, false, 0,true);
 
 
@@ -105,7 +101,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   G4double reconRadius = dso/dsd* detwidth/2.0; // Radius of the cylinder based on DSO and DSD
   G4double reconHeight = ddo;
   auto solidReconCyl = new G4Tubs("ReconCylinder", 0, std::min(ddo, dso), maxz, 0, 360*deg);
-  auto logicReconCyl = new G4LogicalVolume(solidReconCyl, air, "ReconCylinder");
+  auto logicReconCyl = new G4LogicalVolume(solidReconCyl, galactic, "ReconCylinder");
   logicReconCyl->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 1.0, 0.2)));//cilindro viola
 
   // Rotation matrix for scan angle (around Y axis, for example)
@@ -113,19 +109,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   auto rotRecon = new G4RotationMatrix();
   rotRecon->rotateZ(scanAngle);
 
-  // auto solidRadiator = new G4Tubs("Radiator",2*cm, 3*cm, 8*cm,0, 360*deg);
-  // //auto solidRadiator = new G4Box("Radiator",5*cm, 5*cm/2.0,5*cm);
-  // auto logicRadiator = new G4LogicalVolume(solidRadiator, al,"Radiator");
-  // //physRadiator = new G4PVPlacement(0,G4ThreeVector(4*cm,0.,0), logicRadiator,"Radiator",logicReconCyl,false,0 );
-
-  // auto solidRadiator2 = new G4Tubs("Radiator2",0, 5*cm, 8*cm,0, 360*deg);;
-  // auto logicRadiator2 = new G4LogicalVolume(solidRadiator2, H2O,"Radiator2");
-  // //new G4PVPlacement(0,G4ThreeVector(0*cm,0,0), logicRadiator2,"Radiator2",logicReconCyl,false,0 );
-
-  auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 5*cm, 7.5*cm,0, 360*deg);
-  auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
   if(par->GetPhantom()=="WaterCylinder") {
-    new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",logicReconCyl,false,0 );
+    auto airCubeSolid = new G4Box("Container",15*cm, 15*cm,15*cm);
+    auto airCubeLogic = new G4LogicalVolume(airCubeSolid,air,"ContainterLogic");
+    new G4PVPlacement(0,G4ThreeVector(0,0,0), airCubeLogic,"ContainterPlacement",logicReconCyl,false,0 );
+
+    auto solidRadiator3 = new G4Tubs("Radiator",0*cm, 5*cm, 7.5*cm,0, 360*deg);
+    auto logicRadiator3 = new G4LogicalVolume(solidRadiator3, H2O,"Radiator2");
+    new G4PVPlacement(0,G4ThreeVector(0,0,0), logicRadiator3,"Radiator2",airCubeLogic,false,0 );
   }
   //
 
@@ -155,17 +146,17 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
 
-
+  double det_thickness = par->GetDetectorThickness();
   //rivelatori di fotoni
-  solidDetector = new G4Box("solidDetector", 0.5*par->GetDetWidth(), 0.5*cm, 0.5*par->GetDetHeight());
-  logicDetector = new G4LogicalVolume(solidDetector, air, "logicDetector");
+  solidDetector = new G4Box("solidDetector", 0.5*par->GetDetWidth(), 0.5*det_thickness, 0.5*par->GetDetHeight());
+  logicDetector = new G4LogicalVolume(solidDetector, galactic, "logicDetector");
   logicDetector->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)));//detector blu
   //sposto il detecto di metá della sua profonditá per mantenere la ddo corretta
-  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*cm,0.), logicDetector,"physDetector",logicWorld,false,0 );
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.,ddo+0.5*det_thickness,0.), logicDetector,"physDetector",logicWorld,false,0 );
 
   // creo un marker per la sorgente
   auto sourceMarkerSolid = new G4Cons("GunMarkerCone", 0, 1*cm, 0, 2*cm, 1*cm, 0, 360*deg);
-  auto sourceMarkerLogical = new G4LogicalVolume(sourceMarkerSolid, air, "sourceMarkerLV");
+  auto sourceMarkerLogical = new G4LogicalVolume(sourceMarkerSolid, galactic, "sourceMarkerLV");
   sourceMarkerLogical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
   auto rotMarker = new G4RotationMatrix();
   rotMarker->rotateX(90*deg); // Rotate the marker to point upwards

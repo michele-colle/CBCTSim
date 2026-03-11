@@ -13,6 +13,9 @@ void G4DataToNRRDFullPhantoms(){
     lWriter->SetInput(fem);
     lWriter->Update();
 
+    ImageUtils::LabelsToRawFile(ImageUtils::OrganLabelsToMaterialLabels(fem), "./output/icrp_female_body_material_labels");
+
+
     auto huFem = ImageUtils::CreateHUPhantom(fem, 60.0*keV, G4DatReader::PhantomSex::Female);
     ImageUtils::ImageToRawFile(huFem, "./output/icrp_female_hu_phantom");
 
@@ -20,6 +23,9 @@ void G4DataToNRRDFullPhantoms(){
     lWriter->SetFileName("./output/icrp_male_organs_labels.nrrd");
     lWriter->SetInput(male);
     lWriter->Update();
+
+    ImageUtils::LabelsToRawFile(ImageUtils::OrganLabelsToMaterialLabels(male), "./output/icrp_male_body_material_labels");
+
 
     auto huMale = ImageUtils::CreateHUPhantom(male, 60.0*keV, G4DatReader::PhantomSex::Male);
     ImageUtils::ImageToRawFile(huMale, "./output/icrp_male_hu_phantom");

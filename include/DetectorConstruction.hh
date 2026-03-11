@@ -62,7 +62,7 @@ class DetectorConstruction: public G4VUserDetectorConstruction
     G4Box *solidWorld, *solidDetector;
     G4LogicalVolume *logicWorld;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, *physSourceMarker, *physReconstructionCylinder;
-    G4Material *H2O, *air, *tungsteen;
+    G4Material *H2O, *galactic, *air, *tungsteen;
     void DefineMaterial();
 };
 #endif

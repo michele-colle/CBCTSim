@@ -35,11 +35,16 @@
 #include "HistoManager.hh"
 #include "G4Run.hh"
 #include <filesystem>
+#include <fstream>
+#include <cmath>
+#include <sstream>
 #include <CBCTParams.hh>
 #include <TxtWithHeaderReader.hh>
 #include <PrimaryGeneratorAction2.hh>
 #include "G4AnalysisManager.hh"
 #include "G4UnitsTable.hh"
+#include <TFile.h>
+#include <TH2D.h>
 
 #ifdef WITH_CELERITAS
 #include <CeleritasG4.hh>
@@ -48,6 +53,83 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 std::atomic<long> RunAction::fEventsProcessed;
+G4int RunAction::fNPhotonsPerEvent = 1;
+
+// ---------------------------------------------------------------------------
+// Mirror of plotHisto.C::saveTH2DAsBinary + plotHitMaps
+// Opens the ROOT file that was just written, reads primaryMap (id "4") and
+// scatterMap (id "5"), applies the same normalization used in plotHisto.C:
+//   scale = 1000 / (pixelArea_cm2 * nTotalPhotons)
+// and saves three binary float32 .raw files (primary, scatter, total) in outDir.
+// ---------------------------------------------------------------------------
+static void SaveMapsAsRaw(const std::filesystem::path &rootFilePath,
+                          const std::filesystem::path &outDir,
+                          long nTotalPhotons)
+{
+  auto par = CBCTParams::Instance();
+
+  TFile *f = TFile::Open(rootFilePath.string().c_str(), "READ");
+  if (!f || f->IsZombie())
+  {
+    G4cerr << "SaveMapsAsRaw: cannot open " << rootFilePath << G4endl;
+    return;
+  }
+
+  TH2D *primaryMap = dynamic_cast<TH2D *>(f->Get("4"));
+  TH2D *scatterMap = dynamic_cast<TH2D *>(f->Get("5"));
+  if (!primaryMap || !scatterMap)
+  {
+    G4cerr << "SaveMapsAsRaw: histograms '4'/'5' not found in " << rootFilePath << G4endl;
+    f->Close();
+    return;
+  }
+
+  int nx = primaryMap->GetNbinsX();
+  int ny = primaryMap->GetNbinsY();
+
+  // Normalization: same formula as plotHisto.C::StandaloneApplication
+  double detWidth_cm = par->GetDetWidth() / cm;
+  double detHeight_cm = par->GetDetHeight() / cm;
+  double pixelArea_cm2 = (detWidth_cm * detHeight_cm) / (nx * ny);
+  double scale = 1000.0 / (pixelArea_cm2 * nTotalPhotons);
+  G4cout << "SaveMapsAsRaw: nPhotons=" << nTotalPhotons
+         << " = 10^" << std::log10(static_cast<double>(nTotalPhotons))
+         << "  pixelArea=" << pixelArea_cm2 << " cm2"
+         << "  scale=" << scale << G4endl;
+
+  // Helper: write TH2D as binary float32 with y-axis flipped (same as plotHisto.C)
+  auto writeRaw = [&](const std::string &filename, auto valFn)
+  {
+    std::ofstream out(filename, std::ios::binary);
+    for (int iy = ny; iy > 0; --iy)
+    {
+      for (int ix = 1; ix <= nx; ++ix)
+      {
+        float val = static_cast<float>(valFn(ix, iy) * scale);
+        out.write(reinterpret_cast<const char *>(&val), sizeof(float));
+      }
+    }
+    G4cout << "  saved " << filename << G4endl;
+  };
+
+  // Build output base name from the stem of the ROOT file
+  std::string stem = rootFilePath.stem().string();
+  std::ostringstream dim;
+  dim << " float " << nx << "x" << ny << ".raw";
+  std::string prefix = (outDir / stem).string();
+
+  writeRaw(prefix + " primaryMap" + dim.str(),
+           [&](int ix, int iy)
+           { return primaryMap->GetBinContent(ix, iy); });
+  writeRaw(prefix + " scatterMap" + dim.str(),
+           [&](int ix, int iy)
+           { return scatterMap->GetBinContent(ix, iy); });
+  writeRaw(prefix + " totalMap" + dim.str(),
+           [&](int ix, int iy)
+           { return primaryMap->GetBinContent(ix, iy) + scatterMap->GetBinContent(ix, iy); });
+
+  f->Close();
+}
 
 RunAction::RunAction()
 {
@@ -117,7 +199,7 @@ void RunAction::EndOfRunAction(const G4Run *run)
   //   analysis->FillNtupleDColumn(id, 1, fY[i]);
   //   analysis->AddNtupleRow(id);
   // }
-  //G4cout << "number of particles received: "<<fX.size() << G4endl;
+  // G4cout << "number of particles received: "<<fX.size() << G4endl;
 
   G4cout << "end of run action" << G4endl;
 
@@ -126,23 +208,23 @@ void RunAction::EndOfRunAction(const G4Run *run)
   G4cout << "Elapsed time (s): " << elapsed_time << G4endl;
   // Use ctime to format the seconds, as it's easier
   // Get total hours by dividing by seconds-per-hour (3600)
-long long hours = elapsed_time / 3600;
+  long long hours = elapsed_time / 3600;
 
-// Get the remaining seconds after subtracting the hours
-long long remainder_after_hours = elapsed_time % 3600;
+  // Get the remaining seconds after subtracting the hours
+  long long remainder_after_hours = elapsed_time % 3600;
 
-// Get total minutes from the remainder by dividing by seconds-per-minute (60)
-long long minutes = remainder_after_hours / 60;
+  // Get total minutes from the remainder by dividing by seconds-per-minute (60)
+  long long minutes = remainder_after_hours / 60;
 
-// Get the final remaining seconds
-long long seconds = remainder_after_hours % 60;
+  // Get the final remaining seconds
+  long long seconds = remainder_after_hours % 60;
 
-// Now print the correctly formatted duration
-std::cout << "Elapsed time (formatted): " 
-          << hours << "h:" 
-          << minutes << "m:" 
-          << seconds << "s" 
-          << std::endl;
+  // Now print the correctly formatted duration
+  std::cout << "Elapsed time (formatted): "
+            << hours << "h:"
+            << minutes << "m:"
+            << seconds << "s"
+            << std::endl;
   std::cout << "=> GetNumberOfEventsToBeProcessed() " << G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed() << std::endl;
   std::cout << "=> total event counter " << fEventsProcessed.fetch_add(0, std::memory_order_relaxed) << std::endl;
 
@@ -156,40 +238,47 @@ std::cout << "Elapsed time (formatted): "
     analysisManager->CloseFile();
     G4cout << "Closing histogram... " << file << G4endl;
 
-    // copio il file nella cartella root_macro
-    std::filesystem::path outputPath(file.c_str());
-    std::filesystem::path exeDir = std::filesystem::current_path();
-    std::filesystem::path projectDir = std::filesystem::current_path().parent_path().parent_path();
-    std::filesystem::path outDir = projectDir / "out";
-    std::filesystem::path targetPath = outDir / outputPath.filename();
-    if (!std::filesystem::exists(outDir)) {
-      std::filesystem::create_directories(outDir);
-    }
-    try
+    if (IsMaster())
     {
-      std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
-      G4cout << "copied histogram... " << targetPath << G4endl;
-    }
-    catch (const std::exception &e)
-    {
-      G4cerr << "Error copying histogram file: " << e.what() << G4endl;
-      return;
+      // copio il file nella cartella root_macro
+      std::filesystem::path outputPath(file.c_str());
+      std::filesystem::path exeDir = std::filesystem::current_path();
+      std::filesystem::path projectDir = std::filesystem::current_path().parent_path().parent_path();
+      std::filesystem::path outDir = projectDir / "out";
+      std::filesystem::path targetPath = outDir / outputPath.filename();
+      if (!std::filesystem::exists(outDir))
+      {
+        std::filesystem::create_directories(outDir);
+      }
+      try
+      {
+        std::filesystem::copy_file(outputPath, targetPath, std::filesystem::copy_options::overwrite_existing);
+        G4cout << "copied histogram... " << targetPath << G4endl;
+      }
+      catch (const std::exception &e)
+      {
+        G4cerr << "Error copying histogram file: " << e.what() << G4endl;
+        return;
+      }
+
+      // Save primary, scatter and total maps as float32 binary .raw images.
+      // nPhotons = events processed × photons per event (set by /gps/number).
+      long nEventTest = G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed();
+      long nTotalPhotons = nEventTest * fNPhotonsPerEvent;
+      SaveMapsAsRaw(targetPath, outDir, nTotalPhotons);
     }
   }
 
-  //stampo l'elenco dei processi usati
+  // stampo l'elenco dei processi usati
 
-      // Define the labels in the exact same order as the G4ProcessType enum.
-    const char* processLabels[] = {"Transportation (not counted)", "phot", "compt","conv","eIoni", "other"
-    };
-    int n = 0;
-    for (auto &&i : processLabels)
-    {
-      G4cout << "ProcessType " << n << " : " << i << G4endl;
-      n++;
-    }
-    
-    
+  // Define the labels in the exact same order as the G4ProcessType enum.
+  const char *processLabels[] = {"Transportation (not counted)", "phot", "compt", "conv", "eIoni", "other"};
+  int n = 0;
+  for (auto &&i : processLabels)
+  {
+    G4cout << "ProcessType " << n << " : " << i << G4endl;
+    n++;
+  }
 
 #ifdef WITH_CELERITAS
   celeritas::TrackingManagerIntegration::Instance().EndOfRunAction(run);

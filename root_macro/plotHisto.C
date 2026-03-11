@@ -393,7 +393,7 @@ void StandaloneApplication(int argc, char **argv)
   //plotHitMaps("../air_penelope.root");
   //plotHitMaps("../air_standardEM.root");
   //plotHitMaps("../water_cylinder_penelope.root");
-  int nPhotons = 1e9;
+  int nPhotons = 1e8;
   double detSide_cm = 29.34;
   double detNPixelSide = 256;
   double detPixelArea_cm2 = (detSide_cm * detSide_cm) / (detNPixelSide * detNPixelSide);
@@ -401,7 +401,7 @@ void StandaloneApplication(int argc, char **argv)
   std::cout << "Scale factor: " << scale << std::endl;
 
 
-  plotHitMaps("../../out/runtest.root", scale);
+  plotHitMaps("../water_cyilnder_in_air_120_kV_mfp.root", scale);
   std::cout << "Finished plotHitMaps" << endl;
 }
 // This is the standard "main" of C++ starting

@@ -595,4 +595,5 @@ ICRPPhantomToMCGPU/data/
 ICRPPhantomToMCGPU/output/
 ICRPPhantomToMCGPU/phantoms/
 ICRPPhantomToMCGPU/.cache/
+out/
 

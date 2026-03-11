@@ -1,13 +1,13 @@
 #set the source spectrum
 /mysim/setXRaySourceSpectrum 120K10DW
 /mysim/setDetectorMaterial G4_CESIUM_IODIDE
-/mysim/setDetectorThickness 0.35 mm
+/mysim/setDetectorThickness 0.6 mm
 #
 # Set source-detector distance
-/mysim/setDSD 983 mm
+/mysim/setDSD 987 mm
 
 # Set source to rotation center distance
-/mysim/setDSO 575 mm
+/mysim/setDSO 578 mm
 
 # Set detector width and height
 /mysim/setDetWidth 29.34 cm
@@ -28,7 +28,7 @@
 /mysim/setFilter2Material G4_BRASS
 
 # Set filter 1 and filter 2 thicknesses
-/mysim/setFilter1Thickness 1.5 mm
+/mysim/setFilter1Thickness 1.0 mm
 /mysim/setFilter2Thickness 0.6 mm
 /mysim/setPatienStandPosition 13 cm
 
