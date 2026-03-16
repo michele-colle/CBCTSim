@@ -1,41 +1,132 @@
+#include <algorithm>
 #include <cmath>
 #include <cfloat>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <limits>
 #include <string>
 
 #include "TETModelImport.hh"
 #include "G4DatReader.hpp"
 #include "ImageUtils.hpp"
+#include "MCRPMaterialMap.hpp"
 
 #include "G4SystemOfUnits.hh"
 #include "G4ThreeVector.hh"
 #include "G4Tet.hh"
 #include "G4UIExecutive.hh"
+#include "G4RunManager.hh"
+#include "G4EmCalculator.hh"
+#include "G4NistManager.hh"
+#include "G4VUserDetectorConstruction.hh"
+#include "G4Box.hh"
+#include "G4LogicalVolume.hh"
+#include "G4PVPlacement.hh"
+#include "G4Gamma.hh"
+#include "FTFP_BERT.hh"
+#include "G4VUserActionInitialization.hh"
+#include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4ParticleGun.hh"
 
-int main(int argc, char** argv)
+#include <itkImage.h>
+#include <itkImageRegionConstIterator.h>
+#include <itkImageRegionIterator.h>
+
+// ---------------------------------------------------------------------------
+// Minimal Geant4 environment needed to drive G4EmCalculator
+// (same pattern as G4MaterialToHU)
+// ---------------------------------------------------------------------------
+namespace
+{
+    class MiniDetector : public G4VUserDetectorConstruction
+    {
+    public:
+        G4VPhysicalVolume *Construct() override
+        {
+            G4Material *air = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
+            G4Box *box = new G4Box("World", 1 * m, 1 * m, 1 * m);
+            G4LogicalVolume *lv = new G4LogicalVolume(box, air, "World");
+            return new G4PVPlacement(nullptr, G4ThreeVector(), lv, "World", nullptr, false, 0);
+        }
+    };
+    class MiniGun : public G4VUserPrimaryGeneratorAction
+    {
+    public:
+        void GeneratePrimaries(G4Event *event) override
+        {
+            G4ParticleGun gun(1);
+            gun.SetParticleDefinition(G4Gamma::Definition());
+            gun.GeneratePrimaryVertex(event);
+        }
+    };
+    class MiniAction : public G4VUserActionInitialization
+    {
+    public:
+        void Build() const override { SetUserAction(new MiniGun()); }
+    };
+}
+
+int main(int argc, char **argv)
 {
     // ---------------------------------------------------------------------
     // 1. Parse command line arguments
     // ---------------------------------------------------------------------
-    std::string phantomName = "MRCP-00F";
-    double voxelSize_mm = 0.2;
-    std::string outputBase = "./output/MRCP_00F_vox_";
+    std::string phantomName = "MRCP_AF";
+    double voxelSize_mm = 0.5;
+    std::string outputBase = "./output/MRCP_AF_vox_";
 
-    if (argc > 1) {
+    if (argc > 1)
+    {
         phantomName = argv[1];
         outputBase = "./output/" + phantomName + "_vox_";
     }
-    if (argc > 2) {
+    if (argc > 2)
+    {
         voxelSize_mm = std::stod(argv[2]);
     }
+    double zStart_mm = 1388.0;
+    double zEnd_mm   = -1; // negative = full extent (resolved after bbox is known)
+    double xStart_mm = 52.8;
+    double xEnd_mm   = 445.2;
+    double yStart_mm = 0.8;
+    double yEnd_mm   = 236.4;
+    if (argc > 3) zStart_mm = std::stod(argv[3]);
+    if (argc > 4) zEnd_mm   = std::stod(argv[4]);
+    if (argc > 5) xStart_mm = std::stod(argv[5]);
+    if (argc > 6) xEnd_mm   = std::stod(argv[6]);
+    if (argc > 7) yStart_mm = std::stod(argv[7]);
+    if (argc > 8) yEnd_mm   = std::stod(argv[8]);
+
+    // Implant cylinder (axis along Z, perpendicular to slices). All in mm.
+    // Disabled if radius <= 0 (default).
+    double implant_cx_mm     = 217.0;
+    double implant_cy_mm     = 59.0;
+    double implant_cz_mm     = 103.5;
+    double implant_radius_mm = 2.5;  // negative = no implant
+    double implant_height_mm = 22.0;
+    if (argc > 9)  implant_cx_mm     = std::stod(argv[9]);
+    if (argc > 10) implant_cy_mm     = std::stod(argv[10]);
+    if (argc > 11) implant_cz_mm     = std::stod(argv[11]);
+    if (argc > 12) implant_radius_mm = std::stod(argv[12]);
+    if (argc > 13) implant_height_mm = std::stod(argv[13]);
 
     std::cout << "Using phantom: " << phantomName << std::endl;
     std::cout << "Target voxel size: " << voxelSize_mm << " mm" << std::endl;
 
     // ---------------------------------------------------------------------
+    // 1b. Load material map (MRCP IDs → sequential uint8 indices)
+    // ---------------------------------------------------------------------
+    MCRPMaterialMap matMap;
+    {
+        std::string mapDir = "./data/mcgpu_mcrp_materials/" + phantomName;
+        matMap.load(mapDir);
+    }
+
+    // ---------------------------------------------------------------------
     // 2. Load tetrahedral phantom (MRCP) via TETModelImport
     // ---------------------------------------------------------------------
-    G4UIExecutive* ui = nullptr;
+    G4UIExecutive *ui = nullptr;
     TETModelImport tetImport(phantomName, ui, "./phantoms");
 
     G4ThreeVector bbMin = tetImport.GetPhantomBoxMin();
@@ -51,12 +142,45 @@ int main(int argc, char** argv)
     const G4int ny = static_cast<G4int>(std::ceil(lenY / voxelSize));
     const G4int nz = static_cast<G4int>(std::ceil(lenZ / voxelSize));
 
-    std::cout << "Bounding box size [mm]: "
-              << lenX << " x " << lenY << " x " << lenZ << std::endl;
-    std::cout << "Voxel grid size: "
-              << nx << " x " << ny << " x " << nz << std::endl;
+    // Resolve defaults (negative = full extent) and clamp to phantom bounds
+    if (xEnd_mm < 0.0) xEnd_mm = lenX / mm;
+    if (yEnd_mm < 0.0) yEnd_mm = lenY / mm;
+    if (zEnd_mm < 0.0) zEnd_mm = lenZ / mm;
+    if (xStart_mm < 0.0) xStart_mm = 0.0;
+    if (yStart_mm < 0.0) yStart_mm = 0.0;
 
-    if (nx <= 0 || ny <= 0 || nz <= 0) {
+    xStart_mm = std::clamp(xStart_mm, 0.0, lenX / mm);
+    xEnd_mm   = std::clamp(xEnd_mm,   xStart_mm, lenX / mm);
+    yStart_mm = std::clamp(yStart_mm, 0.0, lenY / mm);
+    yEnd_mm   = std::clamp(yEnd_mm,   yStart_mm, lenY / mm);
+    zStart_mm = std::clamp(zStart_mm, 0.0, lenZ / mm);
+    zEnd_mm   = std::clamp(zEnd_mm,   zStart_mm, lenZ / mm);
+
+    const G4int iStart   = static_cast<G4int>(std::floor(xStart_mm / voxelSize_mm));
+    const G4int iEnd     = static_cast<G4int>(std::ceil (xEnd_mm   / voxelSize_mm));
+    const G4int nx_slice = std::max(1, std::min(iEnd, nx) - iStart);
+
+    const G4int jStart   = static_cast<G4int>(std::floor(yStart_mm / voxelSize_mm));
+    const G4int jEnd     = static_cast<G4int>(std::ceil (yEnd_mm   / voxelSize_mm));
+    const G4int ny_slice = std::max(1, std::min(jEnd, ny) - jStart);
+
+    const G4int kStart   = static_cast<G4int>(std::floor(zStart_mm / voxelSize_mm));
+    const G4int kEnd     = static_cast<G4int>(std::ceil (zEnd_mm   / voxelSize_mm));
+    const G4int nz_slice = std::max(1, std::min(kEnd, nz) - kStart);
+
+    std::cout << "Bounding box size [mm]: "
+              << lenX / mm << " x " << lenY / mm << " x " << lenZ / mm << std::endl;
+    std::cout << "Voxel grid size (full): "
+              << nx << " x " << ny << " x " << nz << std::endl;
+    std::cout << "X ROI: " << xStart_mm << " – " << xEnd_mm
+              << " mm  (i " << iStart << " – " << iStart + nx_slice - 1 << ")" << std::endl;
+    std::cout << "Y ROI: " << yStart_mm << " – " << yEnd_mm
+              << " mm  (j " << jStart << " – " << jStart + ny_slice - 1 << ")" << std::endl;
+    std::cout << "Z ROI: " << zStart_mm << " – " << zEnd_mm
+              << " mm  (k " << kStart << " – " << kStart + nz_slice - 1 << ")" << std::endl;
+
+    if (nx <= 0 || ny <= 0 || nz <= 0)
+    {
         std::cerr << "Invalid voxel grid size. Check bounding box or voxel size." << std::endl;
         return 1;
     }
@@ -68,9 +192,9 @@ int main(int argc, char** argv)
 
     LabelImageType::Pointer image = LabelImageType::New();
     LabelImageType::SizeType size;
-    size[0] = static_cast<LabelImageType::SizeType::SizeValueType>(nx);
-    size[1] = static_cast<LabelImageType::SizeType::SizeValueType>(ny);
-    size[2] = static_cast<LabelImageType::SizeType::SizeValueType>(nz);
+    size[0] = static_cast<LabelImageType::SizeType::SizeValueType>(nx_slice);
+    size[1] = static_cast<LabelImageType::SizeType::SizeValueType>(ny_slice);
+    size[2] = static_cast<LabelImageType::SizeType::SizeValueType>(nz_slice);
 
     LabelImageType::RegionType region;
     region.SetSize(size);
@@ -79,10 +203,10 @@ int main(int argc, char** argv)
     image->Allocate();
     image->FillBuffer(0); // default to Air / background
 
-    double spacing[3] = { voxelSize_mm, voxelSize_mm, voxelSize_mm };
+    double spacing[3] = {voxelSize_mm, voxelSize_mm, voxelSize_mm};
     image->SetSpacing(spacing);
 
-    double origin[3] = { 0.0, 0.0, 0.0 };
+    double origin[3] = {iStart * voxelSize_mm, jStart * voxelSize_mm, kStart * voxelSize_mm};
     image->SetOrigin(origin);
 
     image->SetDirection(LabelImageType::DirectionType::GetIdentity());
@@ -93,24 +217,33 @@ int main(int argc, char** argv)
     const G4int numTet = tetImport.GetNumTetrahedron();
     std::cout << "Starting voxelization over " << numTet << " tetrahedra..." << std::endl;
 
-    for (G4int t = 0; t < numTet; ++t) {
-        if (t % 100000 == 0) {
+    for (G4int t = 0; t < numTet; ++t)
+    {
+        if (t % 100000 == 0)
+        {
             std::cout << "Processing tet " << t << " / " << numTet << std::endl;
         }
 
-        G4Tet* tetSolid = tetImport.GetTetrahedron(t);
-        const std::vector<G4ThreeVector>& vertices = tetSolid->GetVertices();
+        G4Tet *tetSolid = tetImport.GetTetrahedron(t);
+        const std::vector<G4ThreeVector> &vertices = tetSolid->GetVertices();
 
         G4double tMinX(DBL_MAX), tMinY(DBL_MAX), tMinZ(DBL_MAX);
         G4double tMaxX(-DBL_MAX), tMaxY(-DBL_MAX), tMaxZ(-DBL_MAX);
 
-        for (const auto& v : vertices) {
-            if (v.x() < tMinX) tMinX = v.x();
-            if (v.x() > tMaxX) tMaxX = v.x();
-            if (v.y() < tMinY) tMinY = v.y();
-            if (v.y() > tMaxY) tMaxY = v.y();
-            if (v.z() < tMinZ) tMinZ = v.z();
-            if (v.z() > tMaxZ) tMaxZ = v.z();
+        for (const auto &v : vertices)
+        {
+            if (v.x() < tMinX)
+                tMinX = v.x();
+            if (v.x() > tMaxX)
+                tMaxX = v.x();
+            if (v.y() < tMinY)
+                tMinY = v.y();
+            if (v.y() > tMaxY)
+                tMaxY = v.y();
+            if (v.z() < tMinZ)
+                tMinZ = v.z();
+            if (v.z() > tMaxZ)
+                tMaxZ = v.z();
         }
 
         // Clamp tet bounding box to global phantom bounds
@@ -130,22 +263,26 @@ int main(int argc, char** argv)
 
         const G4int matID = tetImport.GetMaterialIndex(t);
 
-        for (G4int k = std::max(0, kMin); k <= std::min(kMax, nz - 1); ++k) {
-            for (G4int j = std::max(0, jMin); j <= std::min(jMax, ny - 1); ++j) {
-                for (G4int i = std::max(0, iMin); i <= std::min(iMax, nx - 1); ++i) {
+        for (G4int k = std::max(kStart, kMin); k <= std::min(kMax, kStart + nz_slice - 1); ++k)
+        {
+            for (G4int j = std::max(jStart, jMin); j <= std::min(jMax, jStart + ny_slice - 1); ++j)
+            {
+                for (G4int i = std::max(iStart, iMin); i <= std::min(iMax, iStart + nx_slice - 1); ++i)
+                {
                     const G4double x = bbMin.x() + (i + 0.5) * voxelSize;
                     const G4double y = bbMin.y() + (j + 0.5) * voxelSize;
                     const G4double z = bbMin.z() + (k + 0.5) * voxelSize;
 
                     G4ThreeVector pos(x, y, z);
-                    if (tetSolid->Inside(pos) == kOutside) continue;
+                    if (tetSolid->Inside(pos) == kOutside)
+                        continue;
 
                     LabelImageType::IndexType idx;
-                    idx[0] = static_cast<LabelImageType::IndexType::IndexValueType>(i);
-                    idx[1] = static_cast<LabelImageType::IndexType::IndexValueType>(j);
-                    idx[2] = static_cast<LabelImageType::IndexType::IndexValueType>(k);
+                    idx[0] = static_cast<LabelImageType::IndexType::IndexValueType>(i - iStart);
+                    idx[1] = static_cast<LabelImageType::IndexType::IndexValueType>(j - jStart);
+                    idx[2] = static_cast<LabelImageType::IndexType::IndexValueType>(k - kStart);
 
-                    image->SetPixel(idx, static_cast<unsigned short>(matID));
+                    image->SetPixel(idx, static_cast<unsigned short>(matMap.getSeqIndex(matID)));
                 }
             }
         }
@@ -157,6 +294,245 @@ int main(int argc, char** argv)
     // 5. Save as MCGPU-compatible RAW + .txt using existing helper
     // ---------------------------------------------------------------------
     ImageUtils::LabelsToRawFile(image, outputBase);
+
+    // ---------------------------------------------------------------------
+    // 6. Write MC-GPU [SECTION MATERIAL FILE LIST] sidecar file
+    // ---------------------------------------------------------------------
+    matMap.writeMCGPUSectionFile(outputBase + "_mcgpu_section.txt", phantomName);
+
+    // ---------------------------------------------------------------------
+    // 7. Initialise Geant4 for μ computation (if not already running)
+    // ---------------------------------------------------------------------
+    G4RunManager *runManager = G4RunManager::GetRunManager();
+    if (!runManager)
+    {
+        runManager = new G4RunManager();
+        runManager->SetUserInitialization(new MiniDetector());
+        runManager->SetUserInitialization(new FTFP_BERT());
+        runManager->SetUserInitialization(new MiniAction());
+        runManager->Initialize();
+        runManager->BeamOn(1);
+        std::cout << "Geant4 environment initialised for μ computation." << std::endl;
+    }
+
+    // ---------------------------------------------------------------------
+    // 8. Build μ look-up table  [seq_index] → μ (cm⁻¹) at 60 keV
+    // ---------------------------------------------------------------------
+    const G4double energy60keV = 60.0 * keV;
+    G4EmCalculator emCalc;
+    G4NistManager *nist = G4NistManager::Instance();
+    G4Material *water = nist->FindOrBuildMaterial("G4_WATER");
+    const G4double muWater = 1.0 / (emCalc.ComputeGammaAttenuationLength(energy60keV, water) / cm);
+    std::cout << "μ_water @ 60 keV = " << muWater << " cm^-1" << std::endl;
+
+    const auto &entries = matMap.entries();
+    std::vector<float> muLUT(entries.size(), 0.0f);
+    for (const auto &e : entries)
+    {
+        G4Material *mat = (e.mrcp_id == 0)
+                              ? nist->FindOrBuildMaterial("G4_AIR")
+                              : tetImport.GetMaterial(e.mrcp_id);
+        if (mat)
+        {
+            G4double mu = 1.0 / (emCalc.ComputeGammaAttenuationLength(energy60keV, mat) / cm);
+            muLUT[e.seq_index] = static_cast<float>(mu);
+        }
+        else
+        {
+            std::cerr << "WARNING: no G4Material for MRCP ID " << e.mrcp_id
+                      << " (seq " << e.seq_index << "), μ=0" << std::endl;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // 9. Allocate μ float32 and HU int16 images; fill from label image
+    // ---------------------------------------------------------------------
+    using FloatImageType = itk::Image<float, 3>;
+    using Int16ImageType = itk::Image<int16_t, 3>;
+
+    auto muImage = FloatImageType::New();
+    muImage->SetRegions(image->GetLargestPossibleRegion());
+    muImage->SetSpacing(image->GetSpacing());
+    muImage->SetOrigin(image->GetOrigin());
+    muImage->SetDirection(image->GetDirection());
+    muImage->Allocate();
+
+    auto huImage = Int16ImageType::New();
+    huImage->SetRegions(image->GetLargestPossibleRegion());
+    huImage->SetSpacing(image->GetSpacing());
+    huImage->SetOrigin(image->GetOrigin());
+    huImage->SetDirection(image->GetDirection());
+    huImage->Allocate();
+
+    itk::ImageRegionConstIterator<LabelImageType> itLbl(image, image->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<FloatImageType> itMu(muImage, muImage->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<Int16ImageType> itHU(huImage, huImage->GetLargestPossibleRegion());
+
+    for (itLbl.GoToBegin(), itMu.GoToBegin(), itHU.GoToBegin();
+         !itLbl.IsAtEnd(); ++itLbl, ++itMu, ++itHU)
+    {
+        const unsigned short seqIdx = itLbl.Get();
+        const float mu = (seqIdx < static_cast<unsigned short>(muLUT.size()))
+                             ? muLUT[seqIdx]
+                             : 0.0f;
+        itMu.Set(mu);
+
+        const double huVal = 1000.0 * (static_cast<double>(mu) - muWater) / muWater;
+        const int16_t hu = static_cast<int16_t>(
+            std::clamp(huVal,
+                       static_cast<double>(std::numeric_limits<int16_t>::min()),
+                       static_cast<double>(std::numeric_limits<int16_t>::max())));
+        itHU.Set(hu);
+    }
+
+    std::cout << "μ and HU volumes populated." << std::endl;
+
+    // ---------------------------------------------------------------------
+    // 10. Write μ float32 raw
+    // ---------------------------------------------------------------------
+
+    std::string muPath = outputBase + "mu60keV_" +
+                         std::to_string(nx_slice) + "x" +
+                         std::to_string(ny_slice) + "x" +
+                         std::to_string(nz_slice) + ".raw";
+    std::ofstream muFile(muPath, std::ios::binary);
+    itk::ImageRegionConstIterator<FloatImageType> it(muImage, muImage->GetLargestPossibleRegion());
+    for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+    {
+        float v = it.Get();
+        muFile.write(reinterpret_cast<const char *>(&v), sizeof(float));
+    }
+    muFile.close();
+    std::cout << "μ float32 stack written to: " << muPath << std::endl;
+
+    // ---------------------------------------------------------------------
+    // 11. Write HU int16 raw
+    // ---------------------------------------------------------------------
+
+    std::string huPath = outputBase + "HU60keV_" +
+                         std::to_string(nx_slice) + "x" +
+                         std::to_string(ny_slice) + "x" +
+                         std::to_string(nz_slice) + ".raw";
+    std::ofstream huFile(huPath, std::ios::binary);
+    itk::ImageRegionConstIterator<Int16ImageType> it2(huImage, huImage->GetLargestPossibleRegion());
+    for (it2.GoToBegin(); !it2.IsAtEnd(); ++it2)
+    {
+        int16_t v = it2.Get();
+        huFile.write(reinterpret_cast<const char *>(&v), sizeof(int16_t));
+    }
+    huFile.close();
+    std::cout << "HU int16 stack @ 60 keV written to: " << huPath << std::endl;
+
+    // ---------------------------------------------------------------------
+    // 12. Threshold HU → 5(+1)-label phantom
+    //     0=air, 1=fat, 2=soft tissue, 3=bone spongiosa, 4=bone cortical
+    //     5=implant (cylinder, optional)
+    // ---------------------------------------------------------------------
+    static constexpr int16_t THR_AIR_FAT        = -500;
+    static constexpr int16_t THR_FAT_SOFT       =  -50;
+    static constexpr int16_t THR_SOFT_SPONGIOSA =  200;
+    static constexpr int16_t THR_SPONGIOSA_CORT =  800;
+
+    const size_t totalVox = static_cast<size_t>(nx_slice) *
+                            static_cast<size_t>(ny_slice) *
+                            static_cast<size_t>(nz_slice);
+    std::vector<uint8_t> labelBuf(totalVox);
+
+    // -- HU thresholding --
+    {
+        itk::ImageRegionConstIterator<Int16ImageType> itHU2(huImage, huImage->GetLargestPossibleRegion());
+        size_t idx = 0;
+        for (itHU2.GoToBegin(); !itHU2.IsAtEnd(); ++itHU2, ++idx)
+        {
+            const int16_t hu = itHU2.Get();
+            if      (hu < THR_AIR_FAT)        labelBuf[idx] = 0;
+            else if (hu < THR_FAT_SOFT)       labelBuf[idx] = 1;
+            else if (hu < THR_SOFT_SPONGIOSA) labelBuf[idx] = 2;
+            else if (hu < THR_SPONGIOSA_CORT) labelBuf[idx] = 3;
+            else                              labelBuf[idx] = 4;
+        }
+    }
+
+    // -- Implant cylinder override (axis along Z) --
+    const bool hasImplant = (implant_radius_mm > 0.0);
+    if (hasImplant)
+    {
+        const double r2 = implant_radius_mm * implant_radius_mm;
+        const double halfH = implant_height_mm / 2.0;
+        size_t implantVoxels = 0;
+
+        for (G4int k = 0; k < nz_slice; ++k)
+        {
+            // physical Z of voxel centre (mm from bbMin)
+            const double vz = (kStart + k + 0.5) * voxelSize_mm;
+            if (std::abs(vz - implant_cz_mm) > halfH) continue;
+
+            for (G4int j = 0; j < ny_slice; ++j)
+            {
+                const double vy = (jStart + j + 0.5) * voxelSize_mm;
+                const double dy = vy - implant_cy_mm;
+
+                for (G4int i = 0; i < nx_slice; ++i)
+                {
+                    const double vx = (iStart + i + 0.5) * voxelSize_mm;
+                    const double dx = vx - implant_cx_mm;
+
+                    if (dx*dx + dy*dy <= r2)
+                    {
+                        const size_t flat = static_cast<size_t>(k) * ny_slice * nx_slice +
+                                            static_cast<size_t>(j) * nx_slice +
+                                            static_cast<size_t>(i);
+                        labelBuf[flat] = 5;
+                        ++implantVoxels;
+                    }
+                }
+            }
+        }
+        std::cout << "Implant cylinder: centre=(" << implant_cx_mm << ", "
+                  << implant_cy_mm << ", " << implant_cz_mm << ") mm"
+                  << "  r=" << implant_radius_mm << " mm"
+                  << "  h=" << implant_height_mm << " mm"
+                  << "  → " << implantVoxels << " voxels labelled 5" << std::endl;
+    }
+
+    // -- Write raw --
+    const std::string labelTag = hasImplant ? "6labels_" : "5labels_";
+    std::string label4Path = outputBase + labelTag +
+                             std::to_string(nx_slice) + "x" +
+                             std::to_string(ny_slice) + "x" +
+                             std::to_string(nz_slice) + ".raw";
+    {
+        std::ofstream label4File(label4Path, std::ios::binary);
+        label4File.write(reinterpret_cast<const char*>(labelBuf.data()),
+                         static_cast<std::streamsize>(totalVox));
+    }
+    std::cout << (hasImplant ? "6" : "5")
+              << "-label phantom written to: " << label4Path << std::endl;
+
+    // write companion info .txt (same geometry as the label phantom)
+    {
+        const std::string infoBase = outputBase + labelTag +
+                                     std::to_string(nx_slice) + "x" +
+                                     std::to_string(ny_slice) + "x" +
+                                     std::to_string(nz_slice);
+        const auto sp = image->GetSpacing();
+        const auto sz = image->GetLargestPossibleRegion().GetSize();
+        std::ofstream info4(infoBase + ".txt");
+        info4 << std::fixed << std::setprecision(3);
+        info4 << "#[SECTION VOXELIZED GEOMETRY FILE v.2017-07-26]\n";
+        info4 << "phantom/" << std::filesystem::path(infoBase).filename().string()
+              << ".raw     # VOXEL GEOMETRY FILE (penEasy 2008 format; .gz accepted)\n";
+        info4 << " " << (-static_cast<double>(sz[0]) * sp[0] / 2.0 / 10.0)
+              << "  " << (-static_cast<double>(sz[1]) * sp[1] / 2.0 / 10.0)
+              << "  " << (-static_cast<double>(sz[2]) * sp[2] / 2.0 / 10.0)
+              << "              # OFFSET OF THE VOXEL GEOMETRY [cm]\n";
+        info4 << " " << sz[0] << " " << sz[1] << " " << sz[2]
+              << "                 # NUMBER OF VOXELS\n";
+        info4 << " " << (sp[0] / 10.0) << " " << (sp[1] / 10.0) << " " << (sp[2] / 10.0)
+              << "           # VOXEL SIZES [cm]\n";
+        info4 << " 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS\n";
+        std::cout << (hasImplant ? "6" : "5") << "-label info file written: " << infoBase << ".txt" << std::endl;
+    }
 
     std::cout << "Done." << std::endl;
     return 0;

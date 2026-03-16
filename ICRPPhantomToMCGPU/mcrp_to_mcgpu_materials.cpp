@@ -28,12 +28,43 @@
 #include "G4UIExecutive.hh"
 
 // -----------------------------------------------------------------------------
+// Helper: shorten a material name to ≤16 chars for Fortran's CHARACTER buffer.
+// Step 1: strip non-alphanumeric chars and vowels.
+// Step 2 (fallback): take the first char of each '_'/punctuation-separated word.
+// -----------------------------------------------------------------------------
+static std::string makeSafeMatName(const std::string& name)
+{
+    static const std::string vowels = "aeiouAEIOU";
+
+    std::string noVowels;
+    for (char c : name) {
+        if (!std::isalnum((unsigned char)c)) continue;
+        if (vowels.find(c) != std::string::npos) continue;
+        noVowels += c;
+    }
+    if (noVowels.size() <= 16) return noVowels;
+
+    std::string initials;
+    bool newWord = true;
+    for (char c : name) {
+        if (!std::isalnum((unsigned char)c)) {
+            newWord = true;
+        } else if (newWord) {
+            initials += c;
+            newWord = false;
+        }
+    }
+    if (initials.size() <= 16) return initials;
+    return initials.substr(0, 16);
+}
+
+// -----------------------------------------------------------------------------
 // Helper: write a Penelope material input file and run material.x
 // Returns the path of the generated .mat file, or "" on failure.
 // -----------------------------------------------------------------------------
 static std::string G4MaterialToPenelopeFile(G4Material* material)
 {
-    std::string materialFilePath = material->GetName() + ".mat";
+    std::string materialFilePath = makeSafeMatName(material->GetName()) + ".mat";
 
     std::stringstream ss;
     ss << 1 << std::endl;
@@ -122,11 +153,12 @@ int main(int argc, char** argv)
     const char* home = std::getenv("HOME");
     std::string phantomName  = "MRCP-00F";
     std::string penelopeDir  = home ? std::string(home) + "/penelope/pendbase/" : "/penelope/pendbase/";
-    std::string outputDir    = phantomName+"_female_materials/";
 
     if (argc > 1) phantomName = argv[1];
     if (argc > 2) penelopeDir = argv[2];
-    if (argc > 3) outputDir   = argv[3];
+
+    std::string outputDir = phantomName + "_materials/";
+    if (argc > 3) outputDir = argv[3];
 
     std::cout << "Phantom      : " << phantomName  << std::endl;
     std::cout << "Penelope dir : " << penelopeDir  << std::endl;

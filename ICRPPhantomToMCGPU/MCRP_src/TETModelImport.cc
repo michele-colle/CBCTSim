@@ -53,7 +53,8 @@ TETModelImport::TETModelImport(G4String phantom, G4UIExecutive* ui, G4String pha
 
 
 	// set phantom name
-	if(phantom == "MRCP-00F") phantomName = "MRCP-00F";
+	if     (phantom == "MRCP-00F") phantomName = "MRCP-00F";
+	else if(phantom == "MRCP-00M") phantomName = "MRCP-00M";
 	else if(phantom == "MRCP-01M") phantomName = "MRCP-01M";
 	else if(phantom == "MRCP-01F") phantomName = "MRCP-01F";
 	else if(phantom == "MRCP-05M") phantomName = "MRCP-05M";
@@ -62,7 +63,13 @@ TETModelImport::TETModelImport(G4String phantom, G4UIExecutive* ui, G4String pha
 	else if(phantom == "MRCP-10F") phantomName = "MRCP-10F";
 	else if(phantom == "MRCP-15M") phantomName = "MRCP-15M";
 	else if(phantom == "MRCP-15F") phantomName = "MRCP-15F";
-	else      phantomName = "MRCP-00M";
+	else if(phantom == "MRCP_AF")  phantomName = "MRCP_AF";
+	else if(phantom == "MRCP_AM")  phantomName = "MRCP_AM";
+	else
+		G4Exception("TETModelImport::TETModelImport", "", FatalErrorInArgument,
+			G4String("Unknown phantom name '" + phantom +
+			         "'. Valid names: MRCP-00F, MRCP-00M, MRCP-01M/F, MRCP-05M/F, "
+			         "MRCP-10M/F, MRCP-15M/F, MRCP_AF, MRCP_AM").c_str());
 
 	G4cout << "================================================================================"<<G4endl;
 	G4cout << "\t" << phantomName << " was implemented in this CODE!!   "<< G4endl;

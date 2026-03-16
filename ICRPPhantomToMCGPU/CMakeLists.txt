@@ -81,3 +81,7 @@ add_executable(mcrp_to_mcgpu_materials
     MCRP_src/TETModelImport.cc
 )
 target_link_libraries(mcrp_to_mcgpu_materials ConverterLogic ${Geant4_LIBRARIES})
+
+# EXE 5: hu_to_4labels (HU int16 raw -> 4-label phantom: 0=air,1=fat,2=soft,3=bone)
+add_executable(hu_to_4labels hu_to_4labels.cpp)
+target_compile_features(hu_to_4labels PRIVATE cxx_std_17)
