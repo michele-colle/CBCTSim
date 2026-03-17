@@ -5,10 +5,13 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <map>
+#include <stdexcept>
 #include <string>
 
 #include "TETModelImport.hh"
 #include "G4DatReader.hpp"
+#include "HUDicomExporter.hpp"
 #include "ImageUtils.hpp"
 #include "MCRPMaterialMap.hpp"
 
@@ -67,49 +70,126 @@ namespace
     };
 }
 
+// ---------------------------------------------------------------------------
+// Config-file parser: reads "key = value" lines, ignores # comments
+// ---------------------------------------------------------------------------
+static std::map<std::string, std::string> loadCfg(const std::string &path)
+{
+    std::map<std::string, std::string> cfg;
+    std::ifstream f(path);
+    if (!f) throw std::runtime_error("Cannot open config file: " + path);
+    std::string line;
+    while (std::getline(f, line))
+    {
+        // strip comment
+        auto ch = line.find('#');
+        if (ch != std::string::npos) line.erase(ch);
+        auto eq = line.find('=');
+        if (eq == std::string::npos) continue;
+        auto trim = [](std::string s) {
+            s.erase(0, s.find_first_not_of(" \t\r\n"));
+            s.erase(s.find_last_not_of(" \t\r\n") + 1);
+            return s;
+        };
+        cfg[trim(line.substr(0, eq))] = trim(line.substr(eq + 1));
+    }
+    return cfg;
+}
+
 int main(int argc, char **argv)
 {
     // ---------------------------------------------------------------------
-    // 1. Parse command line arguments
+    // 1. Parse parameters — from a .cfg file or positional args
     // ---------------------------------------------------------------------
-    std::string phantomName = "MRCP_AF";
-    double voxelSize_mm = 0.5;
-    std::string outputBase = "./output/MRCP_AF_vox_";
 
-    if (argc > 1)
-    {
-        phantomName = argv[1];
-        outputBase = "./output/" + phantomName + "_vox_";
-    }
-    if (argc > 2)
-    {
-        voxelSize_mm = std::stod(argv[2]);
-    }
-    double zStart_mm = 1388.0;
-    double zEnd_mm   = -1; // negative = full extent (resolved after bbox is known)
-    double xStart_mm = 52.8;
-    double xEnd_mm   = 445.2;
-    double yStart_mm = 0.8;
-    double yEnd_mm   = 236.4;
-    if (argc > 3) zStart_mm = std::stod(argv[3]);
-    if (argc > 4) zEnd_mm   = std::stod(argv[4]);
-    if (argc > 5) xStart_mm = std::stod(argv[5]);
-    if (argc > 6) xEnd_mm   = std::stod(argv[6]);
-    if (argc > 7) yStart_mm = std::stod(argv[7]);
-    if (argc > 8) yEnd_mm   = std::stod(argv[8]);
+    // defaults
+    std::string phantomName   = "MRCP_AF";
+    double voxelSize_mm       = 0.4;
+    double zStart_mm          = 0.0;
+    double zEnd_mm            = -1.0;   // negative = full extent
+    double xStart_mm          = 0.0;
+    double xEnd_mm            = -1.0;
+    double yStart_mm          = 0.0;
+    double yEnd_mm            = -1.0;
+    // HU thresholds
+    int16_t thr_air_fat        = -500;
+    int16_t thr_fat_soft       =  -50;
+    int16_t thr_soft_spongiosa =  200;
+    int16_t thr_spongiosa_cort =  800;
+    // crop cylinder — labels outside are zeroed; center = volume center + shift
+    bool   crop_cylinder_enable    = false;
+    double crop_cylinder_radius_mm = 100.0;
+    double crop_cylinder_cx_mm     = 0.0;   // absolute coords from bbMin corner [mm]
+    double crop_cylinder_cy_mm     = 0.0;
+    // implant cylinder (axis along Z). radius <= 0 disables it.
+    // coordinates are absolute in the voxel volume [mm from bbMin]
+    double implant_cx_mm      = 275.5;
+    double implant_cy_mm      = 74.5;
+    double implant_cz_mm      = 1462.0;
+    double implant_radius_mm  = 2.5;
+    double implant_height_mm  = 22.0;
 
-    // Implant cylinder (axis along Z, perpendicular to slices). All in mm.
-    // Disabled if radius <= 0 (default).
-    double implant_cx_mm     = 217.0;
-    double implant_cy_mm     = 59.0;
-    double implant_cz_mm     = 103.5;
-    double implant_radius_mm = 2.5;  // negative = no implant
-    double implant_height_mm = 22.0;
-    if (argc > 9)  implant_cx_mm     = std::stod(argv[9]);
-    if (argc > 10) implant_cy_mm     = std::stod(argv[10]);
-    if (argc > 11) implant_cz_mm     = std::stod(argv[11]);
-    if (argc > 12) implant_radius_mm = std::stod(argv[12]);
-    if (argc > 13) implant_height_mm = std::stod(argv[13]);
+    const bool usingCfg = (argc == 2) &&
+        (std::string(argv[1]).size() > 4) &&
+        (std::string(argv[1]).substr(std::string(argv[1]).size() - 4) == ".cfg");
+
+    if (usingCfg)
+    {
+        auto cfg = loadCfg(argv[1]);
+        auto getD = [&](const std::string &k, double def) {
+            return cfg.count(k) ? std::stod(cfg[k]) : def;
+        };
+        auto getS = [&](const std::string &k, const std::string &def) {
+            return cfg.count(k) ? cfg[k] : def;
+        };
+        phantomName      = getS("phantom_name",      phantomName);
+        voxelSize_mm     = getD("voxel_size_mm",     voxelSize_mm);
+        xStart_mm        = getD("x_start_mm",        xStart_mm);
+        xEnd_mm          = getD("x_end_mm",          xEnd_mm);
+        yStart_mm        = getD("y_start_mm",        yStart_mm);
+        yEnd_mm          = getD("y_end_mm",          yEnd_mm);
+        zStart_mm        = getD("z_start_mm",        zStart_mm);
+        zEnd_mm          = getD("z_end_mm",          zEnd_mm);
+        implant_cx_mm    = getD("implant_cx_mm",     implant_cx_mm);
+        implant_cy_mm    = getD("implant_cy_mm",     implant_cy_mm);
+        implant_cz_mm    = getD("implant_cz_mm",     implant_cz_mm);
+        implant_radius_mm   = getD("implant_radius_mm",    implant_radius_mm);
+        implant_height_mm   = getD("implant_height_mm",    implant_height_mm);
+        crop_cylinder_enable    = cfg.count("crop_cylinder_enable")
+                                  ? (cfg["crop_cylinder_enable"] == "1" || cfg["crop_cylinder_enable"] == "true")
+                                  : crop_cylinder_enable;
+        crop_cylinder_radius_mm = getD("crop_cylinder_radius_mm", crop_cylinder_radius_mm);
+        crop_cylinder_cx_mm     = getD("crop_cylinder_cx_mm",     crop_cylinder_cx_mm);
+        crop_cylinder_cy_mm     = getD("crop_cylinder_cy_mm",     crop_cylinder_cy_mm);
+        thr_air_fat         = static_cast<int16_t>(getD("thr_air_fat",        thr_air_fat));
+        thr_fat_soft        = static_cast<int16_t>(getD("thr_fat_soft",       thr_fat_soft));
+        thr_soft_spongiosa  = static_cast<int16_t>(getD("thr_soft_spongiosa", thr_soft_spongiosa));
+        thr_spongiosa_cort  = static_cast<int16_t>(getD("thr_spongiosa_cort", thr_spongiosa_cort));
+        std::cout << "Parameters loaded from: " << argv[1] << std::endl;
+    }
+    else
+    {
+        // positional args (legacy / manual use)
+        if (argc > 1)  phantomName      = argv[1];
+        if (argc > 2)  voxelSize_mm     = std::stod(argv[2]);
+        if (argc > 3)  zStart_mm        = std::stod(argv[3]);
+        if (argc > 4)  zEnd_mm          = std::stod(argv[4]);
+        if (argc > 5)  xStart_mm        = std::stod(argv[5]);
+        if (argc > 6)  xEnd_mm          = std::stod(argv[6]);
+        if (argc > 7)  yStart_mm        = std::stod(argv[7]);
+        if (argc > 8)  yEnd_mm          = std::stod(argv[8]);
+        if (argc > 9)  implant_cx_mm    = std::stod(argv[9]);
+        if (argc > 10) implant_cy_mm    = std::stod(argv[10]);
+        if (argc > 11) implant_cz_mm    = std::stod(argv[11]);
+        if (argc > 12) implant_radius_mm= std::stod(argv[12]);
+        if (argc > 13) implant_height_mm= std::stod(argv[13]);
+    }
+
+    // outputPrefix: cfg stem when using a cfg file, otherwise phantom name
+    const std::string outputPrefix = usingCfg
+        ? std::filesystem::path(argv[1]).stem().string()
+        : phantomName;
+    std::string outputBase = "./output/" + outputPrefix + "_vox_";
 
     std::cout << "Using phantom: " << phantomName << std::endl;
     std::cout << "Target voxel size: " << voxelSize_mm << " mm" << std::endl;
@@ -167,6 +247,17 @@ int main(int argc, char **argv)
     const G4int kStart   = static_cast<G4int>(std::floor(zStart_mm / voxelSize_mm));
     const G4int kEnd     = static_cast<G4int>(std::ceil (zEnd_mm   / voxelSize_mm));
     const G4int nz_slice = std::max(1, std::min(kEnd, nz) - kStart);
+
+    // Build output folder <phantomName>_vox_NxNxN and redirect outputBase into it.
+    {
+        const std::string dimTag = std::to_string(nx_slice) + "x" +
+                                   std::to_string(ny_slice) + "x" +
+                                   std::to_string(nz_slice);
+        const std::string outDir = "./output/" + outputPrefix + "_vox_" + dimTag + "/";
+        std::filesystem::create_directories(outDir);
+        outputBase = outDir + outputPrefix + "_vox_";
+        std::cout << "Output folder: " << outDir << std::endl;
+    }
 
     std::cout << "Bounding box size [mm]: "
               << lenX / mm << " x " << lenY / mm << " x " << lenZ / mm << std::endl;
@@ -424,14 +515,28 @@ int main(int argc, char **argv)
     std::cout << "HU int16 stack @ 60 keV written to: " << huPath << std::endl;
 
     // ---------------------------------------------------------------------
+    // 11b. Export HU volume as DICOM CT series
+    // ---------------------------------------------------------------------
+    {
+        const std::string dicomDir = outputBase + "HU60keV_dicom_" +
+                                     std::to_string(nx_slice) + "x" +
+                                     std::to_string(ny_slice) + "x" +
+                                     std::to_string(nz_slice);
+        HUDicomExporter::Options dcmOpts;
+        dcmOpts.patientName       = phantomName;
+        dcmOpts.seriesDescription = phantomName + " HU @ 60 keV";
+        HUDicomExporter::Write(huImage, dicomDir, dcmOpts);
+    }
+
+    // ---------------------------------------------------------------------
     // 12. Threshold HU → 5(+1)-label phantom
     //     0=air, 1=fat, 2=soft tissue, 3=bone spongiosa, 4=bone cortical
     //     5=implant (cylinder, optional)
     // ---------------------------------------------------------------------
-    static constexpr int16_t THR_AIR_FAT        = -500;
-    static constexpr int16_t THR_FAT_SOFT       =  -50;
-    static constexpr int16_t THR_SOFT_SPONGIOSA =  200;
-    static constexpr int16_t THR_SPONGIOSA_CORT =  800;
+    const int16_t THR_AIR_FAT        = thr_air_fat;
+    const int16_t THR_FAT_SOFT       = thr_fat_soft;
+    const int16_t THR_SOFT_SPONGIOSA = thr_soft_spongiosa;
+    const int16_t THR_SPONGIOSA_CORT = thr_spongiosa_cort;
 
     const size_t totalVox = static_cast<size_t>(nx_slice) *
                             static_cast<size_t>(ny_slice) *
@@ -495,8 +600,42 @@ int main(int argc, char **argv)
                   << "  → " << implantVoxels << " voxels labelled 5" << std::endl;
     }
 
+    // -- Crop cylinder mask (zero everything outside) --
+    if (crop_cylinder_enable)
+    {
+        // centre of the slice ROI in absolute voxel coords [mm]
+        const double cx = crop_cylinder_cx_mm;
+        const double cy = crop_cylinder_cy_mm;
+        const double r2 = crop_cylinder_radius_mm * crop_cylinder_radius_mm;
+        size_t zeroedVoxels = 0;
+
+        for (G4int k = 0; k < nz_slice; ++k)
+            for (G4int j = 0; j < ny_slice; ++j)
+            {
+                const double vy = (jStart + j + 0.5) * voxelSize_mm;
+                const double dy = vy - cy;
+                for (G4int i = 0; i < nx_slice; ++i)
+                {
+                    const double vx = (iStart + i + 0.5) * voxelSize_mm;
+                    const double dx = vx - cx;
+                    if (dx*dx + dy*dy > r2)
+                    {
+                        const size_t flat = static_cast<size_t>(k) * ny_slice * nx_slice +
+                                            static_cast<size_t>(j) * nx_slice +
+                                            static_cast<size_t>(i);
+                        labelBuf[flat] = 0;
+                        ++zeroedVoxels;
+                    }
+                }
+            }
+        std::cout << "Crop cylinder: centre=(" << cx << ", " << cy << ") mm"
+                  << "  r=" << crop_cylinder_radius_mm << " mm"
+                  << "  → " << zeroedVoxels << " voxels zeroed" << std::endl;
+    }
+
     // -- Write raw --
-    const std::string labelTag = hasImplant ? "6labels_" : "5labels_";
+    const std::string labelTag = std::string(hasImplant ? "5labels_implant_" : "5labels_")
+                               + (crop_cylinder_enable ? "reconCylinder_" : "");
     std::string label4Path = outputBase + labelTag +
                              std::to_string(nx_slice) + "x" +
                              std::to_string(ny_slice) + "x" +

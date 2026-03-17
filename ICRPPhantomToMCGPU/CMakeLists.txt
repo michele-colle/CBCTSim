@@ -15,6 +15,9 @@ find_package(ITK REQUIRED COMPONENTS
 )
 include(${ITK_USE_FILE})
 
+find_package(GDCM REQUIRED)
+include(${GDCM_USE_FILE})
+
 find_package(Geant4 REQUIRED)
 include(${Geant4_USE_FILE})
 
@@ -44,7 +47,7 @@ add_library(ConverterLogic ${CONVERTER_SOURCES})
 #     src/G4DatReader.cpp 
 #     src/ImageUtils.cpp
 # )
-target_link_libraries(ConverterLogic ${ITK_LIBRARIES} ${Geant4_LIBRARIES})
+target_link_libraries(ConverterLogic ${ITK_LIBRARIES} ${Geant4_LIBRARIES} ${GDCM_LIBRARIES} gdcmMSFF gdcmDSED gdcmCommon)
 
 include(ExternalProject)
 ExternalProject_Add(ICRPdata

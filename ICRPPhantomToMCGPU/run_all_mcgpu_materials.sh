@@ -15,24 +15,24 @@ if [ ! -f "${BINARY}" ]; then
     exit 1
 fi
 
-# PHANTOMS=(
-#     MRCP-00F
-#     MRCP-00M
-#     MRCP-01F
-#     MRCP-01M
-#     MRCP-05F
-#     MRCP-05M
-#     MRCP-10F
-#     MRCP-10M
-#     MRCP-15F
-#     MRCP-15M
-#     MRCP_AF
-#     MRCP_AM
-# )
 PHANTOMS=(
+    MRCP-00F
+    MRCP-00M
+    MRCP-01F
+    MRCP-01M
+    MRCP-05F
+    MRCP-05M
+    MRCP-10F
+    MRCP-10M
+    MRCP-15F
+    MRCP-15M
     MRCP_AF
     MRCP_AM
 )
+# PHANTOMS=(
+#     MRCP_AF
+#     MRCP_AM
+# )
 
 mkdir -p "${OUTPUT_BASE}"
 
