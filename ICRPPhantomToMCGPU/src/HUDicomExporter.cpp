@@ -13,9 +13,12 @@
 #include <itkMetaDataObject.h>
 #include <itkNumericSeriesFileNames.h>
 
+#include <gdcmDataElement.h>
 #include <gdcmFile.h>
 #include <gdcmFileExplicitFilter.h>
 #include <gdcmReader.h>
+#include <gdcmTag.h>
+#include <gdcmVR.h>
 #include <gdcmWriter.h>
 
 // ---------------------------------------------------------------------------
@@ -148,6 +151,21 @@ void HUDicomExporter::Write(HUImageType::Pointer   huImage,
         fef.SetUseVRUN(true);
         if (!fef.Change())
             throw std::runtime_error("GDCM: FileExplicitFilter failed on " + fname);
+
+        // FileExplicitFilter converts VRs but does NOT update the FMI TS tag —
+        // set it explicitly so the on-disk header reflects 1.2.840.10008.1.2.1
+        fef.GetFile().GetHeader().SetDataSetTransferSyntax(
+            gdcm::TransferSyntax(gdcm::TransferSyntax::ExplicitVRLittleEndian));
+
+        // Replace ImplementationClassUID (0002,0012) with a short valid UID
+        // (GDCM auto-generates one that exceeds the 64-char DICOM limit)
+        {
+            static const char kImplUID[] = "2.25.1";
+            gdcm::DataElement de(gdcm::Tag(0x0002, 0x0012));
+            de.SetVR(gdcm::VR::UI);
+            de.SetByteValue(kImplUID, static_cast<gdcm::VL>(strlen(kImplUID)));
+            fef.GetFile().GetHeader().Replace(de);
+        }
 
         gdcm::Writer w;
         w.SetFileName(fname.c_str());

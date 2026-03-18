@@ -88,3 +88,7 @@ target_link_libraries(mcrp_to_mcgpu_materials ConverterLogic ${Geant4_LIBRARIES}
 # EXE 5: hu_to_4labels (HU int16 raw -> 4-label phantom: 0=air,1=fat,2=soft,3=bone)
 add_executable(hu_to_4labels hu_to_4labels.cpp)
 target_compile_features(hu_to_4labels PRIVATE cxx_std_17)
+
+# EXE 6: dicom_to_mcgpu (DICOM CT series -> 5-label MC-GPU phantom)
+add_executable(dicom_to_mcgpu dicom_to_mcgpu.cpp)
+target_link_libraries(dicom_to_mcgpu ConverterLogic)

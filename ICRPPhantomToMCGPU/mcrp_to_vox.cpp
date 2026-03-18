@@ -96,6 +96,10 @@ static std::map<std::string, std::string> loadCfg(const std::string &path)
     return cfg;
 }
 
+struct ImplantCylinder {
+    double cx_mm, cy_mm, cz_mm, radius_mm, height_mm;
+};
+
 int main(int argc, char **argv)
 {
     // ---------------------------------------------------------------------
@@ -121,13 +125,8 @@ int main(int argc, char **argv)
     double crop_cylinder_radius_mm = 100.0;
     double crop_cylinder_cx_mm     = 0.0;   // absolute coords from bbMin corner [mm]
     double crop_cylinder_cy_mm     = 0.0;
-    // implant cylinder (axis along Z). radius <= 0 disables it.
-    // coordinates are absolute in the voxel volume [mm from bbMin]
-    double implant_cx_mm      = 275.5;
-    double implant_cy_mm      = 74.5;
-    double implant_cz_mm      = 1462.0;
-    double implant_radius_mm  = 2.5;
-    double implant_height_mm  = 22.0;
+    // implant cylinders (axis along Z); populated from cfg or positional args
+    std::vector<ImplantCylinder> implants;
 
     const bool usingCfg = (argc == 2) &&
         (std::string(argv[1]).size() > 4) &&
@@ -150,11 +149,36 @@ int main(int argc, char **argv)
         yEnd_mm          = getD("y_end_mm",          yEnd_mm);
         zStart_mm        = getD("z_start_mm",        zStart_mm);
         zEnd_mm          = getD("z_end_mm",          zEnd_mm);
-        implant_cx_mm    = getD("implant_cx_mm",     implant_cx_mm);
-        implant_cy_mm    = getD("implant_cy_mm",     implant_cy_mm);
-        implant_cz_mm    = getD("implant_cz_mm",     implant_cz_mm);
-        implant_radius_mm   = getD("implant_radius_mm",    implant_radius_mm);
-        implant_height_mm   = getD("implant_height_mm",    implant_height_mm);
+        if (cfg.count("implant_count"))
+        {
+            const int implant_count = std::stoi(cfg["implant_count"]);
+            for (int n = 0; n < implant_count; ++n)
+            {
+                const std::string p = "implant_" + std::to_string(n) + "_";
+                ImplantCylinder imp;
+                imp.cx_mm     = getD(p + "cx_mm",     0.0);
+                imp.cy_mm     = getD(p + "cy_mm",     0.0);
+                imp.cz_mm     = getD(p + "cz_mm",     0.0);
+                imp.radius_mm = getD(p + "radius_mm", 0.0);
+                imp.height_mm = getD(p + "height_mm", 0.0);
+                implants.push_back(imp);
+            }
+        }
+        else
+        {
+            // backward-compat: single implant via old-style keys
+            const double r = getD("implant_radius_mm", -1.0);
+            if (r > 0.0)
+            {
+                ImplantCylinder imp;
+                imp.cx_mm     = getD("implant_cx_mm",    275.5);
+                imp.cy_mm     = getD("implant_cy_mm",     74.5);
+                imp.cz_mm     = getD("implant_cz_mm",   1462.0);
+                imp.radius_mm = r;
+                imp.height_mm = getD("implant_height_mm", 22.0);
+                implants.push_back(imp);
+            }
+        }
         crop_cylinder_enable    = cfg.count("crop_cylinder_enable")
                                   ? (cfg["crop_cylinder_enable"] == "1" || cfg["crop_cylinder_enable"] == "true")
                                   : crop_cylinder_enable;
@@ -178,11 +202,17 @@ int main(int argc, char **argv)
         if (argc > 6)  xEnd_mm          = std::stod(argv[6]);
         if (argc > 7)  yStart_mm        = std::stod(argv[7]);
         if (argc > 8)  yEnd_mm          = std::stod(argv[8]);
-        if (argc > 9)  implant_cx_mm    = std::stod(argv[9]);
-        if (argc > 10) implant_cy_mm    = std::stod(argv[10]);
-        if (argc > 11) implant_cz_mm    = std::stod(argv[11]);
-        if (argc > 12) implant_radius_mm= std::stod(argv[12]);
-        if (argc > 13) implant_height_mm= std::stod(argv[13]);
+        if (argc > 9)
+        {
+            ImplantCylinder imp;
+            imp.cx_mm     = std::stod(argv[9]);
+            imp.cy_mm     = (argc > 10) ? std::stod(argv[10]) : 0.0;
+            imp.cz_mm     = (argc > 11) ? std::stod(argv[11]) : 0.0;
+            imp.radius_mm = (argc > 12) ? std::stod(argv[12]) : 0.0;
+            imp.height_mm = (argc > 13) ? std::stod(argv[13]) : 0.0;
+            if (imp.radius_mm > 0.0)
+                implants.push_back(imp);
+        }
     }
 
     // outputPrefix: cfg stem when using a cfg file, otherwise phantom name
@@ -559,28 +589,28 @@ int main(int argc, char **argv)
     }
 
     // -- Implant cylinder override (axis along Z) --
-    const bool hasImplant = (implant_radius_mm > 0.0);
-    if (hasImplant)
+    const bool hasImplant = !implants.empty();
+    for (size_t impIdx = 0; impIdx < implants.size(); ++impIdx)
     {
-        const double r2 = implant_radius_mm * implant_radius_mm;
-        const double halfH = implant_height_mm / 2.0;
+        const auto& imp = implants[impIdx];
+        const double r2    = imp.radius_mm * imp.radius_mm;
+        const double halfH = imp.height_mm / 2.0;
         size_t implantVoxels = 0;
 
         for (G4int k = 0; k < nz_slice; ++k)
         {
-            // physical Z of voxel centre (mm from bbMin)
             const double vz = (kStart + k + 0.5) * voxelSize_mm;
-            if (std::abs(vz - implant_cz_mm) > halfH) continue;
+            if (std::abs(vz - imp.cz_mm) > halfH) continue;
 
             for (G4int j = 0; j < ny_slice; ++j)
             {
                 const double vy = (jStart + j + 0.5) * voxelSize_mm;
-                const double dy = vy - implant_cy_mm;
+                const double dy = vy - imp.cy_mm;
 
                 for (G4int i = 0; i < nx_slice; ++i)
                 {
                     const double vx = (iStart + i + 0.5) * voxelSize_mm;
-                    const double dx = vx - implant_cx_mm;
+                    const double dx = vx - imp.cx_mm;
 
                     if (dx*dx + dy*dy <= r2)
                     {
@@ -593,10 +623,10 @@ int main(int argc, char **argv)
                 }
             }
         }
-        std::cout << "Implant cylinder: centre=(" << implant_cx_mm << ", "
-                  << implant_cy_mm << ", " << implant_cz_mm << ") mm"
-                  << "  r=" << implant_radius_mm << " mm"
-                  << "  h=" << implant_height_mm << " mm"
+        std::cout << "Implant[" << impIdx << "]: centre=(" << imp.cx_mm << ", "
+                  << imp.cy_mm << ", " << imp.cz_mm << ") mm"
+                  << "  r=" << imp.radius_mm << " mm"
+                  << "  h=" << imp.height_mm << " mm"
                   << "  → " << implantVoxels << " voxels labelled 5" << std::endl;
     }
 
