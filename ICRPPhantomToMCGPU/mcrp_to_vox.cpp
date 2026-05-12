@@ -100,6 +100,18 @@ struct ImplantCylinder {
     double cx_mm, cy_mm, cz_mm, radius_mm, height_mm;
 };
 
+// Stretcher: two adjacent boxes in the XZ plane (full Z extent).
+// carbon (label 10) occupies the -Y half (structural side).
+// foam   (label 11) occupies the +Y half (patient-contact side).
+// cx_mm / cy_mm are in absolute phantom coords (from bbMin corner), same as implants.
+struct Stretcher {
+    double cx_mm;
+    double cy_mm;
+    double width_mm;
+    double carbon_thickness_mm;
+    double foam_thickness_mm;
+};
+
 int main(int argc, char **argv)
 {
     // ---------------------------------------------------------------------
@@ -127,6 +139,17 @@ int main(int argc, char **argv)
     double crop_cylinder_cy_mm     = 0.0;
     // implant cylinders (axis along Z); populated from cfg or positional args
     std::vector<ImplantCylinder> implants;
+    // stretcher
+    bool      stretcher_enable = false;
+    Stretcher stretcher        = {0.0, 0.0, 600.0, 3.0, 60.0};
+    // geometry shift in mm (accumulated when the volume is padded for the stretcher)
+    double shift_x_mm = 0.0;
+    double shift_y_mm = 0.0;
+    // MC-GPU .in template
+    std::string mcgpu_in_template;
+    std::string mcgpu_output_name;
+    int         mcgpu_det_nx = 512;
+    int         mcgpu_det_nz = 512;
 
     const bool usingCfg = (argc == 2) &&
         (std::string(argv[1]).size() > 4) &&
@@ -189,6 +212,18 @@ int main(int argc, char **argv)
         thr_fat_soft        = static_cast<int16_t>(getD("thr_fat_soft",       thr_fat_soft));
         thr_soft_spongiosa  = static_cast<int16_t>(getD("thr_soft_spongiosa", thr_soft_spongiosa));
         thr_spongiosa_cort  = static_cast<int16_t>(getD("thr_spongiosa_cort", thr_spongiosa_cort));
+        stretcher_enable = cfg.count("stretcher_enable")
+            ? (cfg["stretcher_enable"] == "1" || cfg["stretcher_enable"] == "true")
+            : stretcher_enable;
+        stretcher.cx_mm               = getD("stretcher_cx_mm",               stretcher.cx_mm);
+        stretcher.cy_mm               = getD("stretcher_cy_mm",               stretcher.cy_mm);
+        stretcher.width_mm            = getD("stretcher_width_mm",            stretcher.width_mm);
+        stretcher.carbon_thickness_mm = getD("stretcher_carbon_thickness_mm", stretcher.carbon_thickness_mm);
+        stretcher.foam_thickness_mm   = getD("stretcher_foam_thickness_mm",   stretcher.foam_thickness_mm);
+        mcgpu_in_template  = getS("mcgpu_in_template",  mcgpu_in_template);
+        mcgpu_output_name  = getS("mcgpu_output_name",  mcgpu_output_name);
+        mcgpu_det_nx       = static_cast<int>(getD("mcgpu_det_nx", mcgpu_det_nx));
+        mcgpu_det_nz       = static_cast<int>(getD("mcgpu_det_nz", mcgpu_det_nz));
         std::cout << "Parameters loaded from: " << argv[1] << std::endl;
     }
     else
@@ -419,7 +454,7 @@ int main(int argc, char **argv)
     // ---------------------------------------------------------------------
     // 6. Write MC-GPU [SECTION MATERIAL FILE LIST] sidecar file
     // ---------------------------------------------------------------------
-    matMap.writeMCGPUSectionFile(outputBase + "_mcgpu_section.txt", phantomName);
+    matMap.writeMCGPUSectionFile(outputBase + "mcgpu_section.txt", phantomName);
 
     // ---------------------------------------------------------------------
     // 7. Initialise Geant4 for μ computation (if not already running)
@@ -588,6 +623,12 @@ int main(int argc, char **argv)
         }
     }
 
+    // Isocenter of the slice ROI in absolute phantom coords (from bbMin corner).
+    // Implant and stretcher cfg coords are isocenter-relative (same convention as dicom_to_mcgpu).
+    const double iso_x = (iStart + nx_slice / 2.0) * voxelSize_mm;
+    const double iso_y = (jStart + ny_slice / 2.0) * voxelSize_mm;
+    const double iso_z = (kStart + nz_slice / 2.0) * voxelSize_mm;
+
     // -- Implant cylinder override (axis along Z) --
     const bool hasImplant = !implants.empty();
     for (size_t impIdx = 0; impIdx < implants.size(); ++impIdx)
@@ -595,22 +636,26 @@ int main(int argc, char **argv)
         const auto& imp = implants[impIdx];
         const double r2    = imp.radius_mm * imp.radius_mm;
         const double halfH = imp.height_mm / 2.0;
+        // Convert isocenter-relative → bbMin-absolute
+        const double cx_abs = iso_x + imp.cx_mm;
+        const double cy_abs = iso_y + imp.cy_mm;
+        const double cz_abs = iso_z + imp.cz_mm;
         size_t implantVoxels = 0;
 
         for (G4int k = 0; k < nz_slice; ++k)
         {
             const double vz = (kStart + k + 0.5) * voxelSize_mm;
-            if (std::abs(vz - imp.cz_mm) > halfH) continue;
+            if (std::abs(vz - cz_abs) > halfH) continue;
 
             for (G4int j = 0; j < ny_slice; ++j)
             {
                 const double vy = (jStart + j + 0.5) * voxelSize_mm;
-                const double dy = vy - imp.cy_mm;
+                const double dy = vy - cy_abs;
 
                 for (G4int i = 0; i < nx_slice; ++i)
                 {
                     const double vx = (iStart + i + 0.5) * voxelSize_mm;
-                    const double dx = vx - imp.cx_mm;
+                    const double dx = vx - cx_abs;
 
                     if (dx*dx + dy*dy <= r2)
                     {
@@ -624,7 +669,7 @@ int main(int argc, char **argv)
             }
         }
         std::cout << "Implant[" << impIdx << "]: centre=(" << imp.cx_mm << ", "
-                  << imp.cy_mm << ", " << imp.cz_mm << ") mm"
+                  << imp.cy_mm << ", " << imp.cz_mm << ") mm from isocenter"
                   << "  r=" << imp.radius_mm << " mm"
                   << "  h=" << imp.height_mm << " mm"
                   << "  → " << implantVoxels << " voxels labelled 5" << std::endl;
@@ -663,44 +708,218 @@ int main(int argc, char **argv)
                   << "  → " << zeroedVoxels << " voxels zeroed" << std::endl;
     }
 
+    // Final volume dimensions (may grow if stretcher pads the volume)
+    G4int fin_nx_slice = nx_slice;
+    G4int fin_ny_slice = ny_slice;
+
+    // -- Stretcher: two adjacent boxes (carbon -Y / foam +Y) in the XZ plane --
+    // Coordinates are isocenter-relative (same convention as implants and dicom_to_mcgpu).
+    // The volume is zero-padded in X and/or Y if the stretcher falls outside the slice ROI.
+    const bool hasStretcher = stretcher_enable;
+    if (stretcher_enable)
+    {
+        const double total_t = stretcher.carbon_thickness_mm + stretcher.foam_thickness_mm;
+        const double half_w  = stretcher.width_mm / 2.0;
+        const double half_t  = total_t / 2.0;
+
+        // Convert isocenter-relative → bbMin-absolute
+        const double sc_x_abs = iso_x + stretcher.cx_mm;
+        const double sc_y_abs = iso_y + stretcher.cy_mm;
+
+        // Stretcher bounding box in absolute phantom coords [mm]
+        const double str_x_min = sc_x_abs - half_w;
+        const double str_x_max = sc_x_abs + half_w;
+        const double str_y_min = sc_y_abs - half_t;
+        const double str_y_max = sc_y_abs + half_t;
+
+        // Current buffer X/Y range in absolute coords
+        const double buf_x_min = static_cast<double>(iStart) * voxelSize_mm;
+        const double buf_x_max = static_cast<double>(iStart + nx_slice) * voxelSize_mm;
+        const double buf_y_min = static_cast<double>(jStart) * voxelSize_mm;
+        const double buf_y_max = static_cast<double>(jStart + ny_slice) * voxelSize_mm;
+
+        const int pad_xl = (str_x_min < buf_x_min)
+            ? static_cast<int>(std::ceil((buf_x_min - str_x_min) / voxelSize_mm)) : 0;
+        const int pad_xr = (str_x_max > buf_x_max)
+            ? static_cast<int>(std::ceil((str_x_max - buf_x_max) / voxelSize_mm)) : 0;
+        const int pad_yb = (str_y_min < buf_y_min)
+            ? static_cast<int>(std::ceil((buf_y_min - str_y_min) / voxelSize_mm)) : 0;
+        const int pad_yt = (str_y_max > buf_y_max)
+            ? static_cast<int>(std::ceil((str_y_max - buf_y_max) / voxelSize_mm)) : 0;
+
+        const G4int new_nx_slice = nx_slice + pad_xl + pad_xr;
+        const G4int new_ny_slice = ny_slice + pad_yb + pad_yt;
+
+        if (pad_xl || pad_xr || pad_yb || pad_yt)
+        {
+            std::cout << "Stretcher: padding volume ("
+                      << pad_xl << "+" << pad_xr << ") x ("
+                      << pad_yb << "+" << pad_yt << ") voxels in X / Y." << std::endl;
+
+            const size_t newTotal = static_cast<size_t>(new_nx_slice) *
+                                    static_cast<size_t>(new_ny_slice) *
+                                    static_cast<size_t>(nz_slice);
+            std::vector<uint8_t> newBuf(newTotal, 0);
+            for (G4int k = 0; k < nz_slice; ++k)
+                for (G4int j = 0; j < ny_slice; ++j)
+                    for (G4int i = 0; i < nx_slice; ++i)
+                        newBuf[static_cast<size_t>(k) * new_ny_slice * new_nx_slice
+                               + static_cast<size_t>(j + pad_yb) * new_nx_slice
+                               + static_cast<size_t>(i + pad_xl)]
+                            = labelBuf[static_cast<size_t>(k) * ny_slice * nx_slice
+                                       + static_cast<size_t>(j) * nx_slice
+                                       + static_cast<size_t>(i)];
+            labelBuf = std::move(newBuf);
+
+            // Keep the isocenter of the original slice ROI fixed in MC-GPU world coords.
+            shift_x_mm += (static_cast<double>(pad_xr) - static_cast<double>(pad_xl)) * voxelSize_mm / 2.0;
+            shift_y_mm += (static_cast<double>(pad_yt) - static_cast<double>(pad_yb)) * voxelSize_mm / 2.0;
+        }
+
+        // In the padded buffer, voxel (i,j) maps to absolute coord:
+        //   vx = (iStart - pad_xl + i + 0.5) * voxelSize_mm
+        // Stretcher Y bands (absolute coords):
+        const double carb_y_min = sc_y_abs - half_t;
+        const double carb_y_max = carb_y_min + stretcher.carbon_thickness_mm;
+        const double foam_y_max = sc_y_abs + half_t;
+
+        size_t foamVox = 0, carbVox = 0;
+        for (G4int k = 0; k < nz_slice; ++k)
+            for (G4int j = 0; j < new_ny_slice; ++j)
+            {
+                const double vy = (static_cast<double>(jStart - pad_yb + j) + 0.5) * voxelSize_mm;
+                const bool in_carbon = (vy >= carb_y_min && vy <  carb_y_max);
+                const bool in_foam   = (vy >= carb_y_max && vy <  foam_y_max);
+                if (!in_carbon && !in_foam) continue;
+
+                for (G4int i = 0; i < new_nx_slice; ++i)
+                {
+                    const double vx = (static_cast<double>(iStart - pad_xl + i) + 0.5) * voxelSize_mm;
+                    if (vx < str_x_min || vx >= str_x_max) continue;
+
+                    const size_t flat = static_cast<size_t>(k) * new_ny_slice * new_nx_slice
+                                      + static_cast<size_t>(j) * new_nx_slice
+                                      + static_cast<size_t>(i);
+                    if (in_foam)   { labelBuf[flat] = 11; ++foamVox; }
+                    else           { labelBuf[flat] = 10; ++carbVox; }
+                }
+            }
+
+        std::cout << "Stretcher: centre=(" << stretcher.cx_mm << ", " << stretcher.cy_mm << ") mm"
+                  << "  width=" << stretcher.width_mm << " mm"
+                  << "  carbon=" << stretcher.carbon_thickness_mm << " mm (label 10)"
+                  << "  foam="   << stretcher.foam_thickness_mm   << " mm (label 11)"
+                  << "  -> " << carbVox << " carbon + " << foamVox << " foam voxels" << std::endl;
+        std::cout << "Updated volume: " << new_nx_slice << " x " << new_ny_slice << " x " << nz_slice << std::endl;
+        std::cout << "Updated shift : (" << shift_x_mm << ", " << shift_y_mm << ") mm" << std::endl;
+
+        fin_nx_slice = new_nx_slice;
+        fin_ny_slice = new_ny_slice;
+    }
+
     // -- Write raw --
-    const std::string labelTag = std::string(hasImplant ? "5labels_implant_" : "5labels_")
-                               + (crop_cylinder_enable ? "reconCylinder_" : "");
+    const std::string labelTag = std::string(hasImplant      ? "implant_"      : "")
+                               + (hasStretcher               ? "stretcher_"    : "")
+                               + (crop_cylinder_enable       ? "reconCylinder_": "")
+                               + (hasImplant || hasStretcher ? "labels_"       : "5labels_");
+    const size_t finalTotalVox = static_cast<size_t>(fin_nx_slice) *
+                                 static_cast<size_t>(fin_ny_slice) *
+                                 static_cast<size_t>(nz_slice);
     std::string label4Path = outputBase + labelTag +
-                             std::to_string(nx_slice) + "x" +
-                             std::to_string(ny_slice) + "x" +
+                             std::to_string(fin_nx_slice) + "x" +
+                             std::to_string(fin_ny_slice) + "x" +
                              std::to_string(nz_slice) + ".raw";
     {
         std::ofstream label4File(label4Path, std::ios::binary);
         label4File.write(reinterpret_cast<const char*>(labelBuf.data()),
-                         static_cast<std::streamsize>(totalVox));
+                         static_cast<std::streamsize>(finalTotalVox));
     }
-    std::cout << (hasImplant ? "6" : "5")
-              << "-label phantom written to: " << label4Path << std::endl;
+    std::cout << "Label phantom written to: " << label4Path << std::endl;
 
-    // write companion info .txt (same geometry as the label phantom)
+    // write companion info .txt
     {
         const std::string infoBase = outputBase + labelTag +
-                                     std::to_string(nx_slice) + "x" +
-                                     std::to_string(ny_slice) + "x" +
+                                     std::to_string(fin_nx_slice) + "x" +
+                                     std::to_string(fin_ny_slice) + "x" +
                                      std::to_string(nz_slice);
-        const auto sp = image->GetSpacing();
-        const auto sz = image->GetLargestPossibleRegion().GetSize();
+        const double sp = voxelSize_mm / 10.0;  // cm
         std::ofstream info4(infoBase + ".txt");
         info4 << std::fixed << std::setprecision(3);
         info4 << "#[SECTION VOXELIZED GEOMETRY FILE v.2017-07-26]\n";
         info4 << "phantom/" << std::filesystem::path(infoBase).filename().string()
               << ".raw     # VOXEL GEOMETRY FILE (penEasy 2008 format; .gz accepted)\n";
-        info4 << " " << (-static_cast<double>(sz[0]) * sp[0] / 2.0 / 10.0)
-              << "  " << (-static_cast<double>(sz[1]) * sp[1] / 2.0 / 10.0)
-              << "  " << (-static_cast<double>(sz[2]) * sp[2] / 2.0 / 10.0)
+        info4 << " " << (-static_cast<double>(fin_nx_slice) * sp / 2.0 + shift_x_mm / 10.0)
+              << "  " << (-static_cast<double>(fin_ny_slice) * sp / 2.0 + shift_y_mm / 10.0)
+              << "  " << (-static_cast<double>(nz_slice) * sp / 2.0)
               << "              # OFFSET OF THE VOXEL GEOMETRY [cm]\n";
-        info4 << " " << sz[0] << " " << sz[1] << " " << sz[2]
+        info4 << " " << fin_nx_slice << " " << fin_ny_slice << " " << nz_slice
               << "                 # NUMBER OF VOXELS\n";
-        info4 << " " << (sp[0] / 10.0) << " " << (sp[1] / 10.0) << " " << (sp[2] / 10.0)
+        info4 << " " << sp << " " << sp << " " << sp
               << "           # VOXEL SIZES [cm]\n";
         info4 << " 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS\n";
-        std::cout << (hasImplant ? "6" : "5") << "-label info file written: " << infoBase << ".txt" << std::endl;
+        std::cout << "Label info file written: " << infoBase << ".txt" << std::endl;
+    }
+
+    // -------------------------------------------------------------------------
+    // Write MC-GPU .in file (based on template, geometry section replaced)
+    // -------------------------------------------------------------------------
+    if (!mcgpu_in_template.empty())
+    {
+        std::ifstream tmpl(mcgpu_in_template);
+        if (!tmpl)
+        {
+            std::cerr << "Warning: cannot open MC-GPU template: " << mcgpu_in_template << std::endl;
+        }
+        else
+        {
+            const std::string outDir  = std::filesystem::path(label4Path).parent_path().string() + "/";
+            const std::string inPath  = outDir + "CBCT.in";
+            std::ofstream out(inPath);
+            if (!out) throw std::runtime_error("Cannot write .in file: " + inPath);
+
+            const double sp_cm = voxelSize_mm / 10.0;
+            const double off_x = -static_cast<double>(fin_nx_slice) * sp_cm / 2.0 + shift_x_mm / 10.0;
+            const double off_y = -static_cast<double>(fin_ny_slice) * sp_cm / 2.0 + shift_y_mm / 10.0;
+            const double off_z = -static_cast<double>(nz_slice)     * sp_cm / 2.0;
+            const std::string absRawPath = std::filesystem::absolute(label4Path).string();
+
+            std::string line;
+            int skipLines = 0;
+            while (std::getline(tmpl, line))
+            {
+                if (line.find("#[SECTION IMAGE DETECTOR") != std::string::npos)
+                {
+                    out << line << "\n";
+                    out << mcgpu_output_name << "   # OUTPUT IMAGE FILE NAME\n";
+                    out << mcgpu_det_nx << "      " << mcgpu_det_nz
+                        << "                  # NUMBER OF PIXELS IN THE IMAGE: Nx Nz\n";
+                    skipLines = 2;
+                }
+                else if (line.find("#[SECTION VOXELIZED GEOMETRY FILE") != std::string::npos)
+                {
+                    out << line << "\n";
+                    out << std::fixed << std::setprecision(3);
+                    out << absRawPath << "     # VOXEL GEOMETRY FILE (penEasy 2008 format; .gz accepted)\n";
+                    out << " " << off_x << "  " << off_y << "  " << off_z
+                        << "              # OFFSET OF THE VOXEL GEOMETRY [cm]\n";
+                    out << " " << fin_nx_slice << " " << fin_ny_slice << " " << nz_slice
+                        << "                 # NUMBER OF VOXELS\n";
+                    out << " " << sp_cm << " " << sp_cm << " " << sp_cm
+                        << "           # VOXEL SIZES [cm]\n";
+                    out << " 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS\n";
+                    skipLines = 5;
+                }
+                else if (skipLines > 0)
+                {
+                    --skipLines;
+                }
+                else
+                {
+                    out << line << "\n";
+                }
+            }
+            std::cout << "MC-GPU .in file written: " << inPath << std::endl;
+        }
     }
 
     std::cout << "Done." << std::endl;

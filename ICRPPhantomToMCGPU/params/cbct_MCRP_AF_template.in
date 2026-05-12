@@ -9,7 +9,7 @@
 #
 
 #[SECTION SIMULATION CONFIG v.2009-05-12]
-1.0e9                        # Simulating only 1% of the expected mammo exposure for testing!    ORIGINAL HISTORIES:  3.4e11             # TOTAL NUMBER OF HISTORIES, OR SIMULATION TIME IN SECONDS IF VALUE < 100000
+1.0e11                        # Simulating only 1% of the expected mammo exposure for testing!    ORIGINAL HISTORIES:  3.4e11             # TOTAL NUMBER OF HISTORIES, OR SIMULATION TIME IN SECONDS IF VALUE < 100000
 55567891              # RANDOM SEED (ranecu PRNG)
 10                              # GPU NUMBER TO USE WHEN MPI IS NOT USED, OR TO BE AVOIDED IN MPI RUNS
 128                           # GPU THREADS PER CUDA BLOCK (multiple of 32)
@@ -17,6 +17,7 @@
  
 #[SECTION SOURCE v.2016-12-02]
 spectrum/120kV_Al100um_Brass60um.spc    # X-RAY ENERGY SPECTRUM FILE
+#spectrum/80kV_Al340um.spc    # X-RAY ENERGY SPECTRUM FILE
 #spectrum/mono.spc    # X-RAY ENERGY SPECTRUM FILE
  0.0   -57.8   0.0          #  SOURCE POSITION: X (chest-to-nipple), Y (right-to-left), Z (caudal-to-cranial) [cm]
  0.0    1.0    0.0             # SOURCE DIRECTION COSINES: U V W

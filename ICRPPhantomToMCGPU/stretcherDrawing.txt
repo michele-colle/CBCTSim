@@ -1,0 +1,12 @@
+# STRETCHER AXIAL PROFILE (XY plane, +Y = toward patient)
+#
+#   ←——————— top_w ————————→
+#   ___________________________
+#  |     carbon shell wall     |   ← r_top
+#  |  ┌─────────────────────┐  |  ↑
+#  \  │  fill (foam / air)  │  /  | h
+#   \ └─────────────────────┘ /   ↓
+#    \_______________________/   ← r_bot
+#   ←——————— bot_w ————————→
+#
+#  Open side: +Y (top, patient-facing) or -Y (bottom)?
