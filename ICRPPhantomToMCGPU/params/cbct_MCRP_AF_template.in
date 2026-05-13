@@ -45,9 +45,9 @@ results/maria_cristeta_fit_no_stretcher/AF_head_registered_mariaCristeta_vox_5la
  material/Pen_base/icrp_CsI.mcgpu         # detector material
 
 #[SECTION TOMOGRAPHIC TRAJECTORY v.2016-12-02]
-1       # ==> 1 for mammo only; ==> 25 for mammo + DBT    # NUMBER OF PROJECTIONS (1 disables the tomographic mode)
+480       # ==> 1 for mammo only; ==> 25 for mammo + DBT    # NUMBER OF PROJECTIONS (1 disables the tomographic mode)
 57.8                            # SOURCE-TO-ROTATION AXIS DISTANCE serve per ofsettare il centro di rotazione, mettere uguale -source position
-1.0                             # ANGLE BETWEEN PROJECTIONS (360/num_projections for full CT) [degrees]
+0.750                             # ANGLE BETWEEN PROJECTIONS (360/num_projections for full CT) [degrees]
 0.0                             # ANGULAR ROTATION TO FIRST PROJECTION (USEFUL FOR DBT, INPUT SOURCE DIRECTION CONSIDERED AS 0 DEGREES) [degrees]
 0.0  0.0  1.0                   # AXIS OF ROTATION (Vx,Vy,Vz)
 0.0                             # TRANSLATION ALONG ROTATION AXIS BETWEEN PROJECTIONS (HELICAL SCAN) [cm]
@@ -78,6 +78,16 @@ material/MRCP_AF/icrp_Cranium_cortical.mcgpu density=1.904000 voxelId=4
 material/Pen_base/titanium.mcgpu density=4.54 voxelId=5
 material/Pen_base/icrp_c.mcgpu density=2.00 voxelId=10
 material/Pen_base/icrp_polyufoam.mcgpu density=0.021 voxelId=11
+
+
+#material/icrp_air.mcgpu density=0.001200 voxelId=1
+#material/icrp_air.mcgpu density=0.001200 voxelId=2
+#material/icrp_air.mcgpu density=0.001200 voxelId=3
+#material/icrp_air.mcgpu density=0.001200 voxelId=4
+#material/icrp_air.mcgpu density=0.001200 voxelId=5
+#material/icrp_air.mcgpu density=0.001200 voxelId=10
+#material/icrp_air.mcgpu density=0.001200 voxelId=11
+
 
 # >>>> END INPUT FILE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  

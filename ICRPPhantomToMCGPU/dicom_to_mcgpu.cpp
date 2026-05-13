@@ -33,6 +33,7 @@
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 #include <itkImage.h>
+#include <itkImageFileReader.h>
 #include <itkImageSeriesReader.h>
 #include <itkMetaDataObject.h>
 #include <itkNumericSeriesFileNames.h>
@@ -337,6 +338,9 @@ int main(int argc, char **argv)
     bool        write_dicom     = true;
     std::string dicom_output_dir;   // derived automatically after outDirPath is known
 
+    // NRRD segmentation mask (optional): voxels where mask==0 are forced to air
+    std::string mask_nrrd_path;
+
     const bool usingCfg = (argc == 2) &&
         (std::string(argv[1]).size() > 4) &&
         (std::string(argv[1]).substr(std::string(argv[1]).size()-4) == ".cfg");
@@ -426,6 +430,8 @@ int main(int argc, char **argv)
         mcgpu_det_nz      = static_cast<int>(getD("mcgpu_det_nz", mcgpu_det_nz));
 
         write_dicom = (getS("write_dicom", write_dicom ? "true" : "false") != "false");
+
+        mask_nrrd_path = toLinuxPath(getS("mask_nrrd", ""));
 
         std::cout << "Parameters loaded from: " << argv[1] << "\n";
     }
@@ -522,6 +528,11 @@ int main(int argc, char **argv)
 
     ImageType::Pointer huImage = reader->GetOutput();
     huImage->DisconnectPipeline();
+
+    const auto& dcmOriginITK = huImage->GetOrigin();
+    const double dcm_orig_x = dcmOriginITK[0];
+    const double dcm_orig_y = dcmOriginITK[1];
+    const double dcm_orig_z = dcmOriginITK[2];
 
     const auto &dcmSize    = huImage->GetLargestPossibleRegion().GetSize();
     const auto &dcmSpacing = huImage->GetSpacing();
@@ -679,6 +690,38 @@ int main(int argc, char **argv)
         std::cout << "Crop cylinder 2D mask computed.\n";
     }
 
+    // ── NRRD segmentation mask ────────────────────────────────────────────────
+    using MaskImageType = itk::Image<uint8_t, 3>;
+    MaskImageType::Pointer maskImage;
+    const uint8_t* maskBuf = nullptr;
+    int mnx = 0, mny = 0, mnz = 0;
+    double mo_x = 0, mo_y = 0, mo_z = 0;
+    double ms_x = 1, ms_y = 1, ms_z = 1;
+
+    if (!mask_nrrd_path.empty())
+    {
+        auto maskReader = itk::ImageFileReader<MaskImageType>::New();
+        maskReader->SetFileName(mask_nrrd_path);
+        maskReader->Update();
+        maskImage = maskReader->GetOutput();
+        maskImage->DisconnectPipeline();
+
+        const auto& msz  = maskImage->GetLargestPossibleRegion().GetSize();
+        const auto& msp  = maskImage->GetSpacing();
+        const auto& morg = maskImage->GetOrigin();
+
+        mnx = static_cast<int>(msz[0]);
+        mny = static_cast<int>(msz[1]);
+        mnz = static_cast<int>(msz[2]);
+        ms_x = msp[0]; ms_y = msp[1]; ms_z = msp[2];
+        mo_x = morg[0]; mo_y = morg[1]; mo_z = morg[2];
+
+        maskBuf = maskImage->GetBufferPointer();
+        std::cout << "Mask loaded     : " << mask_nrrd_path << "\n";
+        std::cout << "  size="<<mnx<<"x"<<mny<<"x"<<mnz
+                  <<" spacing="<<ms_x<<"x"<<ms_y<<"x"<<ms_z<<" mm\n";
+    }
+
     // =========================================================================
     // 5. Build output paths and open .raw file for streaming write
     // =========================================================================
@@ -812,6 +855,16 @@ int main(int argc, char **argv)
 
                 if (ci<-0.5||ci>inx-0.5||cj<-0.5||cj>iny-0.5||ck<-0.5||ck>inz-0.5)
                     continue;
+
+                // ── NRRD mask: nearest-neighbour lookup in DICOM physical space ──
+                if (maskBuf) {
+                    const int mi = static_cast<int>(std::round((dcm_orig_x + ci*sx_mm - mo_x) / ms_x));
+                    const int mj = static_cast<int>(std::round((dcm_orig_y + cj*sy_mm - mo_y) / ms_y));
+                    const int mk = static_cast<int>(std::round((dcm_orig_z + ck*sz_mm - mo_z) / ms_z));
+                    if (mi < 0 || mi >= mnx || mj < 0 || mj >= mny || mk < 0 || mk >= mnz ||
+                        maskBuf[mk * mny * mnx + mj * mnx + mi] == 0)
+                        continue;  // leave voxel as air
+                }
 
                 const double cic=std::max(0.0,std::min((double)(inx-1),ci));
                 const double cjc=std::max(0.0,std::min((double)(iny-1),cj));
