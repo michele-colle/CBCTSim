@@ -84,6 +84,8 @@ static std::map<std::string, std::string> loadCfg(const std::string &path)
         auto trim = [](std::string s) {
             s.erase(0, s.find_first_not_of(" \t\r\n"));
             s.erase(s.find_last_not_of(" \t\r\n") + 1);
+            if (s.size() >= 2 && s.front() == '"' && s.back() == '"')
+                s = s.substr(1, s.size() - 2);
             return s;
         };
         cfg[trim(line.substr(0, eq))] = trim(line.substr(eq + 1));
@@ -356,7 +358,7 @@ int main(int argc, char **argv)
         };
 
         dicomDir = toLinuxPath(getS("dicom_dir", dicomDir));
-        outputPrefix = getS("output_prefix", outputPrefix);
+        outputPrefix = toLinuxPath(getS("output_prefix", outputPrefix));
         seriesUID    = getS("series_uid",    seriesUID);
 
         thr_air_fat        = static_cast<int16_t>(getD("thr_air_fat",        thr_air_fat));
