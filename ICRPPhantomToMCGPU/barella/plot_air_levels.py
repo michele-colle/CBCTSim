@@ -36,13 +36,27 @@ TABLE_COLORS = ["mediumpurple", "hotpink"]
 
 KV_LABEL = {0: "120 kV  (imgScan_0)", 1: "80 kV  (imgScan_1)"}
 
-# ── Simulated projections (already log-projected, float32) ────────────────────
+def _w(path):
+    """Convert a Windows path to its WSL /mnt/<drive>/... equivalent."""
+    p = path.replace("\\", "/")
+    if len(p) >= 2 and p[1] == ":":
+        p = f"/mnt/{p[0].lower()}/{p[3:]}"
+    return p
+
+
+#── Simulated projections (already log-projected, float32) ────────────────────
 SIM_DIRS = {
-    0: ("/mnt/f/Michele_diskF/GradientHealth/download/testRAR-13MAY2026"
-        "/dicomweb/export/GRDN1TQOUC2B1R2U/20251119_11096464/MCGPU_sim"
-        "/08b_Stretcher_test_rar_25_05_26_120_kV/results/total_proj"),
-    # 1: "...",  # 80 kV — add when ready
+    0: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\08c_Stretcher_test_rar_25_05_26_120_kV\results\total_proj"),
+    1: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\09c_Stretcher_test_rar_25_05_26_80_kV\results\total_proj"),
 }
+SIM_DIRS_PRIMARY = {
+    0: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\08c_Stretcher_test_rar_25_05_26_120_kV\results\primary_proj"),
+    1: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\09c_Stretcher_test_rar_25_05_26_80_kV\results\primary_proj"),
+}
+# SIM_DIRS = {
+#     0: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\08_Stretcher_test_rar_25_05_26_120_kV\results\total_proj"),
+#     1: _w(r"F:\Michele_diskF\GradientHealth\download\testRAR-13MAY2026\dicomweb\export\GRDN1TQOUC2B1R2U\20251119_11096464\MCGPU_sim\09c_Stretcher_test_rar_25_05_26_80_kV\results\total_proj"),
+# }
 
 
 def _hhmm(pjson):
@@ -248,75 +262,90 @@ def plot_averages():
 
 def plot_log_projection():
     """
-    1. I0(i)      = mean of the 3 air-scan ROI values at projection i  (cached)
-    2. img_avg(i) = pixel-wise mean of Table 1 and Table 2 full images at projection i
+    1. I0(i)      = mean of the 3 air-scan ROI values, reordered by angle
+    2. img_avg(i) = pixel-wise mean of Table 1 and Table 2 at the same angle
     3. proj(i)    = mean_ROI[ ln(I0(i)) − ln(img_avg(i)) ]
+    Experimental images are sorted by angle_eff from the JSON.
+    Simulated images are ordered 0°, 0.75°, 1.5°, ... (clockwise, hardcoded).
     """
+    SIM_STEP_DEG = 0.75
+
     _, axes = plt.subplots(1, 2, figsize=(15, 5), sharey=False)
     all_proj = []
 
     for scan_idx, ax in enumerate(axes):
-        # I0 per projection from the 3 air scans (scalar, cached)
-        air_avg = np.mean([_get_means(f, scan_idx) for f, _ in AIR_SCANS], axis=0)
-
-        # table scan metadata (image list + geometry)
+        # ── Table scan metadata + per-scan angle array ────────────────────────
         table_meta = []
         for folder, _ in TABLE_SCANS:
             sd     = os.path.join(_BASE, folder)
             study  = load_study(find_params_json(sd))
             params = study["scans"][scan_idx]
+            angles = np.asarray(params["angle_eff"], dtype=np.float64)
             imgdir = os.path.join(sd, f"imgScan_{scan_idx}")
-            table_meta.append((list_images(imgdir), params["det_rows"], params["det_columns"]))
+            table_meta.append((list_images(imgdir), params["det_rows"],
+                               params["det_columns"], angles))
 
-        images0, rows, cols = table_meta[0]
-        n_proj = len(images0)
-        c0, c1 = cols // 4, cols - cols // 4
-        proj_roi = np.empty(n_proj, dtype=np.float64)
+        images0, rows, cols, angles0 = table_meta[0]
+        sort_idx   = np.argsort(angles0)       # ascending angle order
+        angles_exp = angles0[sort_idx]
+        n_proj     = len(images0)
+        c0, c1     = cols // 4, cols - cols // 4
+        proj_roi   = np.empty(n_proj, dtype=np.float64)
+
+        # I0 from air scans — apply same angular sort
+        air_avg_raw = np.mean([_get_means(f, scan_idx) for f, _ in AIR_SCANS], axis=0)
+        air_avg     = air_avg_raw[sort_idx]
 
         out_dir = os.path.join(_BASE, f"imgScan_{scan_idx}_proj")
         os.makedirs(out_dir, exist_ok=True)
 
         print(f"  log-projection {KV_LABEL[scan_idx]}: {n_proj} projections ...", flush=True)
-        for i in range(n_proj):
+        for out_i, file_i in enumerate(sort_idx):
             imgs = [
-                np.fromfile(images[i][1], dtype=np.uint16)
+                np.fromfile(images[file_i][1], dtype=np.uint16)
                   .reshape(r, c).astype(np.float32)
-                for images, r, c in table_meta
+                for images, r, c, _ in table_meta
             ]
             img_avg = np.mean(imgs, axis=0)
             np.clip(img_avg, 1, None, out=img_avg)
-            log_proj    = np.log(float(air_avg[i])) - np.log(img_avg)
-            proj_roi[i] = log_proj[:, c0:c1].mean()
+            log_proj        = np.log(float(air_avg[out_i])) - np.log(img_avg)
+            proj_roi[out_i] = log_proj[:, c0:c1].mean()
 
-            out_path = os.path.join(out_dir, f"{i:04d}_{cols}x{rows}float.raw")
+            out_path = os.path.join(out_dir, f"{out_i:04d}_{cols}x{rows}float.raw")
             log_proj.astype(np.float32).tofile(out_path)
 
         print(f"  saved {n_proj} images → {out_dir}", flush=True)
 
         all_proj.append(proj_roi)
         color = "steelblue" if scan_idx == 0 else "tomato"
-        ax.plot(proj_roi, color=color, lw=1, label="Experimental")
+        ax.plot(angles_exp, proj_roi, color=color, lw=1, label="Experimental")
         ax.set_title(KV_LABEL[scan_idx])
-        ax.set_xlabel("Projection index")
+        ax.set_xlabel("Angle (°)")
         ax.set_ylabel("Mean log-projection in ROI")
         ax.grid(True, lw=0.4, alpha=0.6)
 
-        # ── Simulated overlay ─────────────────────────────────────────────────
-        sim_dir = SIM_DIRS.get(scan_idx)
-        if sim_dir and os.path.isdir(sim_dir):
+        # ── Simulated overlays ────────────────────────────────────────────────
+        for sim_dir, sim_label, sim_color in [
+            (SIM_DIRS.get(scan_idx),         "Sim total",   "red"),
+            (SIM_DIRS_PRIMARY.get(scan_idx), "Sim primary", "darkorange"),
+        ]:
+            if not sim_dir or not os.path.isdir(sim_dir):
+                continue
             sim_files = _list_sim_files(sim_dir)
-            if sim_files:
-                _, s_rows, s_cols, _ = sim_files[0]
-                sc0, sc1 = s_cols // 4, s_cols - s_cols // 4
-                sim_roi = np.empty(len(sim_files), dtype=np.float64)
-                print(f"  simulated {KV_LABEL[scan_idx]}: {len(sim_files)} projections "
-                      f"({s_rows}×{s_cols}) ...", flush=True)
-                for j, (_, r, c, path) in enumerate(sim_files):
-                    img = np.fromfile(path, dtype=np.float32).reshape(r, c)
-                    sim_roi[j] = img[:, sc0:sc1].mean()
-                all_proj.append(sim_roi)
-                ax.plot(sim_roi, color="red", lw=1, ls="--", label="Simulated")
-                ax.legend(loc="lower right", fontsize=9)
+            if not sim_files:
+                continue
+            _, s_rows, s_cols, _ = sim_files[0]
+            sc0, sc1   = s_cols // 4, s_cols - s_cols // 4
+            sim_roi    = np.empty(len(sim_files), dtype=np.float64)
+            angles_sim = np.arange(len(sim_files)) * SIM_STEP_DEG
+            print(f"  {sim_label} {KV_LABEL[scan_idx]}: {len(sim_files)} projections "
+                  f"({s_rows}×{s_cols}) ...", flush=True)
+            for j, (_, r, c, path) in enumerate(sim_files):
+                img = np.fromfile(path, dtype=np.float32).reshape(r, c)
+                sim_roi[j] = img[:, sc0:sc1].mean()
+            all_proj.append(sim_roi)
+            ax.plot(angles_sim, sim_roi, color=sim_color, lw=1, ls="--", label=sim_label)
+        ax.legend(loc="lower right", fontsize=9)
 
     y_min = min(v.min() for v in all_proj)
     y_max = max(v.max() for v in all_proj)

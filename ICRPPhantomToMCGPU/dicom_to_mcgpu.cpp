@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+#include <omp.h>
+
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 #include <itkImage.h>
@@ -335,6 +337,10 @@ int main(int argc, char **argv)
     std::string mcgpu_output_name;
     int         mcgpu_det_nx = 512;
     int         mcgpu_det_nz = 512;
+    // Base name written into the .in VOXEL GEOMETRY FILE line as
+    // "phantom/<phantom_name>_<dims>.raw" (independent of the on-disk path).
+    // Empty -> fall back to the actual .raw file's basename.
+    std::string phantom_name;
 
     // DICOM output
     bool        write_dicom     = true;
@@ -430,6 +436,7 @@ int main(int argc, char **argv)
         mcgpu_output_name = getS("mcgpu_output_name", mcgpu_output_name);
         mcgpu_det_nx      = static_cast<int>(getD("mcgpu_det_nx", mcgpu_det_nx));
         mcgpu_det_nz      = static_cast<int>(getD("mcgpu_det_nz", mcgpu_det_nz));
+        phantom_name      = getS("phantom_name", phantom_name);
 
         write_dicom = (getS("write_dicom", write_dicom ? "true" : "false") != "false");
 
@@ -526,7 +533,10 @@ int main(int argc, char **argv)
     reader->SetImageIO(gdcmIO);
     reader->SetFileNames(fileNames);
     reader->ForceOrthogonalDirectionOff();
+    const double t_read0 = omp_get_wtime();
     reader->Update();
+    const double t_read = omp_get_wtime() - t_read0;
+    std::cout << "[timing] DICOM read      : " << t_read << " s\n" << std::flush;
 
     ImageType::Pointer huImage = reader->GetOutput();
     huImage->DisconnectPipeline();
@@ -810,12 +820,17 @@ int main(int argc, char **argv)
     }
 
     // =========================================================================
-    // 6. Main slice loop: fill → apply overlays → write
-    //    Only two slices (label + HU) are in RAM at any time.
+    // 6. Build the volume in Z-bands ("chunks") to bound RAM.
+    //    For each band of CHUNK slices:
+    //      Phase A — one OpenMP loop fills the band's slices in parallel
+    //                (slices within a band run with no barrier between them, so
+    //                 all threads stay busy; threads spawn once per band, not
+    //                 once per slice).
+    //      Phase B — the band's labels are appended to the .raw file in order
+    //                and its DICOM slices are written serially.
+    //    Peak RAM = CHUNK * slicePx * (1 + 2*writeDicom) bytes, independent of
+    //    the total Z extent.  The full volume is NEVER held in memory.
     // =========================================================================
-    std::vector<uint8_t> labelSlice(slicePx);
-    std::vector<int16_t> huSlice(slicePx);
-
     const int16_t* dp  = huImage->GetBufferPointer();
     const int inx = static_cast<int>(nx_d);
     const int iny = static_cast<int>(ny_d);
@@ -832,149 +847,201 @@ int main(int argc, char **argv)
     size_t dicomVoxTotal = 0;
     size_t cropZeroTotal = 0;
 
-    for (size_t ok = 0; ok < out_nz; ++ok)
+    // Slices per band: large enough to keep all threads busy, small enough that
+    // band buffers stay well under RAM (e.g. 64 * 4.55M voxels * 3 B ~= 0.9 GB).
+    const size_t CHUNK = 256;
+    std::vector<uint8_t> labelBand(CHUNK * slicePx);
+    std::vector<int16_t> huBand;
+    if (writeDicom) huBand.assign(CHUNK * slicePx, int16_t(-1000));
+
+    std::cout << "Building volume (" << out_nz << " slices, bands of "
+              << CHUNK << ") on " << omp_get_max_threads() << " threads...\n"
+              << std::flush;
+
+    double t_compute = 0, t_rawwrite = 0, t_dicom = 0;  // [timing] accumulators
+
+    for (size_t z0 = 0; z0 < out_nz; z0 += CHUNK)
     {
-        const double pz = (ok+0.5)*out_vz - out_nz*out_vz*0.5;
+        const size_t z1 = std::min(z0 + CHUNK, out_nz);
+        const size_t nslab = z1 - z0;
 
-        // ── Fill slice from DICOM (trilinear interp) ──────────────────────────
-        std::fill(labelSlice.begin(), labelSlice.end(), uint8_t(0));
-        std::fill(huSlice.begin(),    huSlice.end(),    int16_t(-1000));
+        // Reset the active part of the band buffers (air / -1000 HU).
+        std::fill(labelBand.begin(), labelBand.begin() + nslab*slicePx, uint8_t(0));
+        if (writeDicom)
+            std::fill(huBand.begin(), huBand.begin() + nslab*slicePx, int16_t(-1000));
 
-        for (size_t oj = 0; oj < out_ny; ++oj) {
-            const double py = (oj+0.5)*out_vxy - out_ny*out_vxy*0.5;
-            for (size_t oi = 0; oi < out_nx; ++oi) {
-                const double px = (oi+0.5)*out_vxy - out_nx*out_vxy*0.5;
+        const double t_c0 = omp_get_wtime();
 
-                const double rx = px-dicom_corner_x_mm-qcx;
-                const double ry = py-dicom_corner_y_mm-qcy;
-                const double rz = pz-dicom_corner_z_mm-qcz;
-                const auto [qrx,qry,qrz] = Rt.apply(rx,ry,rz);
-                const double qx=qrx+qcx, qy=qry+qcy, qz=qrz+qcz;
+        // ── Phase A: fill the band's slices in parallel ───────────────────────
+        // Slice s owns the disjoint span [s*slicePx, (s+1)*slicePx) of the band,
+        // so threads never touch the same cell.  Scalar tallies use reductions;
+        // per-implant counts merge once per (slice,implant) via an atomic add.
+        #pragma omp parallel for schedule(dynamic) \
+            reduction(+:dicomVoxTotal,cropZeroTotal,strCarbCount,strFoamCount)
+        for (size_t s = 0; s < nslab; ++s)
+        {
+            const size_t ok = z0 + s;
+            const double pz = (ok+0.5)*out_vz - out_nz*out_vz*0.5;
+            uint8_t* const lab = labelBand.data() + s*slicePx;
+            int16_t* const huv = writeDicom ? huBand.data() + s*slicePx : nullptr;
 
-                const double ci = qx/sx_mm-0.5;
-                const double cj = qy/sy_mm-0.5;
-                const double ck = qz/sz_mm-0.5;
-
-                if (ci<-0.5||ci>inx-0.5||cj<-0.5||cj>iny-0.5||ck<-0.5||ck>inz-0.5)
-                    continue;
-
-                // ── NRRD mask: nearest-neighbour lookup in DICOM physical space ──
-                if (maskBuf) {
-                    const int mi = static_cast<int>(std::round((dcm_orig_x + ci*sx_mm - mo_x) / ms_x));
-                    const int mj = static_cast<int>(std::round((dcm_orig_y + cj*sy_mm - mo_y) / ms_y));
-                    const int mk = static_cast<int>(std::round((dcm_orig_z + ck*sz_mm - mo_z) / ms_z));
-                    if (mi < 0 || mi >= mnx || mj < 0 || mj >= mny || mk < 0 || mk >= mnz ||
-                        maskBuf[mk * mny * mnx + mj * mnx + mi] == 0)
-                        continue;  // leave voxel as air
-                }
-
-                const double cic=std::max(0.0,std::min((double)(inx-1),ci));
-                const double cjc=std::max(0.0,std::min((double)(iny-1),cj));
-                const double ckc=std::max(0.0,std::min((double)(inz-1),ck));
-                const int i0=(int)cic,i1=std::min(i0+1,inx-1);
-                const int j0=(int)cjc,j1=std::min(j0+1,iny-1);
-                const int k0=(int)ckc,k1=std::min(k0+1,inz-1);
-                const double ti=cic-i0,tj=cjc-j0,tk=ckc-k0;
-
-                auto huAt=[&](int ii,int jj,int kk)->double{
-                    return (double)dp[kk*iny*inx+jj*inx+ii];};
-                const double hu=
-                    (1-tk)*((1-tj)*((1-ti)*huAt(i0,j0,k0)+ti*huAt(i1,j0,k0))
-                          +    tj *((1-ti)*huAt(i0,j1,k0)+ti*huAt(i1,j1,k0)))
-                    +  tk *((1-tj)*((1-ti)*huAt(i0,j0,k1)+ti*huAt(i1,j0,k1))
-                          +    tj *((1-ti)*huAt(i0,j1,k1)+ti*huAt(i1,j1,k1)));
-
-                const size_t ij = oj*out_nx+oi;
-                const int16_t huVal = static_cast<int16_t>(
-                    std::round(std::clamp(hu,-32768.0,32767.0)));
-                huSlice[ij] = huVal;
-
-                if      (huVal<thr_air_fat)        labelSlice[ij]=0;
-                else if (huVal<thr_fat_soft)       labelSlice[ij]=1;
-                else if (huVal<thr_soft_spongiosa) labelSlice[ij]=2;
-                else if (huVal<thr_spongiosa_cort) labelSlice[ij]=3;
-                else                               labelSlice[ij]=4;
-                ++dicomVoxTotal;
-            }
-        }
-
-        // ── Implant cylinders ─────────────────────────────────────────────────
-        for (size_t impIdx = 0; impIdx < implants.size(); ++impIdx) {
-            const auto& imp = implants[impIdx];
-            if (std::abs(pz-imp.cz_mm) > impCache[impIdx].halfH) continue;
-            const double r2 = impCache[impIdx].r2;
+            // ── Fill slice from DICOM (trilinear interp) ──────────────────────
             for (size_t oj = 0; oj < out_ny; ++oj) {
-                const double dy=(oj+0.5)*out_vxy-out_ny*out_vxy*0.5-imp.cy_mm;
+                const double py = (oj+0.5)*out_vxy - out_ny*out_vxy*0.5;
                 for (size_t oi = 0; oi < out_nx; ++oi) {
-                    const double dx=(oi+0.5)*out_vxy-out_nx*out_vxy*0.5-imp.cx_mm;
-                    if (dx*dx+dy*dy<=r2) {
-                        const size_t ij=oj*out_nx+oi;
-                        labelSlice[ij]=5; huSlice[ij]=3000;
-                        ++implantVoxCount[impIdx];
+                    const double px = (oi+0.5)*out_vxy - out_nx*out_vxy*0.5;
+
+                    const double rx = px-dicom_corner_x_mm-qcx;
+                    const double ry = py-dicom_corner_y_mm-qcy;
+                    const double rz = pz-dicom_corner_z_mm-qcz;
+                    const auto [qrx,qry,qrz] = Rt.apply(rx,ry,rz);
+                    const double qx=qrx+qcx, qy=qry+qcy, qz=qrz+qcz;
+
+                    const double ci = qx/sx_mm-0.5;
+                    const double cj = qy/sy_mm-0.5;
+                    const double ck = qz/sz_mm-0.5;
+
+                    if (ci<-0.5||ci>inx-0.5||cj<-0.5||cj>iny-0.5||ck<-0.5||ck>inz-0.5)
+                        continue;
+
+                    // ── NRRD mask: nearest-neighbour lookup in DICOM physical space ──
+                    if (maskBuf) {
+                        const int mi = static_cast<int>(std::round((dcm_orig_x + ci*sx_mm - mo_x) / ms_x));
+                        const int mj = static_cast<int>(std::round((dcm_orig_y + cj*sy_mm - mo_y) / ms_y));
+                        const int mk = static_cast<int>(std::round((dcm_orig_z + ck*sz_mm - mo_z) / ms_z));
+                        if (mi < 0 || mi >= mnx || mj < 0 || mj >= mny || mk < 0 || mk >= mnz ||
+                            maskBuf[mk * mny * mnx + mj * mnx + mi] == 0)
+                            continue;  // leave voxel as air
+                    }
+
+                    const double cic=std::max(0.0,std::min((double)(inx-1),ci));
+                    const double cjc=std::max(0.0,std::min((double)(iny-1),cj));
+                    const double ckc=std::max(0.0,std::min((double)(inz-1),ck));
+                    const int i0=(int)cic,i1=std::min(i0+1,inx-1);
+                    const int j0=(int)cjc,j1=std::min(j0+1,iny-1);
+                    const int k0=(int)ckc,k1=std::min(k0+1,inz-1);
+                    const double ti=cic-i0,tj=cjc-j0,tk=ckc-k0;
+
+                    auto huAt=[&](int ii,int jj,int kk)->double{
+                        return (double)dp[kk*iny*inx+jj*inx+ii];};
+                    const double hu=
+                        (1-tk)*((1-tj)*((1-ti)*huAt(i0,j0,k0)+ti*huAt(i1,j0,k0))
+                              +    tj *((1-ti)*huAt(i0,j1,k0)+ti*huAt(i1,j1,k0)))
+                        +  tk *((1-tj)*((1-ti)*huAt(i0,j0,k1)+ti*huAt(i1,j0,k1))
+                              +    tj *((1-ti)*huAt(i0,j1,k1)+ti*huAt(i1,j1,k1)));
+
+                    const size_t ij = oj*out_nx+oi;
+                    const int16_t huVal = static_cast<int16_t>(
+                        std::round(std::clamp(hu,-32768.0,32767.0)));
+                    if (huv) huv[ij] = huVal;
+
+                    if      (huVal<thr_air_fat)        lab[ij]=0;
+                    else if (huVal<thr_fat_soft)       lab[ij]=1;
+                    else if (huVal<thr_soft_spongiosa) lab[ij]=2;
+                    else if (huVal<thr_spongiosa_cort) lab[ij]=3;
+                    else                               lab[ij]=4;
+                    ++dicomVoxTotal;
+                }
+            }
+
+            // ── Implant cylinders ─────────────────────────────────────────────
+            for (size_t impIdx = 0; impIdx < implants.size(); ++impIdx) {
+                const auto& imp = implants[impIdx];
+                if (std::abs(pz-imp.cz_mm) > impCache[impIdx].halfH) continue;
+                const double r2 = impCache[impIdx].r2;
+                size_t impHits = 0;
+                for (size_t oj = 0; oj < out_ny; ++oj) {
+                    const double dy=(oj+0.5)*out_vxy-out_ny*out_vxy*0.5-imp.cy_mm;
+                    for (size_t oi = 0; oi < out_nx; ++oi) {
+                        const double dx=(oi+0.5)*out_vxy-out_nx*out_vxy*0.5-imp.cx_mm;
+                        if (dx*dx+dy*dy<=r2) {
+                            const size_t ij=oj*out_nx+oi;
+                            lab[ij]=5; if (huv) huv[ij]=3000;
+                            ++impHits;
+                        }
                     }
                 }
+                #pragma omp atomic
+                implantVoxCount[impIdx] += impHits;
             }
-        }
 
-        // ── Crop cylinder ─────────────────────────────────────────────────────
-        if (crop_cylinder_enable) {
-            for (size_t ij = 0; ij < slicePx; ++ij)
-                if (!cropMask[ij]) {
-                    labelSlice[ij]=0; huSlice[ij]=-1000; ++cropZeroTotal;
+            // ── Crop cylinder ─────────────────────────────────────────────────
+            if (crop_cylinder_enable) {
+                for (size_t ij = 0; ij < slicePx; ++ij)
+                    if (!cropMask[ij]) {
+                        lab[ij]=0; if (huv) huv[ij]=-1000; ++cropZeroTotal;
+                    }
+            }
+
+            // ── Stretcher ──────────────────────────────────────────────────────
+            if (stretcher_enable) {
+                for (size_t ij = 0; ij < slicePx; ++ij) {
+                    const uint8_t m = strMask[ij];
+                    if (m==10) { lab[ij]=10; if (huv) huv[ij]=3000; ++strCarbCount; }
+                    else if (m==11) { lab[ij]=11; if (huv) huv[ij]=-100; ++strFoamCount; }
                 }
-        }
-
-        // ── Stretcher ─────────────────────────────────────────────────────────
-        if (stretcher_enable) {
-            for (size_t ij = 0; ij < slicePx; ++ij) {
-                const uint8_t m = strMask[ij];
-                if (m==10) { labelSlice[ij]=10; huSlice[ij]=3000; ++strCarbCount; }
-                else if (m==11) { labelSlice[ij]=11; huSlice[ij]=-100; ++strFoamCount; }
             }
         }
 
-        // ── Label counts ──────────────────────────────────────────────────────
-        for (uint8_t v : labelSlice) if (v<12) ++counts[v];
+        // ── Label histogram for this band (single serial pass) ────────────────
+        for (size_t i = 0; i < nslab*slicePx; ++i) {
+            const uint8_t v = labelBand[i];
+            if (v < 12) ++counts[v];
+        }
+        t_compute += omp_get_wtime() - t_c0;
 
-        // ── Write to .raw ─────────────────────────────────────────────────────
-        rawFile.write(reinterpret_cast<const char*>(labelSlice.data()),
-                      static_cast<std::streamsize>(slicePx));
+        // ── Phase B1: append band labels to .raw (in order) ───────────────────
+        const double t_w0 = omp_get_wtime();
+        rawFile.write(reinterpret_cast<const char*>(labelBand.data()),
+                      static_cast<std::streamsize>(nslab*slicePx));
+        t_rawwrite += omp_get_wtime() - t_w0;
 
-        // ── Write DICOM slice (GDCM persistent writer, correct IPP + pixel spacing)
+        // ── Phase B2: serial GDCM DICOM write (UID generator is not thread-safe)
+        const double t_d0 = omp_get_wtime();
         if (writeDicom) {
-            gdcm::Image&   gImg = gdcmWriter.GetImage();
-            gdcm::DataSet& ds   = gdcmWriter.GetFile().GetDataSet();
+            for (size_t s = 0; s < nslab; ++s) {
+                const size_t ok = z0 + s;
+                gdcm::Image&   gImg = gdcmWriter.GetImage();
+                gdcm::DataSet& ds   = gdcmWriter.GetFile().GetDataSet();
 
-            // Per-slice geometry
-            const double origin3[3] = {ipp_x, ipp_y, ipp_z0 + ok * out_vz};
-            gImg.SetOrigin(origin3);
+                // Per-slice geometry
+                const double origin3[3] = {ipp_x, ipp_y, ipp_z0 + ok * out_vz};
+                gImg.SetOrigin(origin3);
 
-            // Per-slice metadata
-            gTag(ds, 0x0020, 0x0013, std::to_string(ok + 1));  // Instance Number
-            gTag(ds, 0x0008, 0x0018, gdcmUID.Generate());       // SOP Instance UID (unique)
+                // Per-slice metadata
+                gTag(ds, 0x0020, 0x0013, std::to_string(ok + 1));  // Instance Number
+                gTag(ds, 0x0008, 0x0018, gdcmUID.Generate());       // SOP Instance UID (unique)
 
-            // Pixel data (replaces previous slice)
-            gdcm::DataElement pixDE(gdcm::Tag(0x7fe0, 0x0010));
-            pixDE.SetByteValue(
-                reinterpret_cast<const char*>(huSlice.data()),
-                static_cast<uint32_t>(out_nx * out_ny * sizeof(int16_t)));
-            gImg.SetDataElement(pixDE);
+                // Pixel data (replaces previous slice)
+                gdcm::DataElement pixDE(gdcm::Tag(0x7fe0, 0x0010));
+                pixDE.SetByteValue(
+                    reinterpret_cast<const char*>(huBand.data() + s*slicePx),
+                    static_cast<uint32_t>(out_nx * out_ny * sizeof(int16_t)));
+                gImg.SetDataElement(pixDE);
 
-            std::ostringstream fname;
-            fname << dicom_output_dir << "/CT."
-                  << std::setfill('0') << std::setw(4) << (ok + 1) << ".dcm";
-            gdcmWriter.SetFileName(fname.str().c_str());
-            if (!gdcmWriter.Write())
-                throw std::runtime_error("DICOM write failed: " + fname.str());
+                std::ostringstream fname;
+                fname << dicom_output_dir << "/CT."
+                      << std::setfill('0') << std::setw(4) << (ok + 1) << ".dcm";
+                gdcmWriter.SetFileName(fname.str().c_str());
+                if (!gdcmWriter.Write())
+                    throw std::runtime_error("DICOM write failed: " + fname.str());
+            }
         }
 
-        if ((ok+1)%100==0 || ok+1==out_nz)
-            std::cout << "  slice "<<(ok+1)<<"/"<<out_nz<<"\n"<<std::flush;
+        t_dicom += omp_get_wtime() - t_d0;
+
+        std::cout << "  slices "<<z0+1<<"-"<<z1<<"/"<<out_nz<<"\n"<<std::flush;
     }
 
+    const double t_close0 = omp_get_wtime();
     rawFile.close();
+    t_rawwrite += omp_get_wtime() - t_close0;
     if (writeDicom)
         std::cout << "DICOM output written: " << dicom_output_dir << "\n";
+
+    std::cout << "[timing] compute+hist    : " << t_compute  << " s\n"
+              << "[timing] .raw write      : " << t_rawwrite << " s\n"
+              << "[timing] DICOM write     : " << t_dicom    << " s\n" << std::flush;
 
     // ── Post-loop summaries ───────────────────────────────────────────────────
     std::cout << "DICOM placement : " << dicomVoxTotal << " voxels filled.\n";
@@ -1006,37 +1073,80 @@ int main(int argc, char **argv)
                   shift_x_mm/10.0, shift_y_mm/10.0, shift_z_mm/10.0);
 
     // -------------------------------------------------------------------------
-    // 12. Write MC-GPU .in file
+    // 12. Write MC-GPU .in file(s)
     // -------------------------------------------------------------------------
+    // mcgpu_in_template may list several templates separated by ',' or ';'.
+    // The (expensive) volume is built only once above; here we emit one .in
+    // file per template, so the same volume can be simulated under different
+    // acquisition setups.  With a single template the output is "CBCT.in" (as
+    // before); with several, each is named "CBCT_<template-stem>.in" and its
+    // OUTPUT IMAGE FILE NAME is suffixed with the stem to avoid collisions.
     if (!mcgpu_in_template.empty())
     {
-        std::ifstream tmpl(mcgpu_in_template);
-        if (!tmpl) {
-            std::cerr << "Warning: cannot open MC-GPU template: " << mcgpu_in_template << "\n";
-        } else {
-            const std::string inPath = outDir + "CBCT.in";
+        std::vector<std::string> templates;
+        {
+            std::string item;
+            auto flush = [&]() {
+                item.erase(0, item.find_first_not_of(" \t\r\n"));
+                const auto last = item.find_last_not_of(" \t\r\n");
+                if (last != std::string::npos) item.erase(last + 1); else item.clear();
+                if (!item.empty()) templates.push_back(item);
+                item.clear();
+            };
+            for (char c : mcgpu_in_template) {
+                if (c == ',' || c == ';') flush();
+                else item += c;
+            }
+            flush();
+        }
+        const bool multi = templates.size() > 1;
+
+        const double sx_cm  = out_vxy/10.0, sy_cm = out_vxy/10.0, sz_cm = out_vz/10.0;
+        const double off_x  = -(out_nx*sx_cm/2.0) + shift_x_mm/10.0;
+        const double off_y  = -(out_ny*sy_cm/2.0) + shift_y_mm/10.0;
+        const double off_z  = -(out_nz*sz_cm/2.0) + shift_z_mm/10.0;
+        // VOXEL GEOMETRY FILE: reference by name under phantom/, not the disk
+        // path.  Use phantom_name (+ dims) if given, else the .raw basename.
+        const std::string rawName = phantom_name.empty()
+            ? fs::path(rawPath).filename().string()
+            : (phantom_name + "_" + dimTag + ".raw");
+        const std::string geomRef = "phantom/" + rawName;
+
+        for (const std::string &tmplPath : templates)
+        {
+            std::ifstream tmpl(tmplPath);
+            if (!tmpl) {
+                std::cerr << "Warning: cannot open MC-GPU template: " << tmplPath << "\n";
+                continue;
+            }
+            // stem = file name without directory or extension
+            const auto slash = tmplPath.find_last_of("/\\");
+            std::string stem = (slash == std::string::npos) ? tmplPath
+                                                            : tmplPath.substr(slash + 1);
+            const auto dot = stem.find_last_of('.');
+            if (dot != std::string::npos) stem.erase(dot);
+
+            const std::string inPath  = multi ? (outDir + "CBCT_" + stem + ".in")
+                                              : (outDir + "CBCT.in");
+            const std::string outName = multi ? (mcgpu_output_name + stem)
+                                              : mcgpu_output_name;
+
             std::ofstream out(inPath);
             if (!out) throw std::runtime_error("Cannot write .in file: " + inPath);
-
-            const double sx_cm  = out_vxy/10.0, sy_cm = out_vxy/10.0, sz_cm = out_vz/10.0;
-            const double off_x  = -(out_nx*sx_cm/2.0) + shift_x_mm/10.0;
-            const double off_y  = -(out_ny*sy_cm/2.0) + shift_y_mm/10.0;
-            const double off_z  = -(out_nz*sz_cm/2.0) + shift_z_mm/10.0;
-            const std::string absRawPath = fs::absolute(rawPath).string();
 
             std::string line;
             int skipLines = 0;
             while (std::getline(tmpl, line)) {
                 if (line.find("#[SECTION IMAGE DETECTOR") != std::string::npos) {
                     out << line << "\n";
-                    out << mcgpu_output_name << "   # OUTPUT IMAGE FILE NAME\n";
+                    out << outName << "   # OUTPUT IMAGE FILE NAME\n";
                     out << mcgpu_det_nx << "      " << mcgpu_det_nz
                         << "                  # NUMBER OF PIXELS IN THE IMAGE: Nx Nz\n";
                     skipLines = 2;
                 } else if (line.find("#[SECTION VOXELIZED GEOMETRY FILE") != std::string::npos) {
                     out << line << "\n";
                     out << std::fixed << std::setprecision(3);
-                    out << absRawPath << "     # VOXEL GEOMETRY FILE\n";
+                    out << geomRef << "     # VOXEL GEOMETRY FILE\n";
                     out << " " << off_x << "  " << off_y << "  " << off_z
                         << "              # OFFSET OF THE VOXEL GEOMETRY [cm]\n";
                     out << " " << out_nx << " " << out_ny << " " << out_nz
@@ -1051,7 +1161,8 @@ int main(int argc, char **argv)
                     out << line << "\n";
                 }
             }
-            std::cout << "MC-GPU .in file written: " << inPath << "\n";
+            std::cout << "MC-GPU .in file written: " << inPath
+                      << "  (from " << tmplPath << ")\n";
         }
     }
 

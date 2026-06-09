@@ -67,24 +67,24 @@ phantom/AF_head_registered_mariaCristeta_vox_245x326x352/AF_head_registered_mari
  -10.420  -10.598  -10.598              # OFFSET OF THE VOXEL GEOMETRY [cm]
  245 326 352                 # NUMBER OF VOXELS
  0.080 0.080 0.080           # VOXEL SIZES [cm]
- 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS
+ 2 2 2                          # SIZE OF LOW RESOLUTION VOXELS
 
 #[SECTION MATERIAL FILE LIST v.2020-03-03]
 material/icrp_air.mcgpu density=0.001200 voxelId=0
-material/MRCP_AF/icrp_Breast_left_adipose_tissue.mcgpu density=0.952000 voxelId=1
-material/MRCP_AF/icrp_Muscle_head.mcgpu density=1.050000 voxelId=2
-material/MRCP_AF/icrp_Cranium_spongiosa.mcgpu density=1.252000 voxelId=3
-material/MRCP_AF/icrp_Cranium_cortical.mcgpu density=1.904000 voxelId=4
-material/Pen_base/titanium.mcgpu density=4.54 voxelId=5
+#material/MRCP_AF/icrp_Breast_left_adipose_tissue.mcgpu density=0.952000 voxelId=1
+#material/MRCP_AF/icrp_Muscle_head.mcgpu density=1.050000 voxelId=2
+#material/MRCP_AF/icrp_Cranium_spongiosa.mcgpu density=1.252000 voxelId=3
+#material/MRCP_AF/icrp_Cranium_cortical.mcgpu density=1.904000 voxelId=4
+#material/Pen_base/titanium.mcgpu density=4.54 voxelId=5
 material/Pen_base/icrp_c.mcgpu density=2.00 voxelId=10
 material/Pen_base/icrp_polyufoam.mcgpu density=0.021 voxelId=11
 
 
-#material/icrp_air.mcgpu density=0.001200 voxelId=1
-#material/icrp_air.mcgpu density=0.001200 voxelId=2
-#material/icrp_air.mcgpu density=0.001200 voxelId=3
-#material/icrp_air.mcgpu density=0.001200 voxelId=4
-#material/icrp_air.mcgpu density=0.001200 voxelId=5
+material/icrp_air.mcgpu density=0.001200 voxelId=1
+material/icrp_air.mcgpu density=0.001200 voxelId=2
+material/icrp_air.mcgpu density=0.001200 voxelId=3
+material/icrp_air.mcgpu density=0.001200 voxelId=4
+material/icrp_air.mcgpu density=0.001200 voxelId=5
 #material/icrp_air.mcgpu density=0.001200 voxelId=10
 #material/icrp_air.mcgpu density=0.001200 voxelId=11
 

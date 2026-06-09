@@ -1,0 +1,213 @@
+{
+  "binary": "build/dicom_to_mcgpu",
+  "template": "params/dicom_to_mcgpu_template.cfg",
+  "cwd": ".",
+  "cfg_out_dir": "params/generated",
+  "stretcher_labels": [
+    "A",
+    "B",
+    "C"
+  ],
+  "cases": [
+    {
+      "name": "GRDN00MGH1ABQLE8",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/005_54891767",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 274.4,
+          "top_y_mm": 537.0
+        },
+        {
+          "top_x_mm": 401.9,
+          "top_y_mm": 580.4
+        },
+        {
+          "top_x_mm": 399.6,
+          "top_y_mm": 558.1
+        }
+      ]
+    },
+    {
+      "name": "GRDN02BKET588MC5",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/003_58781134",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 344.5,
+          "top_y_mm": 493.7
+        },
+        {
+          "top_x_mm": 345.7,
+          "top_y_mm": 558.6
+        },
+        {
+          "top_x_mm": 305.2,
+          "top_y_mm": 543.3
+        }
+      ]
+    },
+    {
+      "name": "GRDN0V840WXJ02B6",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/006_09289437",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 391.5,
+          "top_y_mm": 511.9
+        },
+        {
+          "top_x_mm": 265.1,
+          "top_y_mm": 505.0
+        },
+        {
+          "top_x_mm": 394.9,
+          "top_y_mm": 502.2
+        }
+      ]
+    },
+    {
+      "name": "GRDN0XOSMPPEAYBU",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/014_15076077",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 402.1,
+          "top_y_mm": 555.3
+        },
+        {
+          "top_x_mm": 234.9,
+          "top_y_mm": 575.3
+        },
+        {
+          "top_x_mm": 299.6,
+          "top_y_mm": 536.3
+        }
+      ]
+    },
+    {
+      "name": "GRDN0YP5B56SGAJM",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/009_19971542",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 331.5,
+          "top_y_mm": 580.3
+        },
+        {
+          "top_x_mm": 244.5,
+          "top_y_mm": 539.2
+        },
+        {
+          "top_x_mm": 313.8,
+          "top_y_mm": 529.2
+        }
+      ]
+    },
+    {
+      "name": "GRDN17YG2OQIYVPO",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/004_73094250",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 290.5,
+          "top_y_mm": 519.1
+        },
+        {
+          "top_x_mm": 387.5,
+          "top_y_mm": 572.8
+        },
+        {
+          "top_x_mm": 259.2,
+          "top_y_mm": 572.9
+        }
+      ]
+    },
+    {
+      "name": "GRDN1P7W3AFP70R8",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/024_03835066",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 339.0,
+          "top_y_mm": 561.3
+        },
+        {
+          "top_x_mm": 342.6,
+          "top_y_mm": 516.2
+        },
+        {
+          "top_x_mm": 310.6,
+          "top_y_mm": 500.1
+        }
+      ]
+    },
+    {
+      "name": "GRDN1TQOUC2B1R2U",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/012_27503983",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 337.1,
+          "top_y_mm": 533.9
+        },
+        {
+          "top_x_mm": 278.7,
+          "top_y_mm": 558.8
+        },
+        {
+          "top_x_mm": 248.9,
+          "top_y_mm": 567.9
+        }
+      ]
+    },
+    {
+      "name": "GRDN21I9AD975J98",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/005_43663721",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 230.7,
+          "top_y_mm": 572.8
+        },
+        {
+          "top_x_mm": 363.3,
+          "top_y_mm": 515.4
+        },
+        {
+          "top_x_mm": 392.2,
+          "top_y_mm": 580.6
+        }
+      ]
+    },
+    {
+      "name": "GRDN2SAZN503S7N0",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/012_28965209",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "top_x_mm": 238.5,
+          "top_y_mm": 578.5
+        },
+        {
+          "top_x_mm": 289.0,
+          "top_y_mm": 535.7
+        },
+        {
+          "top_x_mm": 324.9,
+          "top_y_mm": 574.5
+        }
+      ]
+    }
+  ]
+}
