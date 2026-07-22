@@ -12,7 +12,8 @@ Two modes:
   scan   Walk the export folder and emit a JSON skeleton, one case per
          patient: dicom_dir, output_prefix, mask_nrrd and three stretcher
          positions (pre-filled from the template, ready to be edited by hand
-         after measuring in a DICOM viewer).
+         after measuring in a DICOM viewer).  Each slot is the stretcher
+         polygon centre in isocenter mm: {"cx_mm": .., "cy_mm": ..}.
 
   run    Read that JSON, and for every case x every stretcher position:
          build a .cfg (template + overrides appended) and invoke the binary.
@@ -28,7 +29,7 @@ Examples
       "F:\\Michele_diskF\\GradientHealth\\download\\testRAR-13MAY2026\\dicomweb\\export" \\
       -o batch_jobs.json
 
-  # 2. edit batch_jobs.json: fill the 3 stretcher top_x_mm/top_y_mm per case
+  # 2. edit batch_jobs.json: fill the 3 stretcher cx_mm/cy_mm per case
 
   # 3. run everything (or --dry-run to only write the .cfg files)
   python3 batch_dicom_to_mcgpu.py run batch_jobs.json
@@ -55,13 +56,13 @@ OVERRIDE_KEYS = (
     "mask_nrrd",
     "phantom_name",
     "stretcher_enable",
-    "stretcher_top_x_mm",
-    "stretcher_top_y_mm",
+    "stretcher_cx_mm",
+    "stretcher_cy_mm",
 )
 PATH_KEYS = ("dicom_dir", "output_prefix", "mask_nrrd")
 
-# Prefix for the phantom_name written into the .in (-> phantom/GH_<id>_<dims>.raw)
-PHANTOM_NAME_PREFIX = "GH_"
+# Prefix for phantom_name (-> .raw named "<prefix><id>_<label>_<dims>byte.raw")
+PHANTOM_NAME_PREFIX = ""
 # The binary prints this line for every .raw it writes.
 RAW_WRITTEN_MARKER = "Label phantom written:"
 
@@ -98,9 +99,9 @@ def read_template_stretcher(template_path: Path):
             k, _, v = line.partition("=")
             k, v = k.strip(), v.strip()
             try:
-                if k == "stretcher_top_x_mm":
+                if k == "stretcher_cx_mm":
                     tx = float(v)
-                elif k == "stretcher_top_y_mm":
+                elif k == "stretcher_cy_mm":
                     ty = float(v)
             except ValueError:
                 pass
@@ -115,8 +116,8 @@ def cmd_scan(args):
     if not export.is_dir():
         sys.exit(f"Export folder not found: {export}")
 
-    def_tx, def_ty = read_template_stretcher(REPO_ROOT / args.template)
-    default_stretchers = [{"top_x_mm": def_tx, "top_y_mm": def_ty} for _ in range(3)]
+    def_cx, def_cy = read_template_stretcher(REPO_ROOT / args.template)
+    default_stretchers = [{"cx_mm": def_cx, "cy_mm": def_cy} for _ in range(3)]
 
     cases = []
     for patient in sorted(p for p in export.iterdir() if p.is_dir()):
@@ -161,7 +162,7 @@ def cmd_scan(args):
     out = Path(args.output)
     out.write_text(json.dumps(doc, indent=2))
     print(f"\nWrote {len(cases)} case(s) -> {out}")
-    print("Edit the 3 stretcher top_x_mm/top_y_mm per case, then run:")
+    print("Edit the 3 stretcher cx_mm/cy_mm per case, then run:")
     print(f"  python3 {Path(__file__).name} run {out}")
 
 
@@ -216,8 +217,8 @@ def cmd_run(args):
                 # label keeps the 3 stretcher volumes distinct in phantom/
                 "phantom_name": f"{ph_base}_{label}",
                 "stretcher_enable": "true",
-                "stretcher_top_x_mm": st["top_x_mm"],
-                "stretcher_top_y_mm": st["top_y_mm"],
+                "stretcher_cx_mm": st["cx_mm"],
+                "stretcher_cy_mm": st["cy_mm"],
             }
             cfg_path = cfg_dir / f"{slug(name)}_{label}.cfg"
             cfg_path.write_text(build_cfg(template_text, overrides))

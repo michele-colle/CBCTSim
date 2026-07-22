@@ -16,16 +16,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 274.4,
-          "top_y_mm": 537.0
+          "cx_mm": -45.6,
+          "cy_mm": 225.9
         },
         {
-          "top_x_mm": 401.9,
-          "top_y_mm": 580.4
+          "cx_mm": 81.9,
+          "cy_mm": 225.9
         },
         {
-          "top_x_mm": 399.6,
-          "top_y_mm": 558.1
+          "cx_mm": 79.6,
+          "cy_mm": 239.9
         }
       ]
     },
@@ -36,16 +36,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 344.5,
-          "top_y_mm": 493.7
+          "cx_mm": 24.5,
+          "cy_mm": 225.2
         },
         {
-          "top_x_mm": 345.7,
-          "top_y_mm": 558.6
+          "cx_mm": 25.7,
+          "cy_mm": 217.7
         },
         {
-          "top_x_mm": 305.2,
-          "top_y_mm": 543.3
+          "cx_mm": -14.8,
+          "cy_mm": 236.2
         }
       ]
     },
@@ -56,16 +56,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 391.5,
-          "top_y_mm": 511.9
+          "cx_mm": 71.5,
+          "cy_mm": 197.5
         },
         {
-          "top_x_mm": 265.1,
-          "top_y_mm": 505.0
+          "cx_mm": -54.9,
+          "cy_mm": 219.3
         },
         {
-          "top_x_mm": 394.9,
-          "top_y_mm": 502.2
+          "cx_mm": 74.9,
+          "cy_mm": 247.0
         }
       ]
     },
@@ -76,16 +76,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 402.1,
-          "top_y_mm": 555.3
+          "cx_mm": 82.1,
+          "cy_mm": 211.8
         },
         {
-          "top_x_mm": 234.9,
-          "top_y_mm": 575.3
+          "cx_mm": -85.1,
+          "cy_mm": 229.4
         },
         {
-          "top_x_mm": 299.6,
-          "top_y_mm": 536.3
+          "cx_mm": -20.4,
+          "cy_mm": 207.0
         }
       ]
     },
@@ -96,16 +96,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 331.5,
-          "top_y_mm": 580.3
+          "cx_mm": 11.5,
+          "cy_mm": 212.6
         },
         {
-          "top_x_mm": 244.5,
-          "top_y_mm": 539.2
+          "cx_mm": -75.5,
+          "cy_mm": 216.2
         },
         {
-          "top_x_mm": 313.8,
-          "top_y_mm": 529.2
+          "cx_mm": -6.2,
+          "cy_mm": 206.5
         }
       ]
     },
@@ -116,16 +116,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 290.5,
-          "top_y_mm": 519.1
+          "cx_mm": -29.5,
+          "cy_mm": 232.4
         },
         {
-          "top_x_mm": 387.5,
-          "top_y_mm": 572.8
+          "cx_mm": 67.5,
+          "cy_mm": 188.9
         },
         {
-          "top_x_mm": 259.2,
-          "top_y_mm": 572.9
+          "cx_mm": -60.8,
+          "cy_mm": 214.5
         }
       ]
     },
@@ -136,16 +136,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 339.0,
-          "top_y_mm": 561.3
+          "cx_mm": 19.0,
+          "cy_mm": 227.3
         },
         {
-          "top_x_mm": 342.6,
-          "top_y_mm": 516.2
+          "cx_mm": 22.6,
+          "cy_mm": 246.7
         },
         {
-          "top_x_mm": 310.6,
-          "top_y_mm": 500.1
+          "cx_mm": -9.4,
+          "cy_mm": 178.9
         }
       ]
     },
@@ -156,16 +156,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 337.1,
-          "top_y_mm": 533.9
+          "cx_mm": 17.1,
+          "cy_mm": 238.5
         },
         {
-          "top_x_mm": 278.7,
-          "top_y_mm": 558.8
+          "cx_mm": -41.3,
+          "cy_mm": 201.3
         },
         {
-          "top_x_mm": 248.9,
-          "top_y_mm": 567.9
+          "cx_mm": -71.1,
+          "cy_mm": 210.7
         }
       ]
     },
@@ -176,16 +176,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 230.7,
-          "top_y_mm": 572.8
+          "cx_mm": -89.3,
+          "cy_mm": 194.3
         },
         {
-          "top_x_mm": 363.3,
-          "top_y_mm": 515.4
+          "cx_mm": 43.3,
+          "cy_mm": 201.7
         },
         {
-          "top_x_mm": 392.2,
-          "top_y_mm": 580.6
+          "cx_mm": 72.2,
+          "cy_mm": 242.1
         }
       ]
     },
@@ -196,16 +196,16 @@
       "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/Segmentation-Segment_1-label.nrrd",
       "stretchers": [
         {
-          "top_x_mm": 238.5,
-          "top_y_mm": 578.5
+          "cx_mm": -81.5,
+          "cy_mm": 191.9
         },
         {
-          "top_x_mm": 289.0,
-          "top_y_mm": 535.7
+          "cx_mm": -31.0,
+          "cy_mm": 213.8
         },
         {
-          "top_x_mm": 324.9,
-          "top_y_mm": 574.5
+          "cx_mm": 4.9,
+          "cy_mm": 212.0
         }
       ]
     }

@@ -43,16 +43,17 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from scipy.ndimage import uniform_filter1d
 
-from cbct_utils import load_params, list_images
+from cbct_utils import load_params, list_images, load_study
 
 # ── Default file paths (WSL mount of Windows downloads) ───────────────────────
 #_BASE   = "/mnt/c/Users/colle/Downloads/BARELLA7G"
 #_PARAMS = os.path.join(_BASE, "19.1220805103146695.81_Params.json")
-_BASE   = "/mnt/c/Users/colle/Downloads/TestRAR__25_05_2026/04_ScanTable2"
+#_BASE   = "/mnt/f/Michele_diskF/Test Fantoccio Zurigo-CBCTvsCT/CBCT_DE/Fantoccio_Head_17x17DE_Reg_Zurigo/Fantoccio_Head_17x17_Zurigo"
+#_PARAMS = os.path.join(_BASE, "19.1240516105915049.1331_Params.json")
+_BASE   = "/mnt/f/Michele_diskF/TestRAR__25_05_2026/04_ScanTable2"
 _PARAMS = os.path.join(_BASE, "19.1220805103146695.379_Params.json")
-#_BASE   = "/mnt/c/Users/colle/Downloads/tesstbarella"
-#_PARAMS = os.path.join(_BASE, "19.1231129144032485.1373_Params.json")
 _I0FILE  = os.path.join(_BASE, "I0.txt")
 
 # ── Projection ranges: (first_img, last_img, direction, edge_label) ───────────
@@ -73,6 +74,19 @@ DEAD          = 10    # columns to ignore at each detector edge
 MIN_AIR_COLS  = 20    # minimum clear-air columns required for a valid detection
 OUTLIER_SIGMA = 2.5   # residual threshold (×std) for linear-fit outlier rejection
 MIN_SINO_VAL  = 0.05  # minimum mean log-projection at detected peak (rejects noise/full-shadow)
+
+# ── Vertical-edge emphasis (stretcher tracking with a phantom in the field) ───
+#   The stretcher panel edges are STRAIGHT, FULL-HEIGHT vertical lines, whereas
+#   an intervening phantom is a CURVED silhouette.  Smoothing each column over a
+#   tall vertical window keeps the vertical edges coherent while the phantom's
+#   oblique boundary — which crosses any given column over only a few rows — is
+#   diluted.  A horizontal gradient then turns the surviving vertical edges into
+#   sharp peaks, and the row average gives the 1-D detection profile.
+USE_VERTICAL_EDGE = False   # build the detection sinogram from the vertical-edge filter
+VEDGE_ROWS        = 401     # vertical smoothing window (rows) enforcing vertical coherence
+VEDGE_DX          = 3       # horizontal-gradient half-span (columns)
+VEDGE_MIN_COV     = 0.5     # min fraction of valid (non-padded) rows for a usable column
+VEDGE_DROP_FRAC   = 0.35    # detect_edge threshold fraction for the edge profile
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -184,27 +198,74 @@ def _apply_matrix_correction_2d(log_proj, M_flat, rows, cols):
     return out.astype(np.float32)
 
 
-def build_sinogram(image_list, rows, cols, i0_val, scan, save_dir=None):
+def vertical_edge_profile(img, rows_win=VEDGE_ROWS, dx=VEDGE_DX,
+                          min_cov=VEDGE_MIN_COV):
+    """
+    Collapse a corrected 2-D log-projection to a 1-D profile that preserves
+    straight VERTICAL edges (stretcher panel sides) and damps everything else
+    (the curved phantom silhouette, smooth soft-tissue gradients).
+
+    Steps
+    -----
+    1. Build a validity mask excluding geometric-correction padding (img≈0) so
+       the zero border does not create fake gradients.
+    2. Smooth each column over a tall vertical window (masked average).  A
+       vertical edge is coherent over all rows and survives; a curved/oblique
+       edge crosses a given column over only a few rows and is diluted by
+       ~(rows_crossed / rows_win).
+    3. Horizontal gradient (central difference over ±dx columns) → each vertical
+       edge becomes a sharp signed step.
+    4. Rectify and average down the rows → 1-D edge-strength profile (both the
+       left and right panel edges appear as positive peaks, matching the
+       air-before-peak logic in detect_edge()).
+
+    Columns with fewer than min_cov valid rows are zeroed to suppress the
+    detector-border padding artefact.
+    """
+    mask = (np.abs(img) > 1e-6).astype(np.float32)
+    num  = uniform_filter1d(img * mask, rows_win, axis=0, mode="nearest")
+    den  = uniform_filter1d(mask,       rows_win, axis=0, mode="nearest")
+    V    = num / np.maximum(den, 1e-6)
+
+    G = np.zeros_like(V)
+    G[:, dx:-dx] = V[:, 2 * dx:] - V[:, :-2 * dx]
+    G *= mask                                   # ignore gradients into padding
+
+    prof = np.abs(G).mean(axis=0)
+    prof[mask.mean(axis=0) < min_cov] = 0.0     # kill low-coverage border columns
+    return prof.astype(np.float32)
+
+
+def build_sinogram(image_list, rows, cols, i0_val, scan, save_dir=None,
+                   save_dir_uncorr=None):
     """
     Apply the per-projection matrix correction to each image, then compute the
     sinogram as the row average of the corrected log-projection.
 
-    Returns (sino, bin_edges):
-        sino[i, c] = mean over all rows of corrected log-projection column c
-        bin_edges  = (cols+1,) array in mm from the isocenter,
-                     matching corrected image column c → x = (c - cols/2)*pitch
+    Returns (sino, sino_edge, bin_edges):
+        sino[i, c]      = mean over all rows of corrected log-projection column c
+        sino_edge[i, c] = vertical-edge-emphasised profile (see
+                          vertical_edge_profile); used for stretcher detection
+                          when USE_VERTICAL_EDGE is True
+        bin_edges       = (cols+1,) array in mm from the isocenter,
+                          matching corrected image column c → x = (c - cols/2)*pitch
 
     i0_val: scalar float  → single I0 for all projections (original behaviour)
             1-D array     → per-projection I0 indexed by img_num-1
 
-    If save_dir is given, each corrected image (rows × cols, float32) is saved
-    as  NNN_corrproj{cols}x{rows}float.raw.
+    If save_dir is given, each geometrically-corrected image (rows × cols,
+    float32) is saved as  NNN_corrproj{cols}x{rows}float.raw.
+
+    If save_dir_uncorr is given, the raw log-projection (log(I0) − log(img))
+    *before* the geometric correction is saved as
+    NNN_logproj{cols}x{rows}float.raw.
     """
     pitch      = scan["det_column_pitch"]
     mats       = scan["matrix_proj"]
     scalar_i0  = np.isscalar(i0_val)
     n          = len(image_list)
     sino       = np.zeros((n, cols), dtype=np.float64)
+    sino_edge  = np.zeros((n, cols), dtype=np.float32)
 
     for i, (img_num, path) in enumerate(image_list):
         M_flat   = mats[img_num - 1]
@@ -213,15 +274,20 @@ def build_sinogram(image_list, rows, cols, i0_val, scan, save_dir=None):
         np.clip(img, 1, None, out=img)
         log_proj = np.log(this_i0) - np.log(img)
 
-        corrected = _apply_matrix_correction_2d(log_proj, M_flat, rows, cols)
-        sino[i]   = corrected.mean(axis=0)
+        if save_dir_uncorr is not None:
+            fname = f"{img_num:03d}_logproj{cols}x{rows}float.raw"
+            log_proj.astype(np.float32).tofile(os.path.join(save_dir_uncorr, fname))
+
+        corrected   = _apply_matrix_correction_2d(log_proj, M_flat, rows, cols)
+        sino[i]      = corrected.mean(axis=0)
+        sino_edge[i] = vertical_edge_profile(corrected)
 
         if save_dir is not None:
             fname = f"{img_num:03d}_corrproj{cols}x{rows}float.raw"
             corrected.tofile(os.path.join(save_dir, fname))
 
     bin_edges = (np.arange(cols + 1, dtype=np.float64) - cols / 2.0) * pitch
-    return sino.astype(np.float32), bin_edges
+    return sino.astype(np.float32), sino_edge, bin_edges
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -232,11 +298,15 @@ def _smooth(arr, win):
     return np.convolve(arr, np.ones(win) / win, mode="same")
 
 
-def detect_edge(row, direction):
+def detect_edge(row, direction, drop_frac=DROP_FRAC):
     """
     Find the first local maximum above threshold from the given direction.
     Returns the integer bin index as a float, or None if not found.
     No interpolation — marker lands exactly on the peak bin.
+
+    drop_frac sets the detection threshold as air + drop_frac·(shadow − air);
+    the vertical-edge profile sits on a higher pedestal than the amplitude
+    profile, so it needs a larger drop_frac (see VEDGE_DROP_FRAC).
     """
     s   = _smooth(row, SMOOTH_WIN)
     n   = len(s)
@@ -244,7 +314,7 @@ def detect_edge(row, direction):
     shd = np.percentile(s, 95)
     if shd - air < 0.01:
         return None
-    thresh = air + DROP_FRAC * (shd - air)
+    thresh = air + drop_frac * (shd - air)
 
     if direction == "L2R":
         for i in range(DEAD + 1, n - DEAD - 1):
@@ -332,6 +402,68 @@ def resolve_ranges(ranges, scan0, scan_target):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+#  I0 resolution + corrected-projection export
+# ═════════════════════════════════════════════════════════════════════════════
+
+def resolve_i0_path(base, scan_index, i0_list_override=None):
+    """
+    Decide which I0 source a scan should use, matching the auto-detect rule in
+    __main__:  explicit list override  →  <base>/imgScan_<n>_I0list.txt if it
+    exists  →  None (caller falls back to the scalar I0.txt file).
+    """
+    if i0_list_override:
+        return i0_list_override
+    candidate = os.path.join(base, f"imgScan_{scan_index}_I0list.txt")
+    return candidate if os.path.isfile(candidate) else None
+
+
+def resolve_i0_value(base, scan_index, i0_file, images, i0_list_override=None):
+    """Return the I0 to use for a scan: per-projection array if a sparse list is
+    found, else the scalar value from I0.txt."""
+    i0_list_path = resolve_i0_path(base, scan_index, i0_list_override)
+    if i0_list_path:
+        n_proj  = max(num for num, _ in images)
+        i0_dict = load_i0_list(i0_list_path)
+        i0_val, _ = fit_i0_linear(i0_dict, n_proj)
+        return i0_val
+    return load_i0(i0_file, f"imgScan_{scan_index}")
+
+
+def export_corrected_projections(params_path, base, i0_file, scan_index,
+                                 i0_list_override=None):
+    """
+    Build and save the geometrically-corrected 2-D projections for one scan,
+    without running edge detection / fitting.  Used to export scans other than
+    the one being analysed (e.g. imgScan_1 when analysing scan 0).
+    """
+    scan   = load_params(params_path, scan_index)
+    imgdir = os.path.join(base, f"imgScan_{scan_index}")
+    if not os.path.isdir(imgdir):
+        print(f"[scan {scan_index}] {imgdir} not found — skipping export.")
+        return
+
+    images = list_images(imgdir)
+    if not images:
+        print(f"[scan {scan_index}] no images in {imgdir} — skipping export.")
+        return
+
+    i0_val = resolve_i0_value(base, scan_index, i0_file, images, i0_list_override)
+    rows   = scan["det_rows"]
+    cols   = scan["det_columns"]
+
+    corrected_dir = os.path.join(base, f"corrected_imgScan_{scan_index}")
+    uncorr_dir    = os.path.join(base, f"uncorrected_imgScan_{scan_index}")
+    os.makedirs(corrected_dir, exist_ok=True)
+    os.makedirs(uncorr_dir,    exist_ok=True)
+    print(f"[scan {scan_index}] saving {len(images)} corrected 2D projections "
+          f"→ {corrected_dir}")
+    print(f"[scan {scan_index}] saving {len(images)} uncorrected log projections "
+          f"→ {uncorr_dir}")
+    build_sinogram(images, rows, cols, i0_val, scan,
+                   save_dir=corrected_dir, save_dir_uncorr=uncorr_dir)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 #  Main
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -373,13 +505,22 @@ def main(params_path, imgdir, i0_path, scan_index, vol_size_mm=None,
     i0_label = f"{float(np.mean(i0_val)):.1f} (mean)" if not np.isscalar(i0_val) else f"{i0_val:.1f}"
     print(f"Images: {len(images)}  det {cols}×{rows}  I0={i0_label}")
 
-    # ── Build sinogram & save corrected 2D projections ───────────────────────
+    # ── Build sinogram & save corrected + uncorrected 2D projections ──────────
     corrected_dir = os.path.join(os.path.dirname(imgdir), f"corrected_imgScan_{scan_index}")
+    uncorr_dir    = os.path.join(os.path.dirname(imgdir), f"uncorrected_imgScan_{scan_index}")
     os.makedirs(corrected_dir, exist_ok=True)
+    os.makedirs(uncorr_dir,    exist_ok=True)
     print("Building sinogram …")
-    sino, bin_edges = build_sinogram(images, rows, cols, i0_val, scan,
-                                     save_dir=corrected_dir)
-    print(f"Saved {len(images)} corrected 2D projections → {corrected_dir}")
+    sino, sino_edge, bin_edges = build_sinogram(images, rows, cols, i0_val, scan,
+                                                save_dir=corrected_dir,
+                                                save_dir_uncorr=uncorr_dir)
+    print(f"Saved {len(images)} corrected 2D projections   → {corrected_dir}")
+    print(f"Saved {len(images)} uncorrected log projections → {uncorr_dir}")
+
+    # Detection profile: vertical-edge-emphasised sinogram (robust to an
+    # intervening phantom) or the legacy row-average amplitude.
+    sino_det = sino_edge if USE_VERTICAL_EDGE else sino
+    print(f"Detection sinogram: {'vertical-edge' if USE_VERTICAL_EDGE else 'row-average amplitude'}")
     bin_width       = bin_edges[1] - bin_edges[0]
     img_numbers = [num for num, _ in images]   # 1-based list
 
@@ -396,9 +537,12 @@ def main(params_path, imgdir, i0_path, scan_index, vol_size_mm=None,
             sino_row = img_numbers.index(img_num)
             proj_idx = img_num - 1
 
-            col = detect_edge(sino[sino_row], direction)
+            drop = VEDGE_DROP_FRAC if USE_VERTICAL_EDGE else DROP_FRAC
+            col = detect_edge(sino_det[sino_row], direction, drop_frac=drop)
             if col is None:
                 continue
+            # gate on the amplitude sinogram: the detected column must sit in a
+            # region of real attenuation (rejects noise / clear-air peaks)
             if sino[sino_row, int(col)] < MIN_SINO_VAL:
                 continue
             detections.append((sino_row, col, ri, proj_idx))
@@ -447,8 +591,8 @@ def main(params_path, imgdir, i0_path, scan_index, vol_size_mm=None,
 
     # ── Sinogram plot with overlaid edges ─────────────────────────────────────
     fig, ax = plt.subplots(figsize=(14, 6))
-    vmax = np.percentile(sino, 99)
-    ax.imshow(sino, aspect="auto", cmap="gray", vmin=0, vmax=vmax,
+    vmax = np.percentile(sino_det, 99)
+    ax.imshow(sino_det, aspect="auto", cmap="gray", vmin=0, vmax=vmax,
               extent=[bin_edges[0], bin_edges[-1], len(images), 0], origin="upper")
 
     # reference marker: first non-zero bin of row 0, same placement rule as edge dots
@@ -475,7 +619,8 @@ def main(params_path, imgdir, i0_path, scan_index, vol_size_mm=None,
     ax.legend(handles=patches, loc="upper right", fontsize=9)
     ax.set_xlabel("Physical x position (mm)")
     ax.set_ylabel("Projection index")
-    ax.set_title("Row-averaged sinogram with detected stretcher edges")
+    ax.set_title(f"{'Vertical-edge' if USE_VERTICAL_EDGE else 'Row-averaged'} "
+                 f"sinogram with detected stretcher edges")
     plt.tight_layout()
 
     # ── Fit & report ──────────────────────────────────────────────────────────
@@ -611,6 +756,16 @@ if __name__ == "__main__":
     if args.vol_size:
         w, h = args.vol_size.lower().split("x")
         vol  = (float(w), float(h))
+
+    # ── Export corrected 2D projections for every other scan in the study ─────
+    # main() saves the corrected projections for the analysed scan; do the same
+    # for the remaining scans (e.g. imgScan_1 when analysing scan 0) so a single
+    # run produces all corrected_imgScan_<n>/ directories.
+    n_scans = len(load_study(args.params)["scans"])
+    for s in range(n_scans):
+        if s == args.scan:
+            continue
+        export_corrected_projections(args.params, _BASE, args.i0, s)
 
     main(args.params, imgdir, args.i0, args.scan, vol_size_mm=vol,
          i0_list_path=i0_list_path)

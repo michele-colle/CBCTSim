@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -32,11 +33,13 @@
 
 #include <omp.h>
 
+#include <itkConnectedComponentImageFilter.h>
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 #include <itkImageSeriesReader.h>
+#include <itkMedianImageFilter.h>
 #include <itkMetaDataObject.h>
 #include <itkNumericSeriesFileNames.h>
 
@@ -106,10 +109,9 @@ struct ImplantCylinder {
 // Stretcher shell (coords in isocenter mm)
 // ---------------------------------------------------------------------------
 struct StretcherShell {
-    // Position of the centre of the flat top surface, measured from the
-    // minimum-X / minimum-Y corner of the output volume.
-    double top_x_mm = 0.0;  // distance from left edge of volume to stretcher top-centre X [mm]
-    double top_y_mm = 0.0;  // distance from bottom edge of volume to stretcher top-centre Y [mm]
+    // Isocenter coordinates (mm) of the stretcher cross-section polygon centre.
+    double cx_mm = 0.0;  // lateral X of the polygon centre, from isocenter [mm]
+    double cy_mm = 0.0;  // vertical Y of the polygon centre, from isocenter [mm]
 };
 
 // 2-D convex polygon helpers
@@ -273,8 +275,191 @@ static void writeInfoFile(const std::string &base,
       << "                 # NUMBER OF VOXELS\n";
     f << " " << sx_cm << " " << sy_cm << " " << sz_cm
       << "           # VOXEL SIZES [cm]\n";
-    f << " 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS\n";
+    f << " 2 2 2                          # SIZE OF LOW RESOLUTION VOXELS\n";
     std::cout << "Info file written: " << txtPath << "\n";
+}
+
+// ---------------------------------------------------------------------------
+// Connected-component despeckle in DICOM space (port of test_denoise_despeckle.py).
+//
+// Every DICOM voxel is classified with the same threshold ladder used by the
+// output builder.  For each treated label, connected components smaller than
+// minSize voxels are found (the LARGEST component of each label is always
+// kept -- protects e.g. the exterior air background).  The HU of each removed
+// voxel is then overwritten with the HU of its nearest surviving voxel
+// (multi-source BFS on the 6-neighbour grid = city-block nearest).
+//
+// Rewriting HU (rather than labels) keeps the downstream trilinear resampling
+// + classification path completely unchanged: despeckled voxels are simply
+// reclassified with the rest.
+//
+// connectivity: 1 = 6-neighbour (faces); 2 or 3 = 26-neighbour (ITK's
+// ConnectedComponentImageFilter has no 18-neighbour mode; 2 maps to 26).
+// Returns the number of voxels rewritten.
+// ---------------------------------------------------------------------------
+static size_t despeckleHuVolume(int16_t* hu,
+                                size_t nx, size_t ny, size_t nz,
+                                int16_t t0, int16_t t1, int16_t t2, int16_t t3,
+                                const std::vector<int>& processLabels,
+                                size_t minSize, int connectivity)
+{
+    using U8Image  = itk::Image<uint8_t, 3>;
+    using U32Image = itk::Image<uint32_t, 3>;
+
+    const int64_t N = static_cast<int64_t>(nx) * ny * nz;
+    const bool fullyConnected = (connectivity >= 2);
+    if (connectivity == 2)
+        std::cout << "  note: connectivity=2 (18-neigh.) approximated by "
+                     "26-neighbour (ITK limitation)\n";
+
+    const double t_all0 = omp_get_wtime();
+
+    // ── 1. Classify every DICOM voxel (same ladder as the output builder) ────
+    std::vector<uint8_t> lab(N);
+    #pragma omp parallel for schedule(static)
+    for (int64_t i = 0; i < N; ++i) {
+        const int16_t h = hu[i];
+        lab[i] = (h < t0) ? 0 : (h < t1) ? 1 : (h < t2) ? 2 : (h < t3) ? 3 : 4;
+    }
+
+    std::vector<uint8_t> removed(N, 0);   // 1 = pending fill, 2 = filled
+    size_t totalSmallComp = 0, totalSmallVox = 0;
+
+    // ── 2. Per-label connected components ────────────────────────────────────
+    for (const int L : processLabels)
+    {
+        if (L < 0 || L > 4) {
+            std::cout << "  despeckle: skipping out-of-range label " << L << "\n";
+            continue;
+        }
+        const double t_l0 = omp_get_wtime();
+
+        // Binary mask image for this label
+        auto mask = U8Image::New();
+        U8Image::RegionType region;
+        region.SetSize({nx, ny, nz});
+        mask->SetRegions(region);
+        mask->Allocate();
+        uint8_t* mp = mask->GetBufferPointer();
+        #pragma omp parallel for schedule(static)
+        for (int64_t i = 0; i < N; ++i)
+            mp[i] = (lab[i] == static_cast<uint8_t>(L)) ? 1 : 0;
+
+        using CCType = itk::ConnectedComponentImageFilter<U8Image, U32Image>;
+        auto cc = CCType::New();
+        cc->SetInput(mask);
+        cc->SetBackgroundValue(0);
+        cc->SetFullyConnected(fullyConnected);
+        cc->Update();
+        mask = nullptr;  // free the 1-byte mask before histogramming
+
+        const uint32_t* cp = cc->GetOutput()->GetBufferPointer();
+        const size_t nObj = static_cast<size_t>(cc->GetObjectCount());
+
+        // Component sizes (per-thread histograms merged once)
+        std::vector<uint64_t> sizes(nObj + 1, 0);
+        #pragma omp parallel
+        {
+            std::vector<uint64_t> local(nObj + 1, 0);
+            #pragma omp for nowait schedule(static)
+            for (int64_t i = 0; i < N; ++i) ++local[cp[i]];
+            #pragma omp critical
+            { for (size_t k = 0; k <= nObj; ++k) sizes[k] += local[k]; }
+        }
+
+        // Largest component (excluding background id 0) is always kept
+        size_t largest = 0;  uint64_t largestSz = 0;
+        for (size_t k = 1; k <= nObj; ++k)
+            if (sizes[k] > largestSz) { largestSz = sizes[k]; largest = k; }
+
+        std::vector<uint8_t> kill(nObj + 1, 0);
+        size_t nSmall = 0, voxSmall = 0;
+        for (size_t k = 1; k <= nObj; ++k) {
+            if (k != largest && sizes[k] > 0 && sizes[k] < minSize) {
+                kill[k] = 1;  ++nSmall;  voxSmall += sizes[k];
+            }
+        }
+
+        size_t marked = 0;
+        #pragma omp parallel for schedule(static) reduction(+:marked)
+        for (int64_t i = 0; i < N; ++i)
+            if (cp[i] != 0 && kill[cp[i]]) { removed[i] = 1; ++marked; }
+
+        static const char* names[5] = {"air", "fat", "soft", "spongiosa", "cortical"};
+        std::cout << "  label " << L << " (" << names[L] << "): "
+                  << nObj << " components, " << nSmall << " small (<" << minSize
+                  << "), " << voxSmall << " voxels marked   ["
+                  << (omp_get_wtime() - t_l0) << " s]\n" << std::flush;
+        totalSmallComp += nSmall;  totalSmallVox += voxSmall;
+    }
+
+    if (totalSmallVox == 0) {
+        std::cout << "Despeckle: nothing to remove.\n";
+        return 0;
+    }
+
+    // ── 3. Refill removed voxels from nearest surviving voxel (BFS) ──────────
+    // Seed: removed voxels adjacent to an original survivor (removed==0).
+    std::vector<int64_t> frontier;
+    frontier.reserve(totalSmallVox);
+    #pragma omp parallel
+    {
+        std::vector<int64_t> local;
+        #pragma omp for nowait schedule(static)
+        for (int64_t i = 0; i < N; ++i) {
+            if (removed[i] != 1) continue;
+            const int64_t x = i % static_cast<int64_t>(nx);
+            const int64_t y = (i / static_cast<int64_t>(nx)) % static_cast<int64_t>(ny);
+            const int64_t z = i / (static_cast<int64_t>(nx) * ny);
+            const int64_t n6[6] = {
+                x > 0            ? i - 1 : -1,
+                x < (int64_t)nx-1 ? i + 1 : -1,
+                y > 0            ? i - (int64_t)nx : -1,
+                y < (int64_t)ny-1 ? i + (int64_t)nx : -1,
+                z > 0            ? i - (int64_t)nx*ny : -1,
+                z < (int64_t)nz-1 ? i + (int64_t)nx*ny : -1 };
+            for (const int64_t nb : n6)
+                if (nb >= 0 && removed[nb] == 0) {   // original survivor
+                    hu[i] = hu[nb];  removed[i] = 2;  local.push_back(i);
+                    break;
+                }
+        }
+        #pragma omp critical
+        frontier.insert(frontier.end(), local.begin(), local.end());
+    }
+
+    // Flood inwards layer by layer (serial; touches only removed voxels)
+    size_t head = 0;
+    while (head < frontier.size()) {
+        const int64_t v = frontier[head++];
+        const int64_t x = v % static_cast<int64_t>(nx);
+        const int64_t y = (v / static_cast<int64_t>(nx)) % static_cast<int64_t>(ny);
+        const int64_t z = v / (static_cast<int64_t>(nx) * ny);
+        const int64_t n6[6] = {
+            x > 0            ? v - 1 : -1,
+            x < (int64_t)nx-1 ? v + 1 : -1,
+            y > 0            ? v - (int64_t)nx : -1,
+            y < (int64_t)ny-1 ? v + (int64_t)nx : -1,
+            z > 0            ? v - (int64_t)nx*ny : -1,
+            z < (int64_t)nz-1 ? v + (int64_t)nx*ny : -1 };
+        for (const int64_t nb : n6)
+            if (nb >= 0 && removed[nb] == 1) {
+                removed[nb] = 2;  hu[nb] = hu[v];  frontier.push_back(nb);
+            }
+    }
+
+    // Sanity: every removed voxel must have been filled
+    size_t unfilled = 0;
+    #pragma omp parallel for schedule(static) reduction(+:unfilled)
+    for (int64_t i = 0; i < N; ++i) if (removed[i] == 1) ++unfilled;
+    if (unfilled)
+        std::cerr << "WARNING: despeckle left " << unfilled
+                  << " voxels unfilled (isolated components?)\n";
+
+    std::cout << "Despeckle total: " << totalSmallComp << " small components, "
+              << (frontier.size()) << " voxels rewritten   ["
+              << (omp_get_wtime() - t_all0) << " s]\n" << std::flush;
+    return frontier.size();
 }
 
 // ---------------------------------------------------------------------------
@@ -305,8 +490,14 @@ int main(int argc, char **argv)
     double vol_height_mm = 0.0;
     double vol_length_mm = 0.0;
 
-    // DICOM placement in output volume (isocenter coords of DICOM [0,0,0] corner)
-    bool   dicom_corner_specified = false;
+    // DICOM placement: offset of the DICOM volume CENTRE from the output volume
+    // centre (isocenter), in mm.  (0,0,0) = DICOM centred.  Measured centre-to-
+    // centre, so the same value places every series identically regardless of
+    // its physical size.  (cfg keys kept as dicom_corner_{x,y,z}_mm.)
+    double dicom_center_offset_x_mm = 0.0;
+    double dicom_center_offset_y_mm = 0.0;
+    double dicom_center_offset_z_mm = 0.0;
+    // Derived: isocenter coords of the DICOM [0,0,0] corner (= offset - half-extent).
     double dicom_corner_x_mm = 0.0;
     double dicom_corner_y_mm = 0.0;
     double dicom_corner_z_mm = 0.0;
@@ -337,9 +528,9 @@ int main(int argc, char **argv)
     std::string mcgpu_output_name;
     int         mcgpu_det_nx = 512;
     int         mcgpu_det_nz = 512;
-    // Base name written into the .in VOXEL GEOMETRY FILE line as
-    // "phantom/<phantom_name>_<dims>.raw" (independent of the on-disk path).
-    // Empty -> fall back to the actual .raw file's basename.
+    // Base name for the .raw file and its .in/.txt reference.  When set, the
+    // .raw is written as "<phantom_name>_<dims>byte.raw" and referenced as
+    // "phantom/<phantom_name>_<dims>byte.raw".  Empty -> legacy descriptive name.
     std::string phantom_name;
 
     // DICOM output
@@ -378,9 +569,10 @@ int main(int argc, char **argv)
         vol_height_mm = getD("vol_height_mm", 0.0);
         vol_length_mm = getD("vol_length_mm", 0.0);
 
-        if (cfg.count("dicom_corner_x_mm")) { dicom_corner_x_mm = std::stod(cfg["dicom_corner_x_mm"]); dicom_corner_specified = true; }
-        if (cfg.count("dicom_corner_y_mm")) { dicom_corner_y_mm = std::stod(cfg["dicom_corner_y_mm"]); dicom_corner_specified = true; }
-        if (cfg.count("dicom_corner_z_mm")) { dicom_corner_z_mm = std::stod(cfg["dicom_corner_z_mm"]); dicom_corner_specified = true; }
+        // Centre-to-centre offset (DICOM centre relative to volume centre).
+        dicom_center_offset_x_mm = getD("dicom_corner_x_mm", 0.0);
+        dicom_center_offset_y_mm = getD("dicom_corner_y_mm", 0.0);
+        dicom_center_offset_z_mm = getD("dicom_corner_z_mm", 0.0);
 
         dicom_rot_x_deg = getD("dicom_rot_x_deg", 0.0);
         dicom_rot_y_deg = getD("dicom_rot_y_deg", 0.0);
@@ -429,8 +621,8 @@ int main(int argc, char **argv)
         stretcher_enable = cfg.count("stretcher_enable")
             ? (cfg["stretcher_enable"] == "1" || cfg["stretcher_enable"] == "true")
             : stretcher_enable;
-        stretcher.top_x_mm = getD("stretcher_top_x_mm", stretcher.top_x_mm);
-        stretcher.top_y_mm = getD("stretcher_top_y_mm", stretcher.top_y_mm);
+        stretcher.cx_mm = getD("stretcher_cx_mm", stretcher.cx_mm);
+        stretcher.cy_mm = getD("stretcher_cy_mm", stretcher.cy_mm);
 
         mcgpu_in_template = getS("mcgpu_in_template", mcgpu_in_template);
         mcgpu_output_name = getS("mcgpu_output_name", mcgpu_output_name);
@@ -605,17 +797,18 @@ int main(int argc, char **argv)
         out_nz = static_cast<size_t>(std::ceil(nz_d * sz_mm / out_vz));
     }
 
-    // Default DICOM corner: centre DICOM in output volume
-    if (!dicom_corner_specified) {
-        dicom_corner_x_mm = -(static_cast<double>(nx_d) * sx_mm) / 2.0;
-        dicom_corner_y_mm = -(static_cast<double>(ny_d) * sy_mm) / 2.0;
-        dicom_corner_z_mm = -(static_cast<double>(nz_d) * sz_mm) / 2.0;
-    }
-
     // DICOM centre in DICOM-local space (mm from DICOM [0,0,0])
     const double qcx = (static_cast<double>(nx_d) * sx_mm) / 2.0;
     const double qcy = (static_cast<double>(ny_d) * sy_mm) / 2.0;
     const double qcz = (static_cast<double>(nz_d) * sz_mm) / 2.0;
+
+    // Place the DICOM centre at the requested centre-to-centre offset from the
+    // output volume centre (isocenter):  corner = offset - DICOM half-extent.
+    // offset (0,0,0) => DICOM centred; a fixed offset places every series the
+    // same way regardless of its physical size.
+    dicom_corner_x_mm = dicom_center_offset_x_mm - qcx;
+    dicom_corner_y_mm = dicom_center_offset_y_mm - qcy;
+    dicom_corner_z_mm = dicom_center_offset_z_mm - qcz;
 
     // Rotation matrix R (forward: DICOM-local → output isocenter offset)
     // R = Rx * Ry * Rz  (intrinsic XYZ Euler)
@@ -627,6 +820,9 @@ int main(int argc, char **argv)
 
     std::cout << "Output volume   : " << out_nx << " x " << out_ny << " x " << out_nz << "\n";
     std::cout << "Output spacing  : " << out_vxy << " x " << out_vxy << " x " << out_vz << " mm\n";
+    std::cout << "DICOM ctr offset: (" << dicom_center_offset_x_mm << ", "
+              << dicom_center_offset_y_mm << ", " << dicom_center_offset_z_mm
+              << ") mm [volume centre -> DICOM centre]\n";
     std::cout << "DICOM corner    : (" << dicom_corner_x_mm << ", "
               << dicom_corner_y_mm << ", " << dicom_corner_z_mm << ") mm (isocenter)\n";
     std::cout << "DICOM rotation  : (" << dicom_rot_x_deg << ", "
@@ -653,12 +849,10 @@ int main(int argc, char **argv)
         const double hw_t = S_TOP_W/2.0, hw_b = S_BOT_W/2.0;
         const double ht = S_H/2.0, ky = ht-S_STR_H, c = S_CHAM;
 
-        // Convert corner-relative top-edge → isocenter polygon centre.
-        // top_x/top_y point to the top edge of the stretcher as seen in the
-        // DICOM viewer (minimum-Y side of the cross-section, i.e. the underside
-        // of the physical stretcher), measured from the min-X / min-Y corner.
-        const double str_cx = stretcher.top_x_mm - out_nx*out_vxy/2.0;
-        const double str_cy = stretcher.top_y_mm - out_ny*out_vxy/2.0 + ht;
+        // Polygon centre is given directly in isocenter coordinates (mm),
+        // matching the (cx, cy) reported by the stretcher-fitting tools.
+        const double str_cx = stretcher.cx_mm;
+        const double str_cy = stretcher.cy_mm;
 
         const Poly2D sharpOuter = {
             {-hw_b,-ht},{hw_b,-ht},{hw_t,ky},{hw_t,ht-c},
@@ -747,7 +941,6 @@ int main(int argc, char **argv)
                                  (prefixStem+"_vox_"+dimTag)).lexically_normal();
     fs::create_directories(outDirPath);
     const std::string outDir  = outDirPath.string()+"/";
-    const std::string outBase = outDir+prefixStem+"_vox_";
     std::cout << "Output folder   : " << outDir << "\n";
 
     if (write_dicom)
@@ -760,8 +953,16 @@ int main(int argc, char **argv)
         (crop_cylinder_enable           ? "reconCylinder_" : "") +
         (hasImplant || stretcher_enable ? "labels_"        : "5labels_");
 
-    const std::string rawBase = outBase+labelTag+dimTag;
-    const std::string rawPath = rawBase+".raw";
+    // On-disk .raw name.  With phantom_name set (batcher passes
+    // "<patient>_<label>") the file is "<patient>_<label>_<dims>byte.raw",
+    // unique per patient+stretcher.  Otherwise fall back to the legacy
+    // descriptive name.  The .in / .txt geometry reference is always
+    // "phantom/<this basename>", so the deployed name matches on disk.
+    const std::string rawStem = phantom_name.empty()
+        ? (prefixStem + "_vox_" + labelTag + dimTag)
+        : (phantom_name + "_" + dimTag + "byte");
+    const std::string rawBase = outDir + rawStem;
+    const std::string rawPath = rawBase + ".raw";
 
     std::ofstream rawFile(rawPath, std::ios::binary);
     if (!rawFile) throw std::runtime_error("Cannot open label file for writing: "+rawPath);
@@ -983,7 +1184,8 @@ int main(int argc, char **argv)
             }
         }
 
-        // ── Label histogram for this band (single serial pass) ────────────────
+        // ── Label histogram for this band (parallel array reduction) ──────────
+        #pragma omp parallel for schedule(static) reduction(+:counts[:12])
         for (size_t i = 0; i < nslab*slicePx; ++i) {
             const uint8_t v = labelBand[i];
             if (v < 12) ++counts[v];
@@ -1105,12 +1307,9 @@ int main(int argc, char **argv)
         const double off_x  = -(out_nx*sx_cm/2.0) + shift_x_mm/10.0;
         const double off_y  = -(out_ny*sy_cm/2.0) + shift_y_mm/10.0;
         const double off_z  = -(out_nz*sz_cm/2.0) + shift_z_mm/10.0;
-        // VOXEL GEOMETRY FILE: reference by name under phantom/, not the disk
-        // path.  Use phantom_name (+ dims) if given, else the .raw basename.
-        const std::string rawName = phantom_name.empty()
-            ? fs::path(rawPath).filename().string()
-            : (phantom_name + "_" + dimTag + ".raw");
-        const std::string geomRef = "phantom/" + rawName;
+        // VOXEL GEOMETRY FILE: reference the .raw by name under phantom/
+        // (matches the on-disk basename), never the absolute disk path.
+        const std::string geomRef = "phantom/" + fs::path(rawPath).filename().string();
 
         for (const std::string &tmplPath : templates)
         {
@@ -1153,8 +1352,9 @@ int main(int argc, char **argv)
                         << "                 # NUMBER OF VOXELS\n";
                     out << " " << sx_cm << " " << sy_cm << " " << sz_cm
                         << "           # VOXEL SIZES [cm]\n";
-                    out << " 0 0 0                          # SIZE OF LOW RESOLUTION VOXELS\n";
-                    skipLines = 5;
+                    // Replace only the 4 lines we recompute; the template's
+                    // "SIZE OF LOW RESOLUTION VOXELS" line passes through verbatim.
+                    skipLines = 4;
                 } else if (skipLines > 0) {
                     --skipLines;
                 } else {

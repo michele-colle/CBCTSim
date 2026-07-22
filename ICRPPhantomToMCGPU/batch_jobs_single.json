@@ -1,0 +1,33 @@
+{
+  "binary": "build/dicom_to_mcgpu",
+  "template": "params/dicom_to_mcgpu_template.cfg",
+  "cwd": ".",
+  "cfg_out_dir": "params/generated",
+  "stretcher_labels": [
+    "A",
+    "B",
+    "C"
+  ],
+  "cases": [
+    {
+      "name": "GRDN00MGH1ABQLE8",
+      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/005_54891767",
+      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/MCGPU",
+      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/Segmentation-Segment_1-label.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": -45.6,
+          "cy_mm": 225.9
+        },
+        {
+          "cx_mm": 81.9,
+          "cy_mm": 225.9
+        },
+        {
+          "cx_mm": 79.6,
+          "cy_mm": 239.9
+        }
+      ]
+    }
+  ]
+}
