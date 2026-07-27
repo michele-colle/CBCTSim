@@ -1,0 +1,3 @@
+# exported .raw files	<phantom>	<raw_path>
+MRCP-15F	./output/MRCP-15F_vox_2134x2134x1000/MRCP-15F_vox_stretcher_labels_2134x2134x1000.raw
+MRCP_AM	./output/MRCP_AM_vox_2134x2134x1000/MRCP_AM_vox_stretcher_labels_2134x2134x1000.raw

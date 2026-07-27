@@ -416,8 +416,8 @@ static size_t despeckleHuVolume(int16_t* hu,
                 x < (int64_t)nx-1 ? i + 1 : -1,
                 y > 0            ? i - (int64_t)nx : -1,
                 y < (int64_t)ny-1 ? i + (int64_t)nx : -1,
-                z > 0            ? i - (int64_t)nx*ny : -1,
-                z < (int64_t)nz-1 ? i + (int64_t)nx*ny : -1 };
+                z > 0            ? i - (int64_t)(nx*ny) : -1,
+                z < (int64_t)nz-1 ? i + (int64_t)(nx*ny) : -1 };
             for (const int64_t nb : n6)
                 if (nb >= 0 && removed[nb] == 0) {   // original survivor
                     hu[i] = hu[nb];  removed[i] = 2;  local.push_back(i);
@@ -440,8 +440,8 @@ static size_t despeckleHuVolume(int16_t* hu,
             x < (int64_t)nx-1 ? v + 1 : -1,
             y > 0            ? v - (int64_t)nx : -1,
             y < (int64_t)ny-1 ? v + (int64_t)nx : -1,
-            z > 0            ? v - (int64_t)nx*ny : -1,
-            z < (int64_t)nz-1 ? v + (int64_t)nx*ny : -1 };
+            z > 0            ? v - (int64_t)(nx*ny) : -1,
+            z < (int64_t)nz-1 ? v + (int64_t)(nx*ny) : -1 };
         for (const int64_t nb : n6)
             if (nb >= 0 && removed[nb] == 1) {
                 removed[nb] = 2;  hu[nb] = hu[v];  frontier.push_back(nb);
@@ -463,6 +463,89 @@ static size_t despeckleHuVolume(int16_t* hu,
 }
 
 // ---------------------------------------------------------------------------
+// Some DICOM exports (e.g. dicomweb re-downloads) bundle MULTIPLE acquisitions
+// of the SAME anatomy into one series: every slice position then appears more
+// than once, distinguished only by Acquisition Number (tag 0020|0012).  ITK
+// sorts by slice position and interleaves them into a single volume with a
+// bogus (halved) z-spacing -> a z-squashed, out-of-order phantom and masks that
+// no longer align.  This detects that case (any slice position occurring more
+// than once) and keeps a SINGLE acquisition:
+//   wantAcq >= 0 : keep exactly that Acquisition Number (if present)
+//   wantAcq <  0 : auto — keep the acquisition with the most slices, tie broken
+//                  by the LOWEST acquisition number.
+// Series with unique slice positions are returned unchanged (no-op).  The
+// returned list is sorted by slice position (Z).
+// ---------------------------------------------------------------------------
+static std::vector<std::string>
+selectSingleAcquisition(const std::vector<std::string>& files, int wantAcq)
+{
+    struct Slice { std::string file; int acq; double z; };
+    std::vector<Slice> slices;
+    slices.reserve(files.size());
+
+    auto io = itk::GDCMImageIO::New();
+    for (const auto& f : files) {
+        io->SetFileName(f);
+        try { io->ReadImageInformation(); }
+        catch (...) { slices.push_back({f, -1, 0.0}); continue; }
+        const auto& dict = io->GetMetaDataDictionary();
+        std::string acqStr, ippStr;
+        itk::ExposeMetaData<std::string>(dict, "0020|0012", acqStr);  // Acquisition Number
+        itk::ExposeMetaData<std::string>(dict, "0020|0032", ippStr);  // Image Position Patient
+        int acq = -1;
+        try { if (!acqStr.empty()) acq = std::stoi(acqStr); } catch (...) {}
+        double z = 0.0;
+        if (!ippStr.empty()) {
+            std::replace(ippStr.begin(), ippStr.end(), '\\', ' ');
+            std::istringstream ss(ippStr); double x, y, zz;
+            if (ss >> x >> y >> zz) z = zz;
+        }
+        slices.push_back({f, acq, z});
+    }
+
+    // Duplicate slice positions?  (round to 3 dp to absorb float noise)
+    std::map<long long, int> zCount;
+    for (const auto& s : slices) ++zCount[std::llround(s.z * 1000.0)];
+    size_t maxPerZ = 0;
+    for (const auto& kv : zCount) maxPerZ = std::max<size_t>(maxPerZ, kv.second);
+    if (maxPerZ <= 1) return files;   // no duplication -> unchanged
+
+    // Group by acquisition number
+    std::map<int, std::vector<Slice>> byAcq;
+    for (const auto& s : slices) byAcq[s.acq].push_back(s);
+
+    std::cout << "WARNING: duplicate slice positions detected (" << files.size()
+              << " files, " << zCount.size() << " unique Z).  Acquisitions:";
+    for (const auto& kv : byAcq)
+        std::cout << " [#" << kv.first << ": " << kv.second.size() << " slices]";
+    std::cout << "\n";
+
+    // Choose the acquisition to keep
+    int chosen = wantAcq;
+    if (wantAcq >= 0 && !byAcq.count(wantAcq)) {
+        std::cout << "  requested acquisition_number=" << wantAcq
+                  << " not present; falling back to auto.\n";
+        chosen = -1;
+    }
+    if (chosen < 0) {                        // most slices, tie -> lowest # (map is
+        size_t best = 0;                     // iterated in ascending-key order)
+        for (const auto& kv : byAcq)
+            if (kv.second.size() > best) { best = kv.second.size(); chosen = kv.first; }
+    }
+
+    auto sel = byAcq[chosen];
+    std::sort(sel.begin(), sel.end(),
+              [](const Slice& a, const Slice& b) { return a.z < b.z; });
+    std::vector<std::string> out;
+    out.reserve(sel.size());
+    for (const auto& s : sel) out.push_back(s.file);
+
+    std::cout << "  keeping acquisition #" << chosen << " (" << out.size()
+              << " slices)  [set 'acquisition_number' in the cfg to override]\n";
+    return out;
+}
+
+// ---------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
     // -------------------------------------------------------------------------
@@ -476,12 +559,23 @@ int main(int argc, char **argv)
     std::string dicomDir     = ".";
     std::string outputPrefix = "dicom";
     std::string seriesUID;
+    // Which acquisition to keep when a series bundles duplicate slice positions
+    // (see selectSingleAcquisition).  -1 = auto (most slices, tie -> lowest #).
+    int acquisition_number = -1;
 
     // HU thresholds
     int16_t thr_air_fat        = -500;
     int16_t thr_fat_soft       =  -50;
     int16_t thr_soft_spongiosa =  200;
     int16_t thr_spongiosa_cort =  800;
+
+    // Noise-robust classification (see test_denoise_despeckle.py).
+    // Master switch: 'denoise' gates BOTH stages below.
+    bool   denoise                = false; // master on/off for the denoiser
+    int    median_radius          = 0;   // median filter radius [vox]; 0 = off
+    size_t despeckle_min_size     = 0;   // min component size [vox]; 0 = off
+    int    despeckle_connectivity = 1;   // 1 = 6-neigh., 2/3 = 26-neigh.
+    std::vector<int> despeckle_labels{0, 3, 4};  // air, spongiosa, cortical
 
     // Output volume geometry (0 = derive from DICOM)
     double vol_vxy_mm    = 0.0;
@@ -557,11 +651,28 @@ int main(int argc, char **argv)
         dicomDir = toLinuxPath(getS("dicom_dir", dicomDir));
         outputPrefix = toLinuxPath(getS("output_prefix", outputPrefix));
         seriesUID    = getS("series_uid",    seriesUID);
+        acquisition_number = static_cast<int>(getD("acquisition_number", acquisition_number));
 
         thr_air_fat        = static_cast<int16_t>(getD("thr_air_fat",        thr_air_fat));
         thr_fat_soft       = static_cast<int16_t>(getD("thr_fat_soft",       thr_fat_soft));
         thr_soft_spongiosa = static_cast<int16_t>(getD("thr_soft_spongiosa", thr_soft_spongiosa));
         thr_spongiosa_cort = static_cast<int16_t>(getD("thr_spongiosa_cort", thr_spongiosa_cort));
+
+        median_radius          = static_cast<int>(getD("median_radius",          median_radius));
+        despeckle_min_size     = static_cast<size_t>(getD("despeckle_min_size", despeckle_min_size));
+        denoise = cfg.count("denoise")
+            ? (cfg["denoise"] == "1" || cfg["denoise"] == "true")
+            : denoise;
+        despeckle_connectivity = static_cast<int>(getD("despeckle_connectivity", despeckle_connectivity));
+        if (cfg.count("despeckle_labels")) {
+            despeckle_labels.clear();
+            std::string s = cfg["despeckle_labels"];
+            std::replace(s.begin(), s.end(), ',', ' ');
+            std::replace(s.begin(), s.end(), ';', ' ');
+            std::istringstream iss(s);
+            int v;
+            while (iss >> v) despeckle_labels.push_back(v);
+        }
 
         vol_vxy_mm    = getD("vol_vxy_mm",    0.0);
         vol_vz_mm     = getD("vol_vz_mm",     0.0);
@@ -648,6 +759,12 @@ int main(int argc, char **argv)
 
     std::cout << "DICOM directory : " << dicomDir     << "\n";
     std::cout << "Output prefix   : " << outputPrefix << "\n";
+    std::cout << "Denoise         : " << (denoise ? "ON" : "OFF");
+    if (denoise)
+        std::cout << "  (median_radius=" << median_radius
+                  << ", despeckle_min_size=" << despeckle_min_size
+                  << ", connectivity=" << despeckle_connectivity << ")";
+    std::cout << "\n";
 
     // -------------------------------------------------------------------------
     // 2. Load DICOM series
@@ -720,6 +837,11 @@ int main(int argc, char **argv)
     std::cout << "Series UID      : " << seriesUID       << "\n";
     std::cout << "Slices found    : " << fileNames.size() << "\n";
 
+    // Guard against exports that bundle multiple acquisitions of the same
+    // anatomy into one series (duplicate slice positions).  Keeps one.
+    fileNames = selectSingleAcquisition(fileNames, acquisition_number);
+    std::cout << "Slices used     : " << fileNames.size() << "\n";
+
     auto gdcmIO = GDCMIOType::New();
     auto reader = ReaderType::New();
     reader->SetImageIO(gdcmIO);
@@ -732,6 +854,25 @@ int main(int argc, char **argv)
 
     ImageType::Pointer huImage = reader->GetOutput();
     huImage->DisconnectPipeline();
+
+    // ── Optional denoise: median filter on the source HU (option A of the
+    //    denoise/despeckle evaluation; see test_denoise_despeckle.py) ────────
+    if (denoise && median_radius > 0)
+    {
+        std::cout << "Median filter     : radius " << median_radius << " vox ("
+                  << (2*median_radius+1) << "^3 kernel)...\n" << std::flush;
+        using MedianType = itk::MedianImageFilter<ImageType, ImageType>;
+        auto med = MedianType::New();
+        med->SetInput(huImage);
+        ImageType::SizeType rad;  rad.Fill(median_radius);
+        med->SetRadius(rad);
+        const double t_med0 = omp_get_wtime();
+        med->Update();
+        std::cout << "[timing] median filter    : "
+                  << (omp_get_wtime() - t_med0) << " s\n" << std::flush;
+        huImage = med->GetOutput();
+        huImage->DisconnectPipeline();
+    }
 
     const auto& dcmOriginITK = huImage->GetOrigin();
     const double dcm_orig_x = dcmOriginITK[0];
@@ -750,6 +891,26 @@ int main(int argc, char **argv)
 
     std::cout << "DICOM size      : " << nx_d << " x " << ny_d << " x " << nz_d << "\n";
     std::cout << "DICOM spacing   : " << sx_mm << " x " << sy_mm << " x " << sz_mm << " mm\n";
+
+    // ── Optional connected-component despeckle in DICOM space (rewrites HU ───
+    //    of small label islands; see test_denoise_despeckle.py) ──────────────
+    if (denoise && despeckle_min_size > 0)
+    {
+        if (despeckle_labels.empty()) {
+            std::cerr << "WARNING: despeckle_min_size > 0 but despeckle_labels "
+                         "is empty; skipping despeckle.\n";
+        } else {
+            std::cout << "Despeckle         : min_size=" << despeckle_min_size
+                      << " conn=" << despeckle_connectivity << " labels=";
+            for (const int L : despeckle_labels) std::cout << " " << L;
+            std::cout << "\n" << std::flush;
+            despeckleHuVolume(huImage->GetBufferPointer(), nx_d, ny_d, nz_d,
+                              thr_air_fat, thr_fat_soft,
+                              thr_soft_spongiosa, thr_spongiosa_cort,
+                              despeckle_labels, despeckle_min_size,
+                              despeckle_connectivity);
+        }
+    }
 
     // Physical bounding box of the DICOM volume
     // Origin (IPP of first slice) comes from ITK image metadata

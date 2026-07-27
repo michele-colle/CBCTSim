@@ -12,6 +12,8 @@ find_package(ITK REQUIRED COMPONENTS
     ITKTransform       
     ITKImageFunction
     ITKImageGrid        # Essential for Resampling/Padding
+    ITKSmoothing        # MedianImageFilter (denoise)
+    ITKConnectedComponents  # ConnectedComponentImageFilter (despeckle)
 )
 include(${ITK_USE_FILE})
 
