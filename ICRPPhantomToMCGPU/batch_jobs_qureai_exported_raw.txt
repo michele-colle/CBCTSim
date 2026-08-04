@@ -1,0 +1,2 @@
+# exported .raw files (one per job)	<tag>	<raw_path>
+CQ500-CT-127 [A]	/mnt/h/MICHELE_MCGPU/QUREAI_VOLUME_EXPORT/CQ500-CT-127_A_2134x2134x834byte.raw

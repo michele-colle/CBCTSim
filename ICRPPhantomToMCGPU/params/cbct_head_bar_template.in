@@ -9,11 +9,11 @@
 #
 
 #[SECTION SIMULATION CONFIG v.2009-05-12]
-1.0e11                        # Simulating only 1% of the expected mammo exposure for testing!    ORIGINAL HISTORIES:  3.4e11             # TOTAL NUMBER OF HISTORIES, OR SIMULATION TIME IN SECONDS IF VALUE < 100000
+1.0e6                        # Simulating only 1% of the expected mammo exposure for testing!    ORIGINAL HISTORIES:  3.4e11             # TOTAL NUMBER OF HISTORIES, OR SIMULATION TIME IN SECONDS IF VALUE < 100000
 55567891              # RANDOM SEED (ranecu PRNG)
 10                              # GPU NUMBER TO USE WHEN MPI IS NOT USED, OR TO BE AVOIDED IN MPI RUNS
 128                           # GPU THREADS PER CUDA BLOCK (multiple of 32)
-5000                         # SIMULATED HISTORIES PER GPU THREAD
+1                         # SIMULATED HISTORIES PER GPU THREAD
  
 #[SECTION SOURCE v.2016-12-02]
 spectrum/120kV_Al100um_Brass60um.spc    # X-RAY ENERGY SPECTRUM FILE
@@ -29,7 +29,7 @@ NO                             # COLLIMATE BEAM TOWARDS POSITIVE AZIMUTHAL (X) A
  
 #[SECTION IMAGE DETECTOR v.2017-06-20]
 results/maria_cristeta_fit_no_stretcher/AF_head_registered_mariaCristeta_vox_5labels_120_kV512x512x2float   # OUTPUT IMAGE FILE NAME
-512      512                  # NUMBER OF PIXELS IN THE IMAGE: Nx Nz
+978      978                  # NUMBER OF PIXELS IN THE IMAGE: Nx Nz
 29.34    29.34                 # IMAGE SIZE (width, height): Dx Dz [cm]
 98.70                           # SOURCE-TO-DETECTOR DISTANCE (detector set in front of the source, perpendicular to the initial direction)
  0.0    0.0                     # IMAGE OFFSET ON DETECTOR PLANE IN WIDTH AND HEIGHT DIRECTIONS (BY DEFAULT BEAM CENTERED AT IMAGE CENTER) [cm]

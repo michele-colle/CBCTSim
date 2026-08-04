@@ -4,210 +4,180 @@
   "cwd": ".",
   "cfg_out_dir": "params/generated",
   "stretcher_labels": [
-    "A",
-    "B",
-    "C"
+    "A"
   ],
+  "auto_head_placement": true,
   "cases": [
     {
-      "name": "GRDN00MGH1ABQLE8",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/005_54891767",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN00MGH1ABQLE8/20250622_67343294/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-00F_dicom_749x538x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-00F_dicom_749x538x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-00F_dicom_749x538x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": -45.6,
-          "cy_mm": 225.9
-        },
-        {
-          "cx_mm": 81.9,
-          "cy_mm": 225.9
-        },
-        {
-          "cx_mm": 79.6,
-          "cy_mm": 239.9
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN02BKET588MC5",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/003_58781134",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN02BKET588MC5/20250508_76735344/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-00M_dicom_749x538x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-00M_dicom_749x538x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-00M_dicom_749x538x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 24.5,
-          "cy_mm": 225.2
-        },
-        {
-          "cx_mm": 25.7,
-          "cy_mm": 217.7
-        },
-        {
-          "cx_mm": -14.8,
-          "cy_mm": 236.2
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN0V840WXJ02B6",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/006_09289437",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0V840WXJ02B6/20241227_03045928/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-01F_dicom_971x686x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-01F_dicom_971x686x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-01F_dicom_971x686x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 71.5,
-          "cy_mm": 197.5
-        },
-        {
-          "cx_mm": -54.9,
-          "cy_mm": 219.3
-        },
-        {
-          "cx_mm": 74.9,
-          "cy_mm": 247.0
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN0XOSMPPEAYBU",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/014_15076077",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0XOSMPPEAYBU/20250810_31318086/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-01M_dicom_950x685x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-01M_dicom_950x685x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-01M_dicom_950x685x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 82.1,
-          "cy_mm": 211.8
-        },
-        {
-          "cx_mm": -85.1,
-          "cy_mm": 229.4
-        },
-        {
-          "cx_mm": -20.4,
-          "cy_mm": 207.0
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN0YP5B56SGAJM",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/009_19971542",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN0YP5B56SGAJM/20251228_52949934/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-05F_dicom_1172x790x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-05F_dicom_1172x790x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-05F_dicom_1172x790x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 11.5,
-          "cy_mm": 212.6
-        },
-        {
-          "cx_mm": -75.5,
-          "cy_mm": 216.2
-        },
-        {
-          "cx_mm": -6.2,
-          "cy_mm": 206.5
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN17YG2OQIYVPO",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/004_73094250",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN17YG2OQIYVPO/20250914_92664499/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-05M_dicom_1179x790x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-05M_dicom_1179x790x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-05M_dicom_1179x790x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": -29.5,
-          "cy_mm": 232.4
-        },
-        {
-          "cx_mm": 67.5,
-          "cy_mm": 188.9
-        },
-        {
-          "cx_mm": -60.8,
-          "cy_mm": 214.5
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN1P7W3AFP70R8",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/024_03835066",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1P7W3AFP70R8/20241110_93676021/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-10F_dicom_1328x815x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-10F_dicom_1328x815x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-10F_dicom_1328x815x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 19.0,
-          "cy_mm": 227.3
-        },
-        {
-          "cx_mm": 22.6,
-          "cy_mm": 246.7
-        },
-        {
-          "cx_mm": -9.4,
-          "cy_mm": 178.9
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN1TQOUC2B1R2U",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/012_27503983",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN1TQOUC2B1R2U/20251119_11096464/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-10M_dicom_1317x828x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-10M_dicom_1317x828x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-10M_dicom_1317x828x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": 17.1,
-          "cy_mm": 238.5
-        },
-        {
-          "cx_mm": -41.3,
-          "cy_mm": 201.3
-        },
-        {
-          "cx_mm": -71.1,
-          "cy_mm": 210.7
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN21I9AD975J98",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/005_43663721",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN21I9AD975J98/20240315_76834266/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-15F_dicom_1316x812x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-15F_dicom_1316x812x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-15F_dicom_1316x812x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": -89.3,
-          "cy_mm": 194.3
-        },
-        {
-          "cx_mm": 43.3,
-          "cy_mm": 201.7
-        },
-        {
-          "cx_mm": 72.2,
-          "cy_mm": 242.1
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
     },
     {
-      "name": "GRDN2SAZN503S7N0",
-      "dicom_dir": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/012_28965209",
-      "output_prefix": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/MCGPU",
-      "mask_nrrd": "/home/colle/GradientHealthExport/export/GRDN2SAZN503S7N0/20250321_21049747/Segmentation-Segment_1-label.nrrd",
+      "name": "MRCP-15M_dicom_1444x834x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-15M_dicom_1444x834x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP-15M_dicom_1444x834x1067_MCGPU",
+      "mask_nrrd": "",
       "stretchers": [
         {
-          "cx_mm": -81.5,
-          "cy_mm": 191.9
-        },
-        {
-          "cx_mm": -31.0,
-          "cy_mm": 213.8
-        },
-        {
-          "cx_mm": 4.9,
-          "cy_mm": 212.0
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
         }
-      ]
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "MRCP_AF_dicom_1539x955x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP_AF_dicom_1539x955x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP_AF_dicom_1539x955x1067_MCGPU",
+      "mask_nrrd": "",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "MRCP_AM_dicom_1552x970x1067",
+      "dicom_dir": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP_AM_dicom_1552x970x1067",
+      "output_prefix": "/mnt/h/MICHELE_MCGPU/DICOM_EXPORT_MCRP/MRCP_AM_dicom_1552x970x1067_MCGPU",
+      "mask_nrrd": "",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
     }
-  ]
+  ],
+  "output_dir": "/mnt/h/MICHELE_MCGPU/MCGPU_EXPORT",
+  "mcgpu_in_dir": "/mnt/h/MICHELE_MCGPU/MCGPU_IN_FILES",
+  "mcgpu_in_template": "params/cbct_head_bar_template.in"
 }

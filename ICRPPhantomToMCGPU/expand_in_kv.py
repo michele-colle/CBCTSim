@@ -185,6 +185,38 @@ def parse_in_geometry(in_path):
     )
 
 
+def parse_split_geometry(txt_path, beam_template_path):
+    """Like parse_in_geometry, but for a minimal (raw+txt only, no .in
+    written) dicom_to_mcgpu run: voxel geometry comes from the plain .txt
+    companion beside the .raw (same "SECTION VOXELIZED GEOMETRY" marker/
+    format a .in carries -- dicom_to_mcgpu's writeInfoFile() writes it
+    identically), beam geometry comes from a separate SHARED .in template
+    (source/detector -- identical across stretcher-position variants and
+    across the production templates, so one shared template covers every
+    position). Lets a raw+txt-only batch sweep still get positioning-check
+    PNGs without writing a per-position .in at all.
+    Returns a dict in the same shape as parse_in_geometry; raises ValueError
+    if a required section is missing from either file."""
+    txt_lines = Path(txt_path).read_text().splitlines()
+    tmpl_lines = Path(beam_template_path).read_text().splitlines()
+    src = _in_section_values(tmpl_lines, "SECTION SOURCE", 3)
+    det = _in_section_values(tmpl_lines, "SECTION IMAGE DETECTOR", 4)
+    vox = _in_section_values(txt_lines, "SECTION VOXELIZED GEOMETRY", 4)
+    if len(src) < 3 or len(det) < 4 or len(vox) < 4:
+        raise ValueError("could not locate SOURCE/DETECTOR (in beam template) "
+                          "or VOXEL (in .txt) sections")
+    return dict(
+        src_pos=[float(v) for v in src[1].split()[:3]],
+        src_dir=[float(v) for v in src[2].split()[:3]],
+        det_size=[float(v) for v in det[2].split()[:2]],
+        sdd=float(det[3].split()[0]),
+        raw_name=Path(vox[0].split()[0]).name,
+        offset=[float(v) for v in vox[1].split()[:3]],
+        nvox=[int(float(v)) for v in vox[2].split()[:3]],
+        vsize=[float(v) for v in vox[3].split()[:3]],
+    )
+
+
 def _load_central_sagittal(raw_path, nvox, cache=None):
     """Memmap the label .raw and return its central sagittal slice (X=Nx//2)
     as a (Nz, Ny) array in [Z, Y] order.  Cached by raw path, since every

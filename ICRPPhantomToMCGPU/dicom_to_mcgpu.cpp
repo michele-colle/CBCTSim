@@ -24,6 +24,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <queue>
 #include <sstream>
@@ -96,6 +97,69 @@ static std::map<std::string, std::string> loadCfg(const std::string &path)
         cfg[trim(line.substr(0, eq))] = trim(line.substr(eq + 1));
     }
     return cfg;
+}
+
+// ---------------------------------------------------------------------------
+// Extract the first `count` non-comment "value" line contents after the first
+// line containing `marker`.  Mirrors expand_in_kv.py's _in_section_values, so
+// this reads the same MC-GPU .in section layout the positioning-check script
+// already parses (SOURCE / IMAGE DETECTOR).  Ported from mcrp_to_vox.cpp.
+// ---------------------------------------------------------------------------
+static std::vector<std::string> inSectionValues(const std::vector<std::string>& lines,
+                                                  const std::string& marker, size_t count)
+{
+    std::vector<std::string> vals;
+    bool grabbing = false;
+    for (const auto& raw : lines) {
+        if (!grabbing) {
+            if (raw.find(marker) != std::string::npos) grabbing = true;
+            continue;
+        }
+        std::string body = raw.substr(0, raw.find('#'));
+        size_t a = body.find_first_not_of(" \t\r\n");
+        if (a == std::string::npos) continue;   // blank / fully-commented line
+        size_t b = body.find_last_not_of(" \t\r\n");
+        vals.push_back(body.substr(a, b - a + 1));
+        if (vals.size() >= count) break;
+    }
+    return vals;
+}
+
+// ---------------------------------------------------------------------------
+// Parse an MC-GPU .in template's beam geometry and return the half-height (in
+// mm, isocenter-relative) of the reconstructed field of view along Z (the
+// cranial-caudal axis), i.e. how far above/below isocenter the fan/cone beam
+// still reaches the detector.  Returns -1.0 if the template can't be read or
+// parsed (SOURCE / IMAGE DETECTOR sections missing).  Ported from
+// mcrp_to_vox.cpp (see HANDOUT_mcrp_dicom_stretcher_augmentation.md §2a).
+//   FOV_halfZ = (detector_height/2) * (SAD / SDD)      [similar triangles]
+// ---------------------------------------------------------------------------
+static double parseBeamFOVHalfZ_mm(const std::string& tmplPath)
+{
+    std::ifstream f(tmplPath);
+    if (!f) return -1.0;
+    std::vector<std::string> lines;
+    { std::string l; while (std::getline(f, l)) lines.push_back(l); }
+
+    // SECTION SOURCE: value[0] = active spectrum line, value[1] = source position
+    auto src = inSectionValues(lines, "SECTION SOURCE", 2);
+    // SECTION IMAGE DETECTOR: [0]=output name [1]=pixels [2]=image size [3]=SDD
+    auto det = inSectionValues(lines, "SECTION IMAGE DETECTOR", 4);
+    if (src.size() < 2 || det.size() < 4) return -1.0;
+
+    double sx, sy, sz, dx, dz, sdd;
+    std::istringstream ssPos(src[1]);
+    std::istringstream ssImg(det[2]);
+    std::istringstream ssSdd(det[3]);
+    if (!(ssPos >> sx >> sy >> sz)) return -1.0;
+    if (!(ssImg >> dx >> dz))       return -1.0;
+    if (!(ssSdd >> sdd))            return -1.0;
+
+    const double sad_cm = std::abs(sy);   // source-to-isocenter distance [cm]
+    if (sdd <= 0.0 || sad_cm <= 0.0) return -1.0;
+
+    const double fovHalfZ_cm = (dz / 2.0) * (sad_cm / sdd);
+    return fovHalfZ_cm * 10.0;   // -> mm
 }
 
 // ---------------------------------------------------------------------------
@@ -208,6 +272,124 @@ static Poly2D roundPolygon(const Poly2D& poly, double r, int n_arc = 20)
         }
     }
     return result;
+}
+
+// ---------------------------------------------------------------------------
+// Basic HU-threshold head detection over an already-loaded (and, if enabled,
+// denoised/despeckled) DICOM HU buffer -- run it AFTER the median filter /
+// despeckle stages so scan noise and small artifacts don't fool it (they're
+// already handled there; see test_denoise_despeckle.py).  Works on any head
+// DICOM, not just MRCP-derived crops.
+//
+// Scans from the `headAtMaxZ`-designated end of the Z axis inward for the
+// first slice whose thresholded voxel count exceeds a small minimum-area
+// floor (rejects couch/immobilization noise) -- that slice is the head tip,
+// regardless of the body's torso/neck/head area profile further in (verified
+// empirically against a real tight-crop MRCP export: area rises from the
+// truncated torso, dips at the neck, rises again over the skull, then tapers
+// to zero at the crown -- first-past-threshold from the head end lands
+// exactly on the crown either way).  Within the following `headRegion_mm`
+// slab (moving from the tip into the body), computes the XY bounding box of
+// thresholded voxels: an XY centre to anchor the head on isocenter, and the
+// AP half-depth (Y extent / 2) the stretcher auto-seat needs.
+//
+// IMPORTANT: coordinates are in this file's own "local, corner-at-zero" DICOM
+// frame -- voxel i's centre at (i+0.5)*spacing, buffer spanning
+// [0, n*spacing) -- the SAME convention the placement/resampling code below
+// already uses (qcx/qcy/qcz, dicom_corner_*_mm).  This deliberately ignores
+// the true DICOM ImagePositionPatient/origin metadata (dcm_orig_x/y/z),
+// exactly like the rest of this file's placement math does; mixing the two
+// frames silently shifts the detected head by the DICOM's own physical
+// origin (caught during testing: MRCP-00F's exporter centres X/Y with
+// origin = -halfExtent, which was erroneously added on top here, shifting
+// the "detected" head centre by a full half-extent).
+// ---------------------------------------------------------------------------
+struct HeadDetectResult {
+    bool   found = false;
+    double tipZ_mm = 0.0;         // local mm (corner-at-zero frame, see above)
+    double xyCentreX_mm = 0.0;    // local mm
+    double xyCentreY_mm = 0.0;
+    double halfDepthY_mm = 0.0;   // AP half-depth of the head slab [mm]
+};
+
+static HeadDetectResult detectHeadHU(const int16_t* hu,
+                                     size_t nx, size_t ny, size_t nz,
+                                     double sx_mm, double sy_mm, double sz_mm,
+                                     int16_t thr_hu, bool headAtMaxZ, double headRegion_mm)
+{
+    HeadDetectResult r;
+    const size_t slicePx = nx * ny;
+    // Minimum tissue area to accept a slice as "head", not noise: ~25 mm^2
+    // worth of voxels (rejects a handful of stray couch/artifact voxels).
+    const size_t minAreaVox = std::max<size_t>(
+        4, static_cast<size_t>(25.0 / (sx_mm * sy_mm)));
+
+    auto sliceArea = [&](size_t k) {
+        const int16_t* s = hu + k * slicePx;
+        size_t cnt = 0;
+        #pragma omp parallel for schedule(static) reduction(+:cnt)
+        for (long i = 0; i < static_cast<long>(slicePx); ++i)
+            if (s[i] >= thr_hu) ++cnt;
+        return cnt;
+    };
+
+    long tipK = -1;
+    if (headAtMaxZ) {
+        for (long k = static_cast<long>(nz) - 1; k >= 0; --k)
+            if (sliceArea(static_cast<size_t>(k)) >= minAreaVox) { tipK = k; break; }
+    } else {
+        for (long k = 0; k < static_cast<long>(nz); ++k)
+            if (sliceArea(static_cast<size_t>(k)) >= minAreaVox) { tipK = k; break; }
+    }
+    if (tipK < 0) return r;   // no tissue found at all
+
+    r.found = true;
+    r.tipZ_mm = (static_cast<double>(tipK) + 0.5) * sz_mm;
+
+    // XY bbox over the head_region_mm slab, moving from the tip INTO the body.
+    const long slabVox = std::max<long>(1, static_cast<long>(std::round(headRegion_mm / sz_mm)));
+    long kLo, kHi;
+    if (headAtMaxZ) { kHi = tipK; kLo = std::max<long>(0, tipK - slabVox + 1); }
+    else            { kLo = tipK; kHi = std::min<long>(static_cast<long>(nz) - 1, tipK + slabVox - 1); }
+
+    double xMin = std::numeric_limits<double>::max(), xMax = -xMin;
+    double yMin = xMin, yMax = -xMin;
+    bool any = false;
+    #pragma omp parallel
+    {
+        double lxMin = std::numeric_limits<double>::max(), lxMax = -lxMin;
+        double lyMin = lxMin, lyMax = -lxMin;
+        bool lany = false;
+        #pragma omp for schedule(static) nowait
+        for (long k = kLo; k <= kHi; ++k) {
+            const int16_t* s = hu + static_cast<size_t>(k) * slicePx;
+            for (size_t j = 0; j < ny; ++j) {
+                const int16_t* row = s + j * nx;
+                for (size_t i = 0; i < nx; ++i) {
+                    if (row[i] < thr_hu) continue;
+                    const double x = (static_cast<double>(i) + 0.5) * sx_mm;
+                    const double y = (static_cast<double>(j) + 0.5) * sy_mm;
+                    lxMin = std::min(lxMin, x); lxMax = std::max(lxMax, x);
+                    lyMin = std::min(lyMin, y); lyMax = std::max(lyMax, y);
+                    lany = true;
+                }
+            }
+        }
+        #pragma omp critical
+        {
+            if (lany) {
+                xMin = std::min(xMin, lxMin); xMax = std::max(xMax, lxMax);
+                yMin = std::min(yMin, lyMin); yMax = std::max(yMax, lyMax);
+                any = true;
+            }
+        }
+    }
+    if (any) {
+        r.xyCentreX_mm  = 0.5 * (xMin + xMax);
+        r.xyCentreY_mm  = 0.5 * (yMin + yMax);
+        r.halfDepthY_mm = 0.5 * (yMax - yMin);
+    }
+    return r;
 }
 
 // ---------------------------------------------------------------------------
@@ -558,6 +740,10 @@ int main(int argc, char **argv)
     // -------------------------------------------------------------------------
     std::string dicomDir     = ".";
     std::string outputPrefix = "dicom";
+    // Optional: write output directly into this folder, flat, instead of the
+    // "<output_prefix>_vox_<dims>/" subfolder derived from output_prefix. See
+    // the output-folder block below (search "output_dir (optional)").
+    std::string output_dir;
     std::string seriesUID;
     // Which acquisition to keep when a series bundles duplicate slice positions
     // (see selectSingleAcquisition).  -1 = auto (most slices, tie -> lowest #).
@@ -596,6 +782,18 @@ int main(int argc, char **argv)
     double dicom_corner_y_mm = 0.0;
     double dicom_corner_z_mm = 0.0;
 
+    // Automatic head detection + FOV/stretcher placement (opt-in; off leaves
+    // every existing manual-offset cfg bit-for-bit unaffected).  See
+    // PLAN_dicom_to_mcgpu_auto_placement.md.
+    bool    auto_head_placement   = false;
+    int16_t head_detect_thr_hu    = -500;   // tissue vs. air, matches thr_air_fat
+    bool    head_at_max_z         = true;   // which end of the volume is "toward the head"
+    double  head_region_mm        = 100.0;  // top slab used for XY centring + AP depth
+    double  head_top_margin_mm    = 10.0;   // air gap kept above the head tip, below the FOV
+    bool    stretcher_auto            = false; // stretcher Y = detected limit + offset
+    double  stretcher_cy_offset_mm    = 0.0;   // augmentation knob added on top of the limit
+    double  stretcher_gap_mm          = 2.0;   // gap between head posterior surface and shell
+
     // DICOM rotation (XYZ Euler angles in degrees, pivot = DICOM centre)
     double dicom_rot_x_deg = 0.0;
     double dicom_rot_y_deg = 0.0;
@@ -619,6 +817,23 @@ int main(int argc, char **argv)
 
     // MC-GPU .in template
     std::string mcgpu_in_template;
+    // Optional: write .in file(s) into this folder instead of the volume's
+    // own output folder (outDir) -- keeps a growing batch's .in files
+    // separate from its (much larger) .raw/.txt volumes.  Written FLAT, with
+    // filenames prefixed by phantom_name (or prefixStem) to stay unique
+    // across an entire batch sharing this folder.  NOTE: the .in's own
+    // "VOXEL GEOMETRY FILE" reference is still "phantom/<raw-name>.raw"
+    // (relative) -- to actually run MC-GPU from here, place/symlink the
+    // matching .raw under "<mcgpu_in_dir>/phantom/".  Empty -> previous
+    // behaviour (.in written alongside the .raw/.txt in outDir).
+    std::string mcgpu_in_dir;
+    // Beam template used ONLY to compute the FOV for auto_head_placement --
+    // decoupled from mcgpu_in_template (which templates to WRITE .in for) so
+    // a minimal run (mcgpu_in_template empty, no .in written) can still
+    // anchor placement against the correct beam FOV instead of falling back
+    // to "volume's own top face".  Empty -> fall back to the first entry of
+    // mcgpu_in_template (previous, still-default behaviour).
+    std::string fov_template;
     std::string mcgpu_output_name;
     int         mcgpu_det_nx = 512;
     int         mcgpu_det_nz = 512;
@@ -650,6 +865,7 @@ int main(int argc, char **argv)
 
         dicomDir = toLinuxPath(getS("dicom_dir", dicomDir));
         outputPrefix = toLinuxPath(getS("output_prefix", outputPrefix));
+        output_dir   = toLinuxPath(getS("output_dir", output_dir));
         seriesUID    = getS("series_uid",    seriesUID);
         acquisition_number = static_cast<int>(getD("acquisition_number", acquisition_number));
 
@@ -735,7 +951,24 @@ int main(int argc, char **argv)
         stretcher.cx_mm = getD("stretcher_cx_mm", stretcher.cx_mm);
         stretcher.cy_mm = getD("stretcher_cy_mm", stretcher.cy_mm);
 
+        auto_head_placement = cfg.count("auto_head_placement")
+            ? (cfg["auto_head_placement"] == "1" || cfg["auto_head_placement"] == "true")
+            : auto_head_placement;
+        head_detect_thr_hu = static_cast<int16_t>(getD("head_detect_thr_hu", head_detect_thr_hu));
+        head_at_max_z = cfg.count("head_at_max_z")
+            ? (cfg["head_at_max_z"] == "1" || cfg["head_at_max_z"] == "true")
+            : head_at_max_z;
+        head_region_mm     = getD("head_region_mm",     head_region_mm);
+        head_top_margin_mm = getD("head_top_margin_mm", head_top_margin_mm);
+        stretcher_auto = cfg.count("stretcher_auto")
+            ? (cfg["stretcher_auto"] == "1" || cfg["stretcher_auto"] == "true")
+            : stretcher_auto;
+        stretcher_cy_offset_mm = getD("stretcher_cy_offset_mm", stretcher_cy_offset_mm);
+        stretcher_gap_mm       = getD("stretcher_gap_mm",       stretcher_gap_mm);
+
         mcgpu_in_template = getS("mcgpu_in_template", mcgpu_in_template);
+        mcgpu_in_dir      = toLinuxPath(getS("mcgpu_in_dir", mcgpu_in_dir));
+        fov_template      = getS("fov_template",      fov_template);
         mcgpu_output_name = getS("mcgpu_output_name", mcgpu_output_name);
         mcgpu_det_nx      = static_cast<int>(getD("mcgpu_det_nx", mcgpu_det_nx));
         mcgpu_det_nz      = static_cast<int>(getD("mcgpu_det_nz", mcgpu_det_nz));
@@ -963,6 +1196,86 @@ int main(int argc, char **argv)
     const double qcy = (static_cast<double>(ny_d) * sy_mm) / 2.0;
     const double qcz = (static_cast<double>(nz_d) * sz_mm) / 2.0;
 
+    // ── Automatic head detection + FOV/stretcher placement (opt-in) ──────────
+    // Runs on the already-loaded (and, if denoise=true, already median-
+    // filtered + despeckled) huImage buffer -- reuses that noise-robustness
+    // rather than re-implementing it.  Overrides dicom_center_offset_*_mm
+    // (auto_head_placement) and/or stretcher.cy_mm (stretcher_auto) below;
+    // both consume the SAME detection pass since they need the same head bbox.
+    double autoHeadHalfDepthY_mm = 0.0;
+    bool   autoHeadFound = false;
+    if (auto_head_placement || stretcher_auto)
+    {
+        const HeadDetectResult hd = detectHeadHU(
+            huImage->GetBufferPointer(), nx_d, ny_d, nz_d,
+            sx_mm, sy_mm, sz_mm,
+            head_detect_thr_hu, head_at_max_z, head_region_mm);
+        autoHeadFound = hd.found;
+        if (!hd.found) {
+            std::cout << "WARNING: head detection (thr=" << head_detect_thr_hu
+                      << " HU) found no tissue; auto placement / stretcher "
+                         "auto-seat disabled for this run.\n";
+        } else {
+            autoHeadHalfDepthY_mm = hd.halfDepthY_mm;
+            std::cout << "Head detected   : tip Z=" << hd.tipZ_mm
+                      << " mm, XY centre=(" << hd.xyCentreX_mm << ", "
+                      << hd.xyCentreY_mm << ") mm, AP half-depth="
+                      << hd.halfDepthY_mm << " mm  (DICOM-local; thr="
+                      << head_detect_thr_hu << " HU, "
+                      << (head_at_max_z ? "max-Z" : "min-Z") << " end)\n";
+
+            if (auto_head_placement) {
+                double fovHalfZ_mm = -1.0;
+                // fov_template wins if set (e.g. a minimal run with
+                // mcgpu_in_template cleared); otherwise fall back to the
+                // first entry of mcgpu_in_template (previous behaviour).
+                std::string firstTmpl = fov_template;
+                if (firstTmpl.empty() && !mcgpu_in_template.empty()) {
+                    firstTmpl = mcgpu_in_template;
+                    const auto sep = firstTmpl.find_first_of(",;");
+                    if (sep != std::string::npos) firstTmpl = firstTmpl.substr(0, sep);
+                    firstTmpl.erase(0, firstTmpl.find_first_not_of(" \t\r\n"));
+                    firstTmpl.erase(firstTmpl.find_last_not_of(" \t\r\n") + 1);
+                }
+                if (!firstTmpl.empty())
+                    fovHalfZ_mm = parseBeamFOVHalfZ_mm(firstTmpl);
+                // Fallback (no template / unparseable): margin below the
+                // output volume's own top face, same convention as
+                // mcrp_to_vox's headTipTargetZ_mm fallback.
+                double targetTipIso_mm = (static_cast<double>(out_nz) * out_vz) / 2.0
+                                        - head_top_margin_mm;
+                if (fovHalfZ_mm > 0.0) {
+                    targetTipIso_mm = std::min(targetTipIso_mm, fovHalfZ_mm - head_top_margin_mm);
+                    std::cout << "Beam FOV        : half-height " << fovHalfZ_mm
+                              << " mm (from " << firstTmpl << ")\n";
+                } else {
+                    std::cout << "Warning: could not parse beam geometry from "
+                                 "fov_template/mcgpu_in_template; head tip placed "
+                                 "near the output volume's own top face.\n";
+                }
+
+                // Solve for the centre-to-centre offsets that land the
+                // detected head tip / XY centre at the targets above.
+                dicom_center_offset_z_mm = targetTipIso_mm - hd.tipZ_mm + qcz;
+                dicom_center_offset_x_mm = qcx - hd.xyCentreX_mm;
+                dicom_center_offset_y_mm = qcy - hd.xyCentreY_mm;
+                std::cout << "Auto placement  : head tip -> Z=" << targetTipIso_mm
+                          << " mm from isocenter; XY centred -> offsets ("
+                          << dicom_center_offset_x_mm << ", " << dicom_center_offset_y_mm
+                          << ", " << dicom_center_offset_z_mm << ") mm\n";
+            }
+
+            if (stretcher_auto) {
+                const double ht = 57.0 / 2.0;   // stretcher shell half-height (S_H below)
+                const double cyLimit = autoHeadHalfDepthY_mm + stretcher_gap_mm + ht;
+                stretcher.cy_mm = cyLimit + stretcher_cy_offset_mm;
+                std::cout << "Stretcher auto-seat: halfDepthY=" << autoHeadHalfDepthY_mm
+                          << " mm -> limit cy=" << cyLimit << " mm + offset "
+                          << stretcher_cy_offset_mm << " mm = " << stretcher.cy_mm << " mm\n";
+            }
+        }
+    }
+
     // Place the DICOM centre at the requested centre-to-centre offset from the
     // output volume centre (isocenter):  corner = offset - DICOM half-extent.
     // offset (0,0,0) => DICOM centred; a fixed offset places every series the
@@ -1097,15 +1410,24 @@ int main(int argc, char **argv)
                                std::to_string(out_nz);
     const fs::path   prefixPath  = fs::path(outputPrefix);
     const std::string prefixStem = prefixPath.filename().string();
-    const fs::path outDirPath = (fs::path(dicomDir).parent_path() /
-                                 prefixPath.parent_path() /
-                                 (prefixStem+"_vox_"+dimTag)).lexically_normal();
+    // output_dir (optional): write directly into this folder, FLAT -- no
+    // per-run "<stem>_vox_<dims>" subfolder -- so a shared external drive
+    // never mixes with the DICOM input tree and stays a single flat listing.
+    // Filenames remain unique via phantom_name/prefixStem, same as always.
+    // Omitted (default): unchanged nested-subfolder behaviour.
+    const fs::path outDirPath = output_dir.empty()
+        ? (fs::path(dicomDir).parent_path() /
+           prefixPath.parent_path() /
+           (prefixStem+"_vox_"+dimTag)).lexically_normal()
+        : fs::path(output_dir).lexically_normal();
     fs::create_directories(outDirPath);
     const std::string outDir  = outDirPath.string()+"/";
     std::cout << "Output folder   : " << outDir << "\n";
 
     if (write_dicom)
-        dicom_output_dir = outDirPath.string() + "_dicom";
+        dicom_output_dir = output_dir.empty()
+            ? (outDirPath.string() + "_dicom")
+            : (outDirPath / (prefixStem + "_dicom")).string();
 
     const bool hasImplant = !implants.empty();
     const std::string labelTag =
@@ -1472,6 +1794,20 @@ int main(int argc, char **argv)
         // (matches the on-disk basename), never the absolute disk path.
         const std::string geomRef = "phantom/" + fs::path(rawPath).filename().string();
 
+        // mcgpu_in_dir (optional): .in goes to a separate FLAT folder,
+        // filenames prefixed for uniqueness across the whole batch sharing
+        // it.  Empty -> previous behaviour (alongside the .raw/.txt, no prefix).
+        const bool separateInDir = !mcgpu_in_dir.empty();
+        std::string inDir = outDir;
+        std::string inNamePrefix;
+        if (separateInDir) {
+            const fs::path inDirPath = fs::path(mcgpu_in_dir).lexically_normal();
+            fs::create_directories(inDirPath);
+            inDir = inDirPath.string() + "/";
+            inNamePrefix = (phantom_name.empty() ? prefixStem : phantom_name) + "_";
+            std::cout << "MC-GPU .in dir  : " << inDir << "\n";
+        }
+
         for (const std::string &tmplPath : templates)
         {
             std::ifstream tmpl(tmplPath);
@@ -1486,8 +1822,8 @@ int main(int argc, char **argv)
             const auto dot = stem.find_last_of('.');
             if (dot != std::string::npos) stem.erase(dot);
 
-            const std::string inPath  = multi ? (outDir + "CBCT_" + stem + ".in")
-                                              : (outDir + "CBCT.in");
+            const std::string inPath  = multi ? (inDir + inNamePrefix + "CBCT_" + stem + ".in")
+                                              : (inDir + inNamePrefix + "CBCT.in");
             const std::string outName = multi ? (mcgpu_output_name + stem)
                                               : mcgpu_output_name;
 
