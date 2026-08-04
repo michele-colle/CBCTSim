@@ -188,6 +188,15 @@ A caution for next time: verifying an upload with `gsutil ls ... 2>/dev/null`
 turned an expired-credential error into an apparently empty bucket, i.e. a
 false "upload failed". Never discard gsutil's stderr when using it as a check.
 
+Both throwaway scripts this round needed have been **folded into
+`upload_phantoms_to_gcp.sh`** rather than left in a scratchpad (README §11):
+`--list FILE` (publish only the named phantoms -- essential when a batch folder
+mixes publishable and unpublishable volumes, as here with the 26 sheared ones),
+`--reclaim` / `--reclaim-only` (delete each `.raw` only after proving the
+archive recoverable: bucket-md5 == local-archive-md5 plus `xz -t`), and
+`--dry-run`. Default behaviour -- every `*.raw` in the given directories, no
+deletion -- is unchanged. Verified end-to-end against a real bucket object.
+
 ### Split-archive merge (dataset-side fix)
 
 Some CQ500 patients are split across two consecutive `qctNN` archives with the

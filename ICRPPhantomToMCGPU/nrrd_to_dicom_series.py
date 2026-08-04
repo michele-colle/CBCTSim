@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Convert an ITK-readable 3-D volume (.nrrd, .nii, .mha, ...) into a CT DICOM
-series that dicom_to_mcgpu can consume as if it were a real patient series.
+Convert an ITK-readable 3-D volume (.nrrd, .nii, .nii.gz, .mha, ...) into a CT
+DICOM series that dicom_to_mcgpu can consume as if it were a real patient
+series.
 
 Why: dicom_to_mcgpu reads its input through GDCMSeriesFileNames, i.e. a
 DIRECTORY OF DICOM SLICES -- it cannot open a single .nrrd.  Some curated
 datasets ship pre-built volumes instead of a series (e.g. the CQ500
 "stitched" cases in qureai-headct/dataset_manifest.json, joined from two
 partial acquisitions).  This writes those out slice-by-slice with the
-geometry PRESERVED EXACTLY (origin / spacing / axis-aligned direction), so a
-companion segmentation mask NRRD in the same physical space still aligns
-after the conversion.
+geometry PRESERVED EXACTLY (origin / spacing / direction cosines), so a
+companion segmentation mask in the same physical space still aligns after the
+conversion.  Oblique volumes are kept oblique: the true direction goes into
+ImageOrientationPatient rather than being resampled away.
 
 Pixel data is written as signed int16 with RescaleIntercept=0 / Slope=1, so
 HU values round-trip bit-exactly (no -1024 offset clipping of the -3024
@@ -38,16 +40,57 @@ import pydicom
 from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.uid import CTImageStorage, ExplicitVRLittleEndian, generate_uid
 
-IDENTITY = (1, 0, 0, 0, 1, 0, 0, 0, 1)
+def load_volume(path: Path) -> sitk.Image:
+    """Read any ITK-supported volume, with a nibabel fallback for NIfTI files
+    whose sform is stored too coarsely to pass ITK's orthonormality test.
+
+    TotalSegmentator's ct.nii.gz keeps the scanner's oblique geometry in a
+    float32 sform, and that rounding leaves the direction cosines a few 1e-4
+    off orthogonal -- ITK refuses to open those at all.  Replacing the matrix
+    with its nearest rotation (polar decomposition via SVD) recovers the
+    geometry the scanner meant, to well under a voxel across the volume.
+    """
+    try:
+        return sitk.ReadImage(str(path))
+    except RuntimeError as exc:
+        if "orthonormal" not in str(exc):
+            raise
+
+    import nibabel as nib
+
+    nii = nib.load(str(path))
+    arr = np.asanyarray(nii.dataobj)                       # [i, j, k]
+    # NIfTI world space is RAS+, DICOM/ITK is LPS: negate the first two axes.
+    aff = np.diag([-1.0, -1.0, 1.0, 1.0]) @ nii.affine
+    mat = aff[:3, :3]
+    spacing = np.linalg.norm(mat, axis=0)
+    raw_dir = mat / spacing
+    u, _, vt = np.linalg.svd(raw_dir)
+    direction = u @ vt                                     # nearest rotation
+
+    # How far the fix moves the far corner of the volume -- the honest measure
+    # of what was given up, since the per-entry residual alone means little.
+    corner = np.array(arr.shape) * spacing
+    shift = float(np.linalg.norm((direction - raw_dir) @ corner))
+    print(f"  [nibabel] sform not orthonormal; re-orthonormalised "
+          f"(corner moves {shift * 1000:.3f} um)")
+
+    img = sitk.GetImageFromArray(np.ascontiguousarray(arr.transpose(2, 1, 0)))
+    img.SetSpacing([float(s) for s in spacing])
+    img.SetOrigin([float(o) for o in aff[:3, 3]])
+    img.SetDirection([float(d) for d in direction.ravel()])
+    return img
 
 
 def convert(volume_path: Path, out_dir: Path, name: str, force: bool = False) -> int:
     """Write volume_path as a CT DICOM series in out_dir.  Returns #slices."""
-    img = sitk.ReadImage(str(volume_path))
-    direction = tuple(round(d, 6) for d in img.GetDirection())
-    if direction != IDENTITY:
-        sys.exit(f"{volume_path.name}: non-identity direction {direction} -- "
-                 "this converter only handles axis-aligned volumes")
+    img = load_volume(volume_path)
+
+    # Columns of the direction matrix = world direction of each voxel axis.
+    d = img.GetDirection()
+    axis_i = np.array([d[0], d[3], d[6]])                  # along a row
+    axis_j = np.array([d[1], d[4], d[7]])                  # down a column
+    axis_k = np.array([d[2], d[5], d[8]])                  # slice normal
 
     arr = sitk.GetArrayFromImage(img)                      # [k, j, i]
     if arr.dtype != np.int16:
@@ -58,7 +101,8 @@ def convert(volume_path: Path, out_dir: Path, name: str, force: bool = False) ->
         arr = arr.astype(np.int16)
 
     sx, sy, sz = img.GetSpacing()
-    ox, oy, oz = img.GetOrigin()
+    origin = np.array(img.GetOrigin())
+    ox, oy, oz = origin
     nz, ny, nx = arr.shape
 
     if out_dir.exists() and any(out_dir.glob("*.dcm")) and not force:
@@ -95,13 +139,27 @@ def convert(volume_path: Path, out_dir: Path, name: str, force: bool = False) ->
         ds.SeriesDescription = f"{volume_path.stem} (converted)"
         ds.StudyDescription = "converted volume"
 
-        # Geometry -- preserved exactly (identity direction checked above).
-        ds.ImagePositionPatient = [f"{ox:.6f}", f"{oy:.6f}", f"{oz + k * sz:.6f}"]
-        ds.ImageOrientationPatient = ["1", "0", "0", "0", "1", "0"]
+        # Type 2 attributes of the CT Image IOD: must be PRESENT, may be empty.
+        # Omitting them altogether makes strict viewers and PACS reject the
+        # series.  Left blank rather than invented -- the source has no dates,
+        # and PatientPosition is deliberately absent so no viewer infers L/R
+        # from a guess instead of from ImageOrientationPatient.
+        ds.StudyDate = ""
+        ds.StudyTime = ""
+        ds.AccessionNumber = ""
+        ds.ReferringPhysicianName = ""
+        ds.PatientBirthDate = ""
+        ds.PatientSex = ""
+
+        # Geometry -- preserved exactly, oblique directions included.
+        pos = origin + k * sz * axis_k
+        ds.ImagePositionPatient = [f"{v:.6f}" for v in pos]
+        ds.ImageOrientationPatient = [f"{v:.9f}" for v in (*axis_i, *axis_j)]
         ds.PixelSpacing = [f"{sy:.9f}", f"{sx:.9f}"]        # [row, column]
         ds.SliceThickness = f"{sz:.6f}"
         ds.SpacingBetweenSlices = f"{sz:.6f}"
-        ds.SliceLocation = f"{oz + k * sz:.6f}"
+        # For an oblique series slice location is measured along the normal.
+        ds.SliceLocation = f"{float(pos @ axis_k):.6f}"
 
         # Pixel data -- signed HU, no rescale, so values round-trip exactly.
         ds.SamplesPerPixel = 1
@@ -124,12 +182,23 @@ def convert(volume_path: Path, out_dir: Path, name: str, force: bool = False) ->
     print(f"  wrote {nz} slice(s) -> {out_dir}  "
           f"({nx}x{ny}x{nz} @ {sx:.4f}x{sy:.4f}x{sz:.4f} mm, "
           f"origin ({ox:.2f}, {oy:.2f}, {oz:.2f}))")
+
+    # dicom_to_mcgpu reads the grid by index and ignores direction cosines, so
+    # an oblique series lands in the phantom box still tilted.  Say so loudly.
+    # Measure each voxel axis against the CLOSEST patient axis, otherwise the
+    # RAS->LPS sign flip alone reads as a 180 deg "tilt".
+    tilt = max(np.degrees(np.arccos(np.clip(np.abs(a).max(), -1, 1)))
+               for a in (axis_i, axis_j, axis_k))
+    if tilt > 0.1:
+        print(f"  [note] oblique volume: voxel axes are up to {tilt:.2f} deg off "
+              f"the patient axes (kept in ImageOrientationPatient, but "
+              f"dicom_to_mcgpu ignores direction -- the phantom stays tilted)")
     return nz
 
 
 def verify(volume_path: Path, out_dir: Path) -> bool:
     """Read the written series back and compare voxels + geometry to the source."""
-    src = sitk.ReadImage(str(volume_path))
+    src = load_volume(volume_path)
     rdr = sitk.ImageSeriesReader()
     rdr.SetFileNames(rdr.GetGDCMSeriesFileNames(str(out_dir)))
     got = rdr.Execute()
@@ -138,7 +207,8 @@ def verify(volume_path: Path, out_dir: Path) -> bool:
     if got.GetSize() != src.GetSize():
         print(f"  [FAIL] size {got.GetSize()} != {src.GetSize()}"); ok = False
     for tag, a, b in (("spacing", got.GetSpacing(), src.GetSpacing()),
-                      ("origin", got.GetOrigin(), src.GetOrigin())):
+                      ("origin", got.GetOrigin(), src.GetOrigin()),
+                      ("direction", got.GetDirection(), src.GetDirection())):
         if max(abs(x - y) for x, y in zip(a, b)) > 1e-3:
             print(f"  [FAIL] {tag} {a} != {b}"); ok = False
     d = sitk.GetArrayFromImage(got).astype(np.int32) - \

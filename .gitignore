@@ -828,3 +828,4 @@ ICRPPhantomToMCGPU/params/generated_mcrp_dicom/MRCP-15M.cfg
 ICRPPhantomToMCGPU/params/generated/GRDN00MGH1ABQLE8_A_denoised.cfg
 ICRPPhantomToMCGPU/denoise_checks/output/baseline/MCGPU_vox_2134x2134x100/MCGPU_vox_5labels_2134x2134x100.txt
 ICRPPhantomToMCGPU/denoise_checks/output/denoised/MCGPU_vox_2134x2134x100/MCGPU_vox_5labels_2134x2134x100.txt
+ICRPPhantomToMCGPU/.totalsegmentator_scan_cache.json

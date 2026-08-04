@@ -482,7 +482,54 @@ rendered from the `.txt` + `check_template` instead. Either way, PNGs land in
   a full batch — the same mixup-prone step (placement) is exactly what
   silently produces a physically-wrong-but-non-crashing volume otherwise.
 
-## 11. Related tools
+## 11. Publishing phantoms and reclaiming disk
+
+`upload_phantoms_to_gcp.sh` compresses each `.raw` into its own `.tar.xz`
+(raw only — no `.txt`, no `.in`) and uploads it to
+`gs://mcgpu-data-gcp/phantom/`. Default behaviour is unchanged: every `*.raw`
+directly inside each given directory.
+
+```bash
+# whole folder (the original behaviour)
+./upload_phantoms_to_gcp.sh /mnt/h/MICHELE_MCGPU/QUREAI_TEETH_VOLUME_EXPORT
+
+# only the phantoms named in a list, then reclaim their disk space
+./upload_phantoms_to_gcp.sh --list clean.txt --reclaim <dir>
+
+# reclaim after an earlier upload (no compression, no upload)
+./upload_phantoms_to_gcp.sh --list clean.txt --reclaim-only <dir>
+
+# see what either would do, touching nothing
+./upload_phantoms_to_gcp.sh --list clean.txt --reclaim --dry-run <dir>
+```
+
+| flag | effect |
+|---|---|
+| `--list FILE` | process only the `.raw` names in FILE (one per line, bare names resolved against `<dir>`, `#` comments ok) |
+| `--reclaim` | after a successful upload, verify recoverability and DELETE the local `.raw` |
+| `--reclaim-only` | skip compress+upload; only verify and delete (for an earlier batch) |
+| `--dry-run` | report only |
+
+**Why `--list` exists:** a batch folder routinely holds a mix of phantoms you
+want published and phantoms you don't — the CQ500 TEETH batch had 26 of 66
+gantry-sheared (§10), which must not be published. Globbing the folder would
+have uploaded them.
+
+**Deletion is gated on proof, never on the upload's exit code.** A `.raw` is
+removed only when all three hold: the local `.tar.xz` exists; its md5 equals
+the md5 GCS reports for the uploaded object (so the bucket copy is
+byte-identical to the local archive); and `xz -t` passes. That guarantees two
+independent copies before anything is deleted. Anything failing a check is
+skipped and reported, never deleted. Local archives are always kept — they are
+small (~4 MB for a 3.8 GB volume) and are the fast restore path; a volume is
+also regenerable from its `params/generated*/*.cfg`.
+
+**When verifying by hand, don't discard gsutil's stderr.** `gsutil ls
+gs://... 2>/dev/null | wc -l` reports 0 both for "bucket empty" and for
+"credentials expired" — which reads as a failed upload when the upload was
+fine. Let stderr through, or check the exit code.
+
+## 12. Related tools
 
 - `expand_in_kv.py` — `parse_in_geometry` / `render_positioning_check`, the
   general .in + label-volume → sagittal-PNG renderer used above (also
