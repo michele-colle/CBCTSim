@@ -183,16 +183,16 @@ def convert(volume_path: Path, out_dir: Path, name: str, force: bool = False) ->
           f"({nx}x{ny}x{nz} @ {sx:.4f}x{sy:.4f}x{sz:.4f} mm, "
           f"origin ({ox:.2f}, {oy:.2f}, {oz:.2f}))")
 
-    # dicom_to_mcgpu reads the grid by index and ignores direction cosines, so
-    # an oblique series lands in the phantom box still tilted.  Say so loudly.
     # Measure each voxel axis against the CLOSEST patient axis, otherwise the
     # RAS->LPS sign flip alone reads as a 180 deg "tilt".
     tilt = max(np.degrees(np.arccos(np.clip(np.abs(a).max(), -1, 1)))
                for a in (axis_i, axis_j, axis_k))
     if tilt > 0.1:
+        # Since the direction-cosine fix, dicom_to_mcgpu resolves this into
+        # true patient space, so the phantom comes out correctly oriented.
         print(f"  [note] oblique volume: voxel axes are up to {tilt:.2f} deg off "
-              f"the patient axes (kept in ImageOrientationPatient, but "
-              f"dicom_to_mcgpu ignores direction -- the phantom stays tilted)")
+              f"the patient axes (written to ImageOrientationPatient; "
+              f"dicom_to_mcgpu honours it)")
     return nz
 
 

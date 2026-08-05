@@ -115,8 +115,25 @@ everything from the DICOMs and the phantoms themselves.
 Uploaded with `--list` (the folder mixes these 28 with the 38 from round 7):
 **28 uploaded, 0 failed**, verified by NAME against the bucket listing rather
 than by count, with gsutil's stderr kept. `gs://mcgpu-data-gcp/phantom/` went
-77 -> 105 objects and now holds **all 66 teeth phantoms**. No `--reclaim`: the
-28 `.raw` (~106 GB) are still on H:.
+77 -> 105 objects and now holds **all 66 teeth phantoms**.
+
+Then reclaimed after the QA renders were reviewed and accepted:
+`--reclaim-only` deleted **28/28** `.raw`, 0 kept, **99 GiB freed** (H: 371 ->
+471 GB). Local `.tar.xz` (66, 261 MB) and `.txt` (66) are kept, and all 66
+archives were re-confirmed present in the bucket afterwards.
+
+**The credential trap bit again, in a new disguise.** The first `--reclaim-only`
+dry run reported "object not in bucket (or no md5)" for all 28 and refused to
+delete anything -- despite the objects demonstrably being there minutes
+earlier. Cause: the ACTIVE gcloud account had silently changed to a personal
+`@gmail.com` that lacks `storage.objects.list` on the bucket, so
+`gcs_md5_hex()`'s `gsutil ls -L ... 2>/dev/null` returned empty and the gate
+read it as "no bucket copy". Round 7's lesson was "never discard gsutil's
+stderr"; the sharper version is that `gcs_md5_hex()` STILL swallows stderr
+(line 82), so any auth failure there is indistinguishable from a missing
+object. It fails safe -- it keeps the `.raw` rather than deleting it -- but it
+diagnoses terribly. Check `gcloud config get-value account` before blaming the
+bucket. Worth making that helper surface its stderr.
 
 ## Round 3: separate `.in` folder (`mcgpu_in_dir`)
 

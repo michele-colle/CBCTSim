@@ -1,0 +1,728 @@
+{
+ "seed": 20260805,
+ "gap_mm": 2.0,
+ "xz_opts": "xz -T 32 -9e -M 30G",
+ "created": "2026-08-05T13:18:56",
+ "phantoms": {
+  "MRCP-00M_dicom_749x538x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -65.313,
+     "cy_mm": 279.872,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13214730,
+     "foam_vox": 211458198,
+     "archive": "MRCP-00M_dicom_749x538x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "a1fc435cf73a0028f5fbb1ffc54aa6d3"
+    },
+    "C": {
+     "cx_mm": -33.596,
+     "cy_mm": 154.702,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211396482,
+     "archive": "MRCP-00M_dicom_749x538x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "99aa72ad5e25fe93963d81840611e873"
+    },
+    "D": {
+     "cx_mm": -66.47,
+     "cy_mm": 150.109,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13217232,
+     "foam_vox": 211507404,
+     "archive": "MRCP-00M_dicom_749x538x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "336f23fdcac5cef4500f1b471840ea82"
+    },
+    "E": {
+     "cx_mm": 36.048,
+     "cy_mm": 196.162,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13212228,
+     "foam_vox": 211418166,
+     "archive": "MRCP-00M_dicom_749x538x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "37f7b841dc23d69d4743429094dead00"
+    },
+    "F": {
+     "cx_mm": 56.061,
+     "cy_mm": 177.05,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211447356,
+     "archive": "MRCP-00M_dicom_749x538x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "77c201b30812fce716f34c2e2521a5f7"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-00F_dicom_749x538x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -25.995,
+     "cy_mm": 126.69,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13222236,
+     "foam_vox": 211497396,
+     "archive": "MRCP-00F_dicom_749x538x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "632cfc4ba9cd6bd334624aded96bb6cd"
+    },
+    "C": {
+     "cx_mm": -65.992,
+     "cy_mm": 139.685,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13218066,
+     "foam_vox": 211387308,
+     "archive": "MRCP-00F_dicom_749x538x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "a1f9bd265e660d43b7c29642deb32250"
+    },
+    "D": {
+     "cx_mm": -38.777,
+     "cy_mm": 254.577,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13214730,
+     "foam_vox": 211424004,
+     "archive": "MRCP-00F_dicom_749x538x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "b93e86cce70034945e06598f0773b3c7"
+    },
+    "E": {
+     "cx_mm": -83.256,
+     "cy_mm": 136.592,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211502400,
+     "archive": "MRCP-00F_dicom_749x538x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "127b96b1246ee8b6c8247d08e56f6bf0"
+    },
+    "F": {
+     "cx_mm": 56.015,
+     "cy_mm": 270.176,
+     "cy_min_mm": 91.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211423170,
+     "archive": "MRCP-00F_dicom_749x538x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "c6ab841a283c946b7f6a545193724ec6"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-01F_dicom_971x686x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": 81.695,
+     "cy_mm": 125.746,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211485720,
+     "archive": "MRCP-01F_dicom_971x686x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "948d2efad423366aa6a417e66cba9cf2"
+    },
+    "C": {
+     "cx_mm": -6.717,
+     "cy_mm": 117.752,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13217232,
+     "foam_vox": 211411494,
+     "archive": "MRCP-01F_dicom_971x686x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "852f6f4055d54d00d7013688e2b0f2b5"
+    },
+    "D": {
+     "cx_mm": 85.537,
+     "cy_mm": 240.768,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211383972,
+     "archive": "MRCP-01F_dicom_971x686x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "ce8b558d4a1d346b08b39cadb78c16f2"
+    },
+    "E": {
+     "cx_mm": 79.107,
+     "cy_mm": 117.208,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211435680,
+     "archive": "MRCP-01F_dicom_971x686x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "2e73cb8b1e6c31f73158300a4ece9653"
+    },
+    "F": {
+     "cx_mm": -10.484,
+     "cy_mm": 129.675,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13212228,
+     "foam_vox": 211456530,
+     "archive": "MRCP-01F_dicom_971x686x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "e9ca43632d5e0c223029a64d0bedefc6"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-01M_dicom_950x685x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -2.352,
+     "cy_mm": 213.709,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211467372,
+     "archive": "MRCP-01M_dicom_950x685x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "31ad0b331e873c89d089e6f465fb8d48"
+    },
+    "C": {
+     "cx_mm": -37.44,
+     "cy_mm": 225.467,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13216398,
+     "foam_vox": 211419000,
+     "archive": "MRCP-01M_dicom_950x685x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "3b883e82851a2b987bcaf8369feb663f"
+    },
+    "D": {
+     "cx_mm": 40.954,
+     "cy_mm": 273.787,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211428174,
+     "archive": "MRCP-01M_dicom_950x685x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "63dceac9b87aa565df3536abdb1e4d76"
+    },
+    "E": {
+     "cx_mm": 57.46,
+     "cy_mm": 194.646,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13210560,
+     "foam_vox": 211450692,
+     "archive": "MRCP-01M_dicom_950x685x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "28e343828a97d20219417a7c623c5d38"
+    },
+    "F": {
+     "cx_mm": 8.965,
+     "cy_mm": 129.249,
+     "cy_min_mm": 110.7,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13218066,
+     "foam_vox": 211412328,
+     "archive": "MRCP-01M_dicom_950x685x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "62687612eb55b280b0637e14fa51ff15"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-05F_dicom_1172x790x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -79.788,
+     "cy_mm": 133.298,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211463202,
+     "archive": "MRCP-05F_dicom_1172x790x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "3715d493fbdf082e579b48ac7ee57b12"
+    },
+    "C": {
+     "cx_mm": 93.499,
+     "cy_mm": 125.385,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211462368,
+     "archive": "MRCP-05F_dicom_1172x790x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "b8a0466bc9d3b9d62406734780cf7555"
+    },
+    "D": {
+     "cx_mm": 42.131,
+     "cy_mm": 146.883,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211424838,
+     "archive": "MRCP-05F_dicom_1172x790x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "9732eb092948aa845c2387f7de0d2b1d"
+    },
+    "E": {
+     "cx_mm": -50.975,
+     "cy_mm": 153.055,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13210560,
+     "foam_vox": 211449858,
+     "archive": "MRCP-05F_dicom_1172x790x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "25ef168843976bdf39bd5f2a9a9d75cb"
+    },
+    "F": {
+     "cx_mm": 38.788,
+     "cy_mm": 206.97,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13216398,
+     "foam_vox": 211457364,
+     "archive": "MRCP-05F_dicom_1172x790x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "30ca267bdcca7dc84d44210dbd9f069d"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-05M_dicom_1179x790x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": 58.775,
+     "cy_mm": 261.4,
+     "cy_min_mm": 120.9,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13208892,
+     "foam_vox": 211465704,
+     "archive": "MRCP-05M_dicom_1179x790x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "0bcce0497f8531e689275a0b9a028708"
+    },
+    "C": {
+     "cx_mm": -82.664,
+     "cy_mm": 261.48,
+     "cy_min_mm": 120.9,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13212228,
+     "foam_vox": 211424004,
+     "archive": "MRCP-05M_dicom_1179x790x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "170f7a2bd45a04fd3d4b72c88892a268"
+    },
+    "D": {
+     "cx_mm": 79.773,
+     "cy_mm": 244.327,
+     "cy_min_mm": 120.9,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211473210,
+     "archive": "MRCP-05M_dicom_1179x790x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "d42a0fc9dac3eb2a6d08e9f4176e3bcf"
+    },
+    "E": {
+     "cx_mm": 11.357,
+     "cy_mm": 176.562,
+     "cy_min_mm": 120.9,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211380636,
+     "archive": "MRCP-05M_dicom_1179x790x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "831c7f4083f821cfc50e986354abd506"
+    },
+    "F": {
+     "cx_mm": 68.637,
+     "cy_mm": 228.213,
+     "cy_min_mm": 120.9,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13212228,
+     "foam_vox": 211439850,
+     "archive": "MRCP-05M_dicom_1179x790x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "98c08cec92e9a71003d8b8c026bb61dd"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-10F_dicom_1328x815x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -52.634,
+     "cy_mm": 246.523,
+     "cy_min_mm": 124.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13210560,
+     "foam_vox": 211442352,
+     "archive": "MRCP-10F_dicom_1328x815x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "2883614148b3ee5eb5c89a7f26cfcd8c"
+    },
+    "C": {
+     "cx_mm": -50.485,
+     "cy_mm": 131.126,
+     "cy_min_mm": 124.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211477380,
+     "archive": "MRCP-10F_dicom_1328x815x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "98e374455f03e8c95d2d43bcc9e3d6ba"
+    },
+    "D": {
+     "cx_mm": 3.673,
+     "cy_mm": 155.668,
+     "cy_min_mm": 124.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13216398,
+     "foam_vox": 211455696,
+     "archive": "MRCP-10F_dicom_1328x815x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "39eb241a741a04677496ef28e9e96556"
+    },
+    "E": {
+     "cx_mm": -27.815,
+     "cy_mm": 216.636,
+     "cy_min_mm": 124.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211483218,
+     "archive": "MRCP-10F_dicom_1328x815x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "814691f3318e18a4b77f6ef7ded1d1e4"
+    },
+    "F": {
+     "cx_mm": -60.004,
+     "cy_mm": 199.927,
+     "cy_min_mm": 124.2,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211476546,
+     "archive": "MRCP-10F_dicom_1328x815x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "c5af67ed83d6339bf46bf4e50a30a979"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-10M_dicom_1317x828x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -66.853,
+     "cy_mm": 275.864,
+     "cy_min_mm": 123.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211384806,
+     "archive": "MRCP-10M_dicom_1317x828x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "42faa355cb95bc9077f5b8a2144614ae"
+    },
+    "C": {
+     "cx_mm": -45.928,
+     "cy_mm": 247.248,
+     "cy_min_mm": 123.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211446522,
+     "archive": "MRCP-10M_dicom_1317x828x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "657bf029527fd3ab61489bb1ccb20054"
+    },
+    "D": {
+     "cx_mm": 87.896,
+     "cy_mm": 291.161,
+     "cy_min_mm": 123.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211380636,
+     "archive": "MRCP-10M_dicom_1317x828x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "eb1bd9b5a1e7e49860ee42bb63f6ab92"
+    },
+    "E": {
+     "cx_mm": -22.434,
+     "cy_mm": 206.933,
+     "cy_min_mm": 123.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211444020,
+     "archive": "MRCP-10M_dicom_1317x828x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "34a6d9bab642a61bacc3ba8644a3a2be"
+    },
+    "F": {
+     "cx_mm": 30.183,
+     "cy_mm": 156.55,
+     "cy_min_mm": 123.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211453194,
+     "archive": "MRCP-10M_dicom_1317x828x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "2fc4712d299dddf8b4de55d2a773ab51"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-15F_dicom_1316x812x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -91.232,
+     "cy_mm": 253.914,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13210560,
+     "foam_vox": 211469040,
+     "archive": "MRCP-15F_dicom_1316x812x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "8e91395c01a9f9acf8a96b4b885c2cef"
+    },
+    "C": {
+     "cx_mm": 36.877,
+     "cy_mm": 155.602,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13218066,
+     "foam_vox": 211396482,
+     "archive": "MRCP-15F_dicom_1316x812x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "b87176253e6a5d485918975abf04cf1a"
+    },
+    "D": {
+     "cx_mm": -59.22,
+     "cy_mm": 129.259,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13214730,
+     "foam_vox": 211454862,
+     "archive": "MRCP-15F_dicom_1316x812x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "320bba91c699048bc66e35f1bf1a41c0"
+    },
+    "E": {
+     "cx_mm": 21.679,
+     "cy_mm": 209.054,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211453194,
+     "archive": "MRCP-15F_dicom_1316x812x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "cdb250d11238a304c801ae37f1a4449a"
+    },
+    "F": {
+     "cx_mm": 11.923,
+     "cy_mm": 214.762,
+     "cy_min_mm": 121.5,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211455696,
+     "archive": "MRCP-15F_dicom_1316x812x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "6703d4821eb186e111bf4cd568b8bf44"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP-15M_dicom_1444x834x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": 35.085,
+     "cy_mm": 160.452,
+     "cy_min_mm": 125.1,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13216398,
+     "foam_vox": 211414830,
+     "archive": "MRCP-15M_dicom_1444x834x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "36128155c4a600e9010032f980e0dca0"
+    },
+    "C": {
+     "cx_mm": 24.783,
+     "cy_mm": 217.067,
+     "cy_min_mm": 125.1,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211419834,
+     "archive": "MRCP-15M_dicom_1444x834x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "beb61dd92c199424126cc0e7c15d5b5f"
+    },
+    "D": {
+     "cx_mm": -9.588,
+     "cy_mm": 169.369,
+     "cy_min_mm": 125.1,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211385640,
+     "archive": "MRCP-15M_dicom_1444x834x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "7cf9cdb99658cc1f67ecfdf94d426640"
+    },
+    "E": {
+     "cx_mm": 79.618,
+     "cy_mm": 143.439,
+     "cy_min_mm": 125.1,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211483218,
+     "archive": "MRCP-15M_dicom_1444x834x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "6d51d4584d1a903c08817a06dde7bf10"
+    },
+    "F": {
+     "cx_mm": -68.348,
+     "cy_mm": 237.524,
+     "cy_min_mm": 125.1,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13212228,
+     "foam_vox": 211443186,
+     "archive": "MRCP-15M_dicom_1444x834x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "47a7aec26153122258647cc7945888c4"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP_AF_dicom_1539x955x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": 17.626,
+     "cy_mm": 274.667,
+     "cy_min_mm": 132.3,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211421502,
+     "archive": "MRCP_AF_dicom_1539x955x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "47954df9a9e5485d4ed74c1180719aa3"
+    },
+    "C": {
+     "cx_mm": 16.973,
+     "cy_mm": 225.975,
+     "cy_min_mm": 132.3,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211499064,
+     "archive": "MRCP_AF_dicom_1539x955x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "62d402136ce1d919db2c8a0a7103cdee"
+    },
+    "D": {
+     "cx_mm": 66.898,
+     "cy_mm": 189.176,
+     "cy_min_mm": 132.3,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13214730,
+     "foam_vox": 211384806,
+     "archive": "MRCP_AF_dicom_1539x955x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "0f9364b57294dad7648af2b6bbc4a744"
+    },
+    "E": {
+     "cx_mm": 90.38,
+     "cy_mm": 221.033,
+     "cy_min_mm": 132.3,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213062,
+     "foam_vox": 211444020,
+     "archive": "MRCP_AF_dicom_1539x955x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "d07c7d39c86ee2ffb42070e6aa8ad3e0"
+    },
+    "F": {
+     "cx_mm": 58.125,
+     "cy_mm": 169.989,
+     "cy_min_mm": 132.3,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13214730,
+     "foam_vox": 211429008,
+     "archive": "MRCP_AF_dicom_1539x955x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "71b65907a00fbcfb75f8e087d4edbd5c"
+    }
+   },
+   "base_raw_deleted": true
+  },
+  "MRCP_AM_dicom_1552x970x1067": {
+   "variants": {
+    "B": {
+     "cx_mm": -34.083,
+     "cy_mm": 278.3,
+     "cy_min_mm": 138.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211431510,
+     "archive": "MRCP_AM_dicom_1552x970x1067_B_2134x2134x834byte.tar.xz",
+     "raw_md5": "b3922655d6c2b7a0276bdab82b4aea11"
+    },
+    "C": {
+     "cx_mm": 50.909,
+     "cy_mm": 220.24,
+     "cy_min_mm": 138.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13211394,
+     "foam_vox": 211485720,
+     "archive": "MRCP_AM_dicom_1552x970x1067_C_2134x2134x834byte.tar.xz",
+     "raw_md5": "fee250cab6dacd4757e1ff293f900c2b"
+    },
+    "D": {
+     "cx_mm": 89.318,
+     "cy_mm": 214.105,
+     "cy_min_mm": 138.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13215564,
+     "foam_vox": 211434012,
+     "archive": "MRCP_AM_dicom_1552x970x1067_D_2134x2134x834byte.tar.xz",
+     "raw_md5": "670efa7e4cbdc0d54923ff983e524fdd"
+    },
+    "E": {
+     "cx_mm": 80.137,
+     "cy_mm": 173.12,
+     "cy_min_mm": 138.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13218900,
+     "foam_vox": 211436514,
+     "archive": "MRCP_AM_dicom_1552x970x1067_E_2134x2134x834byte.tar.xz",
+     "raw_md5": "aa5a7a6ce903ccd0d0e755625098360a"
+    },
+    "F": {
+     "cx_mm": 55.828,
+     "cy_mm": 141.935,
+     "cy_min_mm": 138.6,
+     "cy_max_mm": 291.3,
+     "tries": 1,
+     "carbon_vox": 13213896,
+     "foam_vox": 211442352,
+     "archive": "MRCP_AM_dicom_1552x970x1067_F_2134x2134x834byte.tar.xz",
+     "raw_md5": "3e53a40600b4ffc01078ead6f1026fe9"
+    }
+   },
+   "base_raw_deleted": true
+  }
+ }
+}
