@@ -444,23 +444,30 @@ rendered from the `.txt` + `check_template` instead. Either way, PNGs land in
   drive, clean up `.raw`/DICOM volumes once their positioning-check PNGs are
   rendered and reviewed — the PNGs are the lasting artifact, the big volumes
   are regenerable from the `.cfg`.
-- **⚠ GANTRY TILT IS IGNORED — sheared phantoms, silently.** The binary builds
-  voxel positions as `(index + 0.5) * spacing` and never reads
-  `ImageOrientationPatient` (tag 0020|0037). Head CT is routinely acquired with
-  a tilted gantry: the slice planes are then rotated about X while the table
-  still advances along patient +Z, so treating the stack as axial **shears the
-  anatomy** by `tan(tilt)` of Y per unit Z — the head comes out visibly
-  elongated/skewed in a sagittal view. Nothing warns you; the DICOM is
-  perfectly valid and every computed offset looks plausible.
-  Two giveaways, both cheap to check before a batch:
-  - `GantryDetectorTilt` (0018|1120) is non-zero;
-  - the reported slice spacing is `nominal / cos(tilt)` rather than the nominal
-    value (e.g. 0.625 mm nominal → 0.684 mm at 24°), i.e. an oddly precise
-    non-round spacing.
-  Measured on the CQ500 TEETH batch: **26 of 66 series were tilted, 4°–24°**,
-  giving up to 80 mm of skew across a 180 mm head. Until the binary honours the
-  direction cosines, either exclude tilted series or resample them onto an
-  axis-aligned grid first (SimpleITK `Resample` with the identity direction).
+- **Gantry tilt is handled (fixed; was a silent shearing bug).** The binary
+  reads `ImageOrientationPatient` (0020|0037) and maps output voxel centres
+  through the series' full physical frame, so a tilted acquisition is no longer
+  sheared. It prints `DICOM oblique : <n> deg` plus the direction columns and
+  whether the lattice is `SHEARED (gantry tilt)` or `rotated (orthonormal)`
+  whenever the series is off-axis, so tilt is visible in the log rather than
+  silent. Verified on the CQ500 TEETH batch (26 of 66 series tilted, 4°–24°):
+  tissue extents now match the DICOM's own IPP/IOP geometry to **under one
+  0.3 mm voxel**, against errors of up to ±27 mm before. A tilt-free series
+  reproduces the pre-fix output **byte for byte**.
+  Two things to keep in mind:
+  - **Un-shearing enlarges the anatomy's true extent.** Case 108 (24°) spans
+    175 mm along the index grid but 202 mm in reality, so at the production
+    250 mm box the corrected head reaches the volume's inferior face. Raise
+    `vol_length_mm` if the caudal end matters for your study; the FOV-anchored
+    head tip is unaffected.
+  - **`detectHeadHU` still scans the index grid**, so on an oblique series
+    "tip Z" is measured along index k rather than true patient superior. That
+    shifts the placement anchor by a few mm (it does not deform anatomy) and
+    now prints a warning. Not yet fixed.
+  A tilted series is still recognisable up front by `GantryDetectorTilt`
+  (0018|1120) being non-zero, and by a reported slice spacing of
+  `nominal / cos(tilt)` rather than the nominal value (0.625 mm → 0.684 mm at
+  24°) — an oddly precise, non-round spacing.
 - **`head_at_max_z` is a config flag, not orientation detection.** Basic
   HU-threshold head detection, not patient-orientation inference — if a
   series is scanned feet-first (or otherwise Z-reversed relative to what's
@@ -511,9 +518,11 @@ directly inside each given directory.
 | `--dry-run` | report only |
 
 **Why `--list` exists:** a batch folder routinely holds a mix of phantoms you
-want published and phantoms you don't — the CQ500 TEETH batch had 26 of 66
-gantry-sheared (§10), which must not be published. Globbing the folder would
-have uploaded them.
+want published and phantoms you don't. The original case was the CQ500 TEETH
+batch, where 26 of 66 were gantry-sheared and had to stay unpublished until the
+tilt bug was fixed (§10); globbing the folder would have uploaded them. The
+same need recurs whenever a folder mixes freshly rebuilt volumes with archives
+from an earlier run.
 
 **Deletion is gated on proof, never on the upload's exit code.** A `.raw` is
 removed only when all three hold: the local `.tar.xz` exists; its md5 equals

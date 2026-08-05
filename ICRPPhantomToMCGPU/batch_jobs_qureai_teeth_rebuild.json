@@ -1,0 +1,407 @@
+{
+  "binary": "build/dicom_to_mcgpu",
+  "template": "params/dicom_to_mcgpu_template.cfg",
+  "cwd": ".",
+  "cfg_out_dir": "params/generated_qureai_teeth_rebuild",
+  "stretcher_labels": [
+    "A"
+  ],
+  "auto_head_placement": true,
+  "output_dir": "/mnt/h/MICHELE_MCGPU/QUREAI_TEETH_VOLUME_EXPORT",
+  "mcgpu_in_dir": "/mnt/h/MICHELE_MCGPU/QUREAI_TEETH_IN_FILES",
+  "mcgpu_in_template": "params/cbct_head_bar_template.in",
+  "cases": [
+    {
+      "name": "CQ500-CT-108",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct01/CQ500CT108 CQ500CT108/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-108",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-108__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-121",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct02/CQ500CT121 CQ500CT121/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-121",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-121__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-140",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct02/CQ500CT140 CQ500CT140/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-140",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-140__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-149",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct03/CQ500CT149 CQ500CT149/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-149",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-149__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-159",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct03/CQ500CT159 CQ500CT159/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-159",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-159__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-162",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct03/CQ500CT162 CQ500CT162/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-162",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-162__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-166",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct03/CQ500CT166 CQ500CT166/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-166",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-166__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-167",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/merged/CQ500CT167 CQ500CT167/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-167",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-167__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-17",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct04/CQ500CT17 CQ500CT17/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-17",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-17__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-18",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct04/CQ500CT18 CQ500CT18/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-18",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-18__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-190",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/merged/CQ500CT190 CQ500CT190/Unknown Study/CT Thin Plain",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-190",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-190__Thin_Plain.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-196",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct05/CQ500CT196 CQ500CT196/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-196",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-196__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-319",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct10/CQ500CT319 CQ500CT319/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-319",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-319__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-346",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct11/CQ500CT346 CQ500CT346/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-346",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-346__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-383",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct12/CQ500CT383 CQ500CT383/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-383",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-383__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-384",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct12/CQ500CT384 CQ500CT384/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-384",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-384__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-396",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct13/CQ500CT396 CQ500CT396/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-396",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-396__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-40",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct13/CQ500CT40 CQ500CT40/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-40",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-40__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-402",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct13/CQ500CT402 CQ500CT402/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-402",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-402__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-407",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct13/CQ500CT407 CQ500CT407/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-407",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-407__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-411",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct13/CQ500CT411 CQ500CT411/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-411",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-411__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-425",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct14/CQ500CT425 CQ500CT425/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-425",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-425__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-460",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/merged/CQ500CT460 CQ500CT460/Unknown Study/CT PLAIN THIN",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-460",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-460__PLAIN_THIN.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-468",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct16/CQ500CT468 CQ500CT468/Unknown Study/CT Plain",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-468",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-468__Plain.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-489",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct17/CQ500CT489 CQ500CT489/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-489",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-489__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-55",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct17/CQ500CT55 CQ500CT55/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-55",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-55__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-60",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct17/CQ500CT60 CQ500CT60/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-60",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-60__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    },
+    {
+      "name": "CQ500-CT-90",
+      "dicom_dir": "/mnt/f/Michele_diskF/kaggle/qureai-headct/qct18/CQ500CT90 CQ500CT90/Unknown Study/CT 0.625mm",
+      "output_prefix": "/mnt/f/Michele_diskF/kaggle/qureai-headct/MCGPU_CQ500-CT-90",
+      "mask_nrrd": "/mnt/f/Michele_diskF/kaggle/qureai-headct/masks/CQ500-CT-90__0.625mm.nrrd",
+      "stretchers": [
+        {
+          "cx_mm": 0.0,
+          "auto": true,
+          "cy_offset_mm": 0.0
+        }
+      ],
+      "auto_head_placement": true
+    }
+  ]
+}

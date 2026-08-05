@@ -415,6 +415,32 @@ struct Mat3 {
         for (int i=0;i<3;i++) for (int j=0;j<3;j++) R.m[i][j]=m[j][i];
         return R;
     }
+    double det() const {
+        return m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])
+             - m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])
+             + m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+    }
+    // General inverse.  A gantry-tilted series is NOT a rotation: the slice
+    // planes tilt while the table still advances along patient +Z, so the
+    // sampling lattice is sheared and its direction matrix is non-orthogonal
+    // (ForceOrthogonalDirectionOff keeps it that way deliberately).  Using the
+    // transpose there -- valid only for a true rotation -- would tilt the
+    // volume the wrong way instead of undoing the shear.
+    Mat3 inv() const {
+        const double d = det();
+        const double id = 1.0 / d;
+        Mat3 R;
+        R.m[0][0] =  (m[1][1]*m[2][2]-m[1][2]*m[2][1])*id;
+        R.m[0][1] = -(m[0][1]*m[2][2]-m[0][2]*m[2][1])*id;
+        R.m[0][2] =  (m[0][1]*m[1][2]-m[0][2]*m[1][1])*id;
+        R.m[1][0] = -(m[1][0]*m[2][2]-m[1][2]*m[2][0])*id;
+        R.m[1][1] =  (m[0][0]*m[2][2]-m[0][2]*m[2][0])*id;
+        R.m[1][2] = -(m[0][0]*m[1][2]-m[0][2]*m[1][0])*id;
+        R.m[2][0] =  (m[1][0]*m[2][1]-m[1][1]*m[2][0])*id;
+        R.m[2][1] = -(m[0][0]*m[2][1]-m[0][1]*m[2][0])*id;
+        R.m[2][2] =  (m[0][0]*m[1][1]-m[0][1]*m[1][0])*id;
+        return R;
+    }
 };
 
 static Mat3 rotX(double a) {
@@ -1122,8 +1148,57 @@ int main(int argc, char **argv)
     const double sy_mm = dcmSpacing[1];
     const double sz_mm = dcmSpacing[2];
 
+    // Direction cosines: column j = world direction of DICOM index axis j.
+    // Reading these as identity is what sheared the gantry-tilted phantoms
+    // (PROGRESS round 7): with a tilted gantry the slice planes rotate about X
+    // while the table advances along patient +Z, so treating the stack as
+    // plainly axial skews anatomy by tan(tilt) of Y per unit Z.
+    const auto& dcmDirITK = huImage->GetDirection();
+    Mat3 dcmDir;
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            dcmDir.m[i][j] = dcmDirITK(i, j);
+
+    // A degenerate direction matrix would make Mat3::inv() produce inf/nan and
+    // silently fill the phantom with air; refuse it instead.
+    if (std::fabs(dcmDir.det()) < 1e-9)
+        throw std::runtime_error("DICOM direction cosines are singular (det=" +
+                                 std::to_string(dcmDir.det()) +
+                                 "); cannot map the series into the output volume");
+
+    // Angle of each index axis from the patient axis NEAREST it -- comparing
+    // against a fixed axis instead would report a plain sign flip as 180 deg.
+    const double rad2deg = 180.0 / std::acos(-1.0);
+    double obliquity_deg = 0.0;
+    for (int j = 0; j < 3; ++j) {
+        double best = 0.0;
+        for (int i = 0; i < 3; ++i)
+            best = std::max(best, std::fabs(dcmDir.m[i][j]));
+        obliquity_deg = std::max(obliquity_deg,
+                                 std::acos(std::min(1.0, best)) * rad2deg);
+    }
+
     std::cout << "DICOM size      : " << nx_d << " x " << ny_d << " x " << nz_d << "\n";
     std::cout << "DICOM spacing   : " << sx_mm << " x " << sy_mm << " x " << sz_mm << " mm\n";
+    if (obliquity_deg > 0.01) {
+        std::cout << "DICOM oblique   : " << obliquity_deg
+                  << " deg off the patient axes (direction cosines honoured)\n";
+        std::cout << "  direction cols : ";
+        for (int j = 0; j < 3; ++j)
+            std::cout << "(" << dcmDir.m[0][j] << ", " << dcmDir.m[1][j]
+                      << ", " << dcmDir.m[2][j] << ")" << (j < 2 ? " " : "\n");
+        // Non-orthogonal => genuinely sheared sampling (gantry tilt), not a
+        // rigid rotation.  Worth saying out loud: the two need different maths
+        // and only the inverse (not the transpose) undoes a shear.
+        const Mat3 g = dcmDir.T() * dcmDir;
+        double offdiag = 0.0;
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                if (i != j) offdiag = std::max(offdiag, std::fabs(g.m[i][j]));
+        std::cout << "  lattice        : "
+                  << (offdiag > 1e-6 ? "SHEARED (gantry tilt)" : "rotated (orthonormal)")
+                  << ", det=" << dcmDir.det() << "\n";
+    }
 
     // ── Optional connected-component despeckle in DICOM space (rewrites HU ───
     //    of small label islands; see test_denoise_despeckle.py) ──────────────
@@ -1206,6 +1281,15 @@ int main(int argc, char **argv)
     bool   autoHeadFound = false;
     if (auto_head_placement || stretcher_auto)
     {
+        // Detection scans the index grid, so on an oblique series "tip Z" is
+        // measured along the index k axis rather than true patient superior.
+        // That shifts the placement anchor (by ~extent*(1-cos(tilt))); it does
+        // NOT deform anatomy, which the resampler now maps through dcmDir.
+        if (obliquity_deg > 1.0)
+            std::cout << "WARNING: series is oblique (" << obliquity_deg
+                      << " deg); head detection runs on the index grid, so the "
+                         "placement anchor may be off by a few mm.\n";
+
         const HeadDetectResult hd = detectHeadHU(
             huImage->GetBufferPointer(), nx_d, ny_d, nz_d,
             sx_mm, sy_mm, sz_mm,
@@ -1291,6 +1375,16 @@ int main(int argc, char **argv)
                     rotY(dicom_rot_y_deg*deg2rad) *
                     rotZ(dicom_rot_z_deg*deg2rad);
     const Mat3 Rt = R.T();  // inverse rotation
+
+    // Full inverse map, output-physical mm -> DICOM index-space mm.  The
+    // forward model is  p = R * D * (u - qc) + offset,  with u = index*spacing,
+    // so the inverse carries D^-1 as well as R^T.  D^-1 rather than D^T because
+    // a gantry-tilted lattice is sheared, not rotated (see Mat3::inv).  Folding
+    // it in here keeps the resampling loop a single matrix-vector product (no
+    // added cost), and for an axis-aligned series D^-1 is the identity, so
+    // Minv == Rt and every tilt-free phantom built before this change is
+    // reproduced bit for bit.
+    const Mat3 Minv = dcmDir.inv() * Rt;
 
     std::cout << "Output volume   : " << out_nx << " x " << out_ny << " x " << out_nz << "\n";
     std::cout << "Output spacing  : " << out_vxy << " x " << out_vxy << " x " << out_vz << " mm\n";
@@ -1395,6 +1489,15 @@ int main(int argc, char **argv)
         mnz = static_cast<int>(msz[2]);
         ms_x = msp[0]; ms_y = msp[1]; ms_z = msp[2];
         mo_x = morg[0]; mo_y = morg[1]; mo_z = morg[2];
+
+        // The mask is looked up by index, so its grid must match the series'.
+        // (Its stored direction cosines are ignored on purpose -- see the
+        // lookup in the resampling loop for why comparing them would mislead.)
+        if (mnx != static_cast<int>(nx_d) || mny != static_cast<int>(ny_d) ||
+            mnz != static_cast<int>(nz_d))
+            std::cerr << "WARNING: mask grid " << mnx << "x" << mny << "x" << mnz
+                      << " != DICOM grid " << nx_d << "x" << ny_d << "x" << nz_d
+                      << "; the mask is applied by index and will not line up.\n";
 
         maskBuf = maskImage->GetBufferPointer();
         std::cout << "Mask loaded     : " << mask_nrrd_path << "\n";
@@ -1578,7 +1681,7 @@ int main(int argc, char **argv)
                     const double rx = px-dicom_corner_x_mm-qcx;
                     const double ry = py-dicom_corner_y_mm-qcy;
                     const double rz = pz-dicom_corner_z_mm-qcz;
-                    const auto [qrx,qry,qrz] = Rt.apply(rx,ry,rz);
+                    const auto [qrx,qry,qrz] = Minv.apply(rx,ry,rz);
                     const double qx=qrx+qcx, qy=qry+qcy, qz=qrz+qcz;
 
                     const double ci = qx/sx_mm-0.5;
@@ -1590,6 +1693,16 @@ int main(int argc, char **argv)
 
                     // ── NRRD mask: nearest-neighbour lookup in DICOM physical space ──
                     if (maskBuf) {
+                        // Deliberately NOT routed through physical space.  A
+                        // mask is drawn on this series' own voxel grid, so the
+                        // correspondence is index-to-index.  Round-tripping via
+                        // mm looks more rigorous but silently misaligns an
+                        // oblique case: ITK writes the mask with ORTHOGONALISED
+                        // direction cosines (slice normal in the 3rd column),
+                        // while the series is read with
+                        // ForceOrthogonalDirectionOff and keeps the true
+                        // sheared column (0,0,1).  The two frames disagree, and
+                        // mapping between them eats into the masked volume.
                         const int mi = static_cast<int>(std::round((dcm_orig_x + ci*sx_mm - mo_x) / ms_x));
                         const int mj = static_cast<int>(std::round((dcm_orig_y + cj*sy_mm - mo_y) / ms_y));
                         const int mk = static_cast<int>(std::round((dcm_orig_z + ck*sz_mm - mo_z) / ms_z));

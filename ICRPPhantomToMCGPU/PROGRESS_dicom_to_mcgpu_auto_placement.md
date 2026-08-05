@@ -7,6 +7,117 @@ placement mode, (2) a separate external folder for `.in` files specifically
 filed apart from the volume data). **Status: done, validated end-to-end
 against real MRCP data.**
 
+## Round 8: gantry tilt fixed (closes round 7's open bug)
+
+`dicom_to_mcgpu.cpp` now honours the series' direction cosines, so tilted
+acquisitions are no longer sheared. The change is small because the resampling
+loop was already an inverse map: it takes each output voxel centre, subtracts
+the corner and half-extent, applies `Rt` (the transpose of the augmentation
+rotation), then divides by spacing. Only that last step was wrong -- dividing
+by spacing assumes the index axes ARE the patient axes.
+
+Forward model, with `u = index * spacing`:
+
+```
+p = R * D * (u - qc) + offset        =>        u = D^-1 * R^T * (p - offset) + qc
+```
+
+so the fix is one extra matrix folded into the existing transform,
+`Minv = dcmDir.inv() * Rt`, precomputed once and used in place of `Rt`. No
+runtime cost (same single matrix-vector product), and for an axis-aligned
+series `D^-1` is the identity so `Minv == Rt` exactly.
+
+**The trap: `D^-1`, NOT `D^T`.** The first implementation used the transpose,
+which is correct only for a rotation. A gantry-tilted lattice is **sheared**,
+not rotated: the slice planes tilt while the table still advances along patient
++Z, so `D`'s third column stays `(0,0,1)` while its second is
+`(0, cos24, -sin24)` -- non-orthogonal, `det = 0.9135`. `ForceOrthogonalDirectionOff()`
+(already in the reader) keeps it that way deliberately. Using `D^T` made case
+108 visibly *worse* than before the fix; only a general inverse undoes a shear.
+Beware that SimpleITK's default reader orthogonalises and reports `det = 1` for
+the same series, which hides the shear entirely -- do not use it to reason about
+this.
+
+**Second trap, found by voxel-level checking: do NOT route the NRRD mask
+through physical space.** An earlier revision mapped mask lookups
+index -> mm -> index "properly" and lost ~15% of the masked volume on case 108.
+Reason: the mask is stored with ORTHOGONALISED direction cosines (slice normal
+in the 3rd column, since it was written through a normal ITK reader) while the
+series is read with `ForceOrthogonalDirectionOff` and keeps the true sheared
+column. The two frames disagree, so the round trip lands on the wrong voxels.
+Masks are drawn on the series' own grid, so the correspondence is
+index-to-index; the code now says so explicitly and warns if the mask grid size
+differs from the series'.
+
+Also added: `detectHeadHU` still scans the index grid, so on an oblique series
+"tip Z" is measured along index k rather than true patient superior. That
+shifts the placement anchor a few mm but does not deform anatomy; it now prints
+a warning rather than being silent. Fixing it properly is left open.
+
+### Validation (CQ500 teeth data)
+
+| Test | Result |
+|---|---|
+| **Regression, tilt-free** (case 9, IOP identity, 0 deg) | `.raw` **md5-identical** to the pre-fix binary -- the 38 published phantoms are unaffected |
+| **Geometry, tilted** (case 108, 24 deg) | tissue extent vs truth computed from the DICOM's own IPP/IOP: **y +0.31 mm, z +0.26 mm** (was **y +22.21 mm, z -26.74 mm**) |
+| **Voxel-level** (case 108 mid-sagittal, 2.2 M voxels) | independent numpy reimplementation of the mapping agrees on **99.9992%** of labels, tissue Dice **0.999998**, 1 differing voxel |
+
+The geometry test needed a taller test box (`vol_length_mm = 340`) and
+`denoise = false`: un-shearing genuinely ENLARGES the anatomy's true z extent
+(case 108: 175 mm as sampled on the index grid -> 202 mm in reality), so at the
+production 250 mm box the corrected head touches the bottom face. Measuring in
+the production box would have read that clipping as a geometry error.
+
+**Consequence for the rebuilt phantoms:** tilted cases now reach the inferior
+face of the 250 mm output volume. Box dimensions were left at
+2134x2134x834 to keep every teeth phantom identical; the head TIP (the
+FOV-anchored, superior end that matters for these studies) is correct, and the
+loss is at the inferior edge.
+
+### Rebuild + publish of the 28 pending teeth cases
+
+**28/28 built, validated, uploaded.** The pending set was the 26 tilted cases
+plus 190 and 460 (held back in round 7 for the split-archive reason), i.e.
+every teeth case that had no `.tar.xz`.
+
+**The jobs JSON was stale and had to be regenerated.** `batch_jobs_qureai_teeth.json`
+still pointed 460 at its old `CT BONE` series, and 167/190/460 at their
+pre-merge `qctNN/` paths -- the manifest had since moved all three to
+`merged/` (and 460 to `PLAIN THIN` with a different mask). Rebuilt with
+`make_qureai_jobs.py` into `batch_jobs_qureai_teeth_rebuild.json`, then
+filtered to the cases lacking an archive. Using the old JSON would have
+rebuilt 460 from the wrong series entirely.
+
+Validation (per case, not sampled): each phantom's anterior-posterior tissue
+extent vs the truth computed from that series' own IPP/IOP. y is the axis to
+judge on -- gantry tilt shears in y-z, and unlike z the 640 mm box never clips
+it.
+
+| tilt | cases | worst y error |
+|---|---|---|
+| 13.5-24 deg | 6 | +0.31 mm |
+| 7-11 deg | 12 | +0.33 mm |
+| 4-6.5 deg | 8 | +0.35 mm |
+| 0 deg (190, 460) | 2 | +0.43 mm |
+
+All under half a millimetre against a 0.3 mm voxel; case 108 was +22.21 mm
+before the fix. Independently confirmed from the DICOM headers that exactly 26
+of the 28 are tilted, with the IOP column angle matching `GantryDetectorTilt`
+to the decimal on every case, and that the tilted set matches round 7's list.
+
+**A lesson about verifying a batch:** the first sweep of the batch log looked
+clean and was worthless -- the run had been piped through `tail -60`, so the
+saved log held only the last 60 lines (one case), and greps over it reported
+"1 oblique series" for a 26-tilted-case batch. Never sweep a log that was
+captured through `tail`/`head`. The numbers above come from re-deriving
+everything from the DICOMs and the phantoms themselves.
+
+Uploaded with `--list` (the folder mixes these 28 with the 38 from round 7):
+**28 uploaded, 0 failed**, verified by NAME against the bucket listing rather
+than by count, with gsutil's stderr kept. `gs://mcgpu-data-gcp/phantom/` went
+77 -> 105 objects and now holds **all 66 teeth phantoms**. No `--reclaim`: the
+28 `.raw` (~106 GB) are still on H:.
+
 ## Round 3: separate `.in` folder (`mcgpu_in_dir`)
 
 User course-corrected round 2: minimal output (no `.in` at all) wasn't
@@ -126,7 +237,7 @@ python3 batch_dicom_to_mcgpu.py run batch_jobs_qureai.json --kv-variants \
 
 ## Round 7: gantry tilt (OPEN BUG), upload/reclaim, split-archive merge
 
-### ⚠ OPEN BUG: `dicom_to_mcgpu` ignores gantry tilt -> sheared phantoms
+### ~~⚠ OPEN BUG~~ FIXED IN ROUND 8: `dicom_to_mcgpu` ignores gantry tilt -> sheared phantoms
 
 Found by a user question about two TEETH phantoms with an "elongated cranium"
 (108, 489) -- is it a patient feature or a data problem? It is neither: it is
