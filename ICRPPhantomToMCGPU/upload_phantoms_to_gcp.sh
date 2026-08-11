@@ -76,6 +76,16 @@ if [[ -n "$LIST" && ! -f "$LIST" ]]; then
     exit 1
 fi
 
+# Every run is logged automatically (console output mirrored to a timestamped
+# file) so there's a record of what was uploaded/deleted without relying on
+# the caller to pipe through tee.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/upload_phantoms_to_gcp_$(date +%Y%m%d_%H%M%S).log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+echo "=== log: $LOG_FILE ==="
+
 # md5 of a bucket object, as hex (GCS reports base64). Empty if absent.
 gcs_md5_hex() {
     local obj="$1" b64
@@ -182,4 +192,5 @@ done
 
 echo "=== uploaded $n_up, deleted $n_del, skipped $n_skip, failed $n_fail"
 [[ $total_freed -gt 0 ]] && echo "=== reclaimed $((total_freed/1024/1024/1024)) GiB"
+echo "=== log saved: $LOG_FILE ==="
 exit $(( n_fail > 0 ? 1 : 0 ))
