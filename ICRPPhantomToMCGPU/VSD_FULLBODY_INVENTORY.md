@@ -40,6 +40,17 @@ Present in all 29 human cases (`Sacrum` unpaired, the other 20 paired left/right
 
 That is **11 distinct bones/bone groups → 21 labels**. Nothing above the iliac crest is segmented in any case: no spine (except the phantom), ribs, skull, arms or organs.
 
+## Limb-pair counts (hands / arms / knees / feet)
+
+| Region | Structure(s) | Cases with the pair | Pairs (L+R) |
+|---|---|---|---|
+| Hands | — (not segmented) | 0 | 0 |
+| Arms | — (not segmented) | 0 | 0 |
+| Knees | `Patella` (+ `Minisci` in `z064` only) | 29 | 29 |
+| Feet | `Talus`, `Calcaneus`, `Tarsals`, `Metatarsals`, `Phalanges` | 29 each | 145 (29 × 5 bone groups) |
+
+This is a lower-limb/pelvis-only dataset, so hands and arms never appear — only the 29 human cases (all except the `Phantom001` calibration object) carry knee and foot pairs. `z064` adds a `Minisci` (menisci) pair on top of its knee. `z066` has all 21 labelmap segments including both feet, but is missing `.ply` surface meshes for `Phalanges_L/R`.
+
 ## Per-case detail
 
 | Case | Region(s) | Age/Sex | h (m) | w (kg) | Anatomies | `.ply` | Cropped ROIs | Full volume | in-plane x slice (mm) |

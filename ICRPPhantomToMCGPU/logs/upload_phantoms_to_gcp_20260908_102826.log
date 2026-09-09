@@ -1,0 +1,24 @@
+=== log: /home/colle/CBCTSim/ICRPPhantomToMCGPU/logs/upload_phantoms_to_gcp_20260908_102826.log ===
+=== /mnt/h/MICHELE_MCGPU/QUREAI_VOLUME_EXPORT: 10 .raw file(s) ===
+--- [1/10] CQ500-CT-127_A_2134x2134x834byte
+    would DELETE CQ500-CT-127_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [2/10] CQ500-CT-136_A_2134x2134x834byte
+    would DELETE CQ500-CT-136_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [3/10] CQ500-CT-172_A_2134x2134x834byte
+    would DELETE CQ500-CT-172_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [4/10] CQ500-CT-183_A_2134x2134x834byte
+    would DELETE CQ500-CT-183_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [5/10] CQ500-CT-241_A_2134x2134x834byte
+    would DELETE CQ500-CT-241_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [6/10] CQ500-CT-266_A_2134x2134x834byte
+    would DELETE CQ500-CT-266_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [7/10] CQ500-CT-298_A_2134x2134x834byte
+    would DELETE CQ500-CT-298_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [8/10] CQ500-CT-305_A_2134x2134x834byte
+    would DELETE CQ500-CT-305_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [9/10] CQ500-CT-307_A_2134x2134x834byte
+    would DELETE CQ500-CT-307_A_2134x2134x834byte.raw (3.6G reclaimed)
+--- [10/10] CQ500-CT-325_A_2134x2134x834byte
+    would DELETE CQ500-CT-325_A_2134x2134x834byte.raw (3.6G reclaimed)
+=== uploaded 0, deleted 0, skipped 0, failed 0
+=== log saved: /home/colle/CBCTSim/ICRPPhantomToMCGPU/logs/upload_phantoms_to_gcp_20260908_102826.log ===

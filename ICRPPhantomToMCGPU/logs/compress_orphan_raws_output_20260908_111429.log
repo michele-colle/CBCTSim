@@ -1,0 +1,43 @@
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK python_hu_phantom1061x486x474.raw -> 35M, freed 933 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK python_dicom1061x486x474.raw -> 82M, freed 933 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK python_dicom345x345x349.raw -> 78M, freed 159 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK female_head_phantom_registered1061x724x474.raw -> 168K, freed 348 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK female_head_phantom_registered1061x744x474.raw -> 172K, freed 357 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK my_run_vox_HU60keV_558x292x349.raw -> 556K, freed 109 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK my_run_vox_mu60keV_558x292x349.raw -> 612K, freed 217 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_mu60keV_374x422x437.raw -> 1.1M, freed 264 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_full_vox_506x273x1631.raw -> 2.4M, freed 215 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_full_vox_5labels_506x273x1631.raw -> 2.0M, freed 215 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_full_vox_HU60keV_506x273x1631.raw -> 2.6M, freed 430 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_full_vox_mu60keV_506x273x1631.raw -> 3.0M, freed 860 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_1025x618x659.raw -> 2.4M, freed 399 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_5labels_1025x618x659.raw -> 2.1M, freed 399 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_5labels_implant_1025x618x659.raw -> 2.1M, freed 399 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_5labels_reconCylinder_1025x618x659.raw -> 1.5M, freed 399 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_HU60keV_1025x618x659.raw -> 2.5M, freed 797 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_mu60keV_513x309x330.raw -> 612K, freed 200 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_HU60keV_374x422x437.raw -> 916K, freed 132 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_implant_stretcher_labels_886x497x437.raw -> 912K, freed 184 MiB
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+OK AF_head_vox_mu60keV_1025x618x659.raw -> 2.8M, freed 1593 MiB
+=== compressed+deleted 21, kept 0, freed 9 GiB ===

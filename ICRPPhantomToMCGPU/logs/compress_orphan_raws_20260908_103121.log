@@ -1,0 +1,13 @@
+--- MRCP-00F_vox_stretcher_labels_2134x2134x1000.raw
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+    archive 1.9M, xz -t OK, round-trip md5 OK (3c527bd97818f8077eb9ef397dd2cf2b) -> raw deleted, freed 4343 MiB
+--- MRCP-00M_vox_stretcher_labels_2134x2134x1000.raw
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+    archive 1.9M, xz -t OK, round-trip md5 OK (e62e9ecc7d9ea7affbba0d6814f90a20) -> raw deleted, freed 4343 MiB
+--- MRCP-15F_vox_stretcher_labels_2134x2134x1000.raw
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+    archive 3.6M, xz -t OK, round-trip md5 OK (a30a12398fc7fca9b994d7a8b3f0c915) -> raw deleted, freed 4343 MiB
+--- MRCP_AM_vox_stretcher_labels_2134x2134x1000.raw
+xz: Reduced the number of threads from 32 to 24 to not exceed the memory usage limit of 30720 MiB
+    archive 3.7M, xz -t OK, round-trip md5 OK (a829e7b2bcbdaf73e04ae9bcfeed3072) -> raw deleted, freed 4343 MiB
+=== freed 16 GiB ===

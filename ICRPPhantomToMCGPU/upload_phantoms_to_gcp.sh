@@ -150,7 +150,16 @@ for dir in "${dirs[@]}"; do
 
         if [[ $RECLAIM_ONLY -eq 0 ]]; then
             if [[ ! -f "$raw" ]]; then
-                echo "    [skip] .raw not found: $raw"; n_skip=$((n_skip+1)); continue
+                # A batch whose .raw was already compressed + proven + reclaimed
+                # (the implant lane works one 3.8 GB raw at a time and deletes
+                # it as soon as its archive round-trips) still has to be
+                # publishable: upload the archive that is standing in for it.
+                if [[ -f "$archive" ]]; then
+                    echo "    .raw already reclaimed -- publishing existing archive"
+                else
+                    echo "    [skip] neither .raw nor archive found: $raw"
+                    n_skip=$((n_skip+1)); continue
+                fi
             fi
             if [[ -f "$archive" ]]; then
                 echo "    archive exists, reusing"

@@ -1,0 +1,46 @@
+=== log: /home/colle/CBCTSim/ICRPPhantomToMCGPU/logs/upload_phantoms_to_gcp_20260908_102915.log ===
+=== /mnt/h/MICHELE_MCGPU/QUREAI_VOLUME_EXPORT: 10 .raw file(s) ===
+--- [1/10] CQ500-CT-127_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [2/10] CQ500-CT-136_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [3/10] CQ500-CT-172_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [4/10] CQ500-CT-183_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [5/10] CQ500-CT-241_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [6/10] CQ500-CT-266_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [7/10] CQ500-CT-298_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [8/10] CQ500-CT-305_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [9/10] CQ500-CT-307_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [10/10] CQ500-CT-325_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+=== /mnt/h/MICHELE_MCGPU/GRADIENTHEALTH_VOLUME_EXPORT: 10 .raw file(s) ===
+--- [1/10] GRDN00MGH1ABQLE8_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [2/10] GRDN02BKET588MC5_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [3/10] GRDN0V840WXJ02B6_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [4/10] GRDN0XOSMPPEAYBU_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [5/10] GRDN0YP5B56SGAJM_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [6/10] GRDN17YG2OQIYVPO_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [7/10] GRDN1P7W3AFP70R8_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [8/10] GRDN1TQOUC2B1R2U_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [9/10] GRDN21I9AD975J98_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+--- [10/10] GRDN2SAZN503S7N0_A_2134x2134x834byte
+    verified recoverable -> deleted, freed 3622 MiB
+=== uploaded 0, deleted 20, skipped 0, failed 0
+=== reclaimed 70 GiB
+=== log saved: /home/colle/CBCTSim/ICRPPhantomToMCGPU/logs/upload_phantoms_to_gcp_20260908_102915.log ===

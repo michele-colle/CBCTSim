@@ -597,6 +597,14 @@ ICRPPhantomToMCGPU/phantoms/
 ICRPPhantomToMCGPU/.cache/
 out/
 
+# Big data trees moved to H:\MICHELE_CBCTSim_DATA and replaced by symlinks.
+# The slash-less form is required: a "dir/" rule matches directories only, and
+# git sees a symlink as a blob, so the rules above would not cover the links.
+ICRPPhantomToMCGPU/data
+ICRPPhantomToMCGPU/output
+ICRPPhantomToMCGPU/phantoms
+ICRPPhantomToMCGPU/denoise_checks/output
+
 ICRPPhantomToMCGPU/barella/progetti cefla/97465158.DXF
 ICRPPhantomToMCGPU/barella/progetti cefla/97465158.log
 ICRPPhantomToMCGPU/barella/progetti cefla/97465158.pdf
